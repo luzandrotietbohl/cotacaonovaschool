@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS processados (
     valor_frete     REAL,
     extracao_json   TEXT,
     erro            TEXT,
+    label           TEXT,
     criado_em       TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_processados_thread ON processados(thread_id);
@@ -44,6 +45,7 @@ _CAMPOS = (
     "valor_frete",
     "extracao_json",
     "erro",
+    "label",
     "criado_em",
 )
 
@@ -54,6 +56,11 @@ class Banco:
         self._caminho = caminho
         with closing(self._conectar()) as con:
             con.executescript(ESQUEMA)
+            # Bancos criados antes da coluna label: CREATE IF NOT EXISTS nao
+            # altera tabela existente, entao o ALTER cobre a migracao.
+            colunas = [c[1] for c in con.execute("PRAGMA table_info(processados)")]
+            if "label" not in colunas:
+                con.execute("ALTER TABLE processados ADD COLUMN label TEXT")
             con.commit()
 
     def _conectar(self) -> sqlite3.Connection:
@@ -103,6 +110,7 @@ class Banco:
         valor_frete: float | None = None,
         extracao: dict | None = None,
         erro: str | None = None,
+        label: str | None = None,
     ) -> None:
         valores = (
             id_email,
@@ -119,6 +127,7 @@ class Banco:
             valor_frete,
             json.dumps(extracao, ensure_ascii=False) if extracao else None,
             erro,
+            label,
             datetime.now(timezone.utc).isoformat(timespec="seconds"),
         )
         marcadores = ",".join("?" * len(_CAMPOS))
