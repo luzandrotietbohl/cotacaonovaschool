@@ -127,5 +127,50 @@ class TestConsultasDoPainel(BaseComBanco):
         self.assertTrue(self.banco.ja_processado("fora"))
 
 
+class TestAgenteGravaLabel(unittest.TestCase):
+    """O label Gmail aplicado ao fechar o email deve ir para o SQLite,
+    senao o painel nao sabe o que esta em revisao."""
+
+    def test_fechar_passa_o_label_ao_banco(self):
+        from cotador.agente import Agente
+        from cotador.core.modelos import Email
+
+        class BancoGravador:
+            def __init__(self):
+                self.registros = []
+
+            def registrar(self, **kw):
+                self.registros.append(kw)
+
+        class CaixaNula:
+            def aplicar_labels(self, *a, **k):
+                pass
+
+        class CfgFake:
+            LABEL_PROCESSADO = "cotador-processado"
+
+        banco = BancoGravador()
+        agente = Agente(
+            cfg=CfgFake(),
+            caixa=CaixaNula(),
+            tarifas=None,
+            extrator=None,
+            banco=banco,
+        )
+        email = Email(
+            id="m1",
+            thread_id="t1",
+            remetente="a@b.com",
+            nome_remetente="Ana",
+            assunto="Cotacao",
+            corpo="",
+            message_id_header=None,
+            references_header=None,
+            uid="7",
+        )
+        agente._fechar(email, "cotado", label="cotador-processado")
+        self.assertEqual(banco.registros[0]["label"], "cotador-processado")
+
+
 if __name__ == "__main__":
     unittest.main()

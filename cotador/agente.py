@@ -99,6 +99,7 @@ class Agente:
                 remetente=email.remetente,
                 assunto=email.assunto,
                 desfecho="erro",
+                label=self.cfg.LABEL_REVISAR,
                 erro=repr(exc),
             )
             self.caixa.aplicar_labels(email.uid, [self.cfg.LABEL_REVISAR], remover_unread=False)
@@ -278,6 +279,7 @@ class Agente:
             remetente=email.remetente,
             assunto=email.assunto,
             desfecho=desfecho,
+            label=label,
             **extra,
         )
         self.caixa.aplicar_labels(email.uid, [label])
