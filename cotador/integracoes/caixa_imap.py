@@ -144,6 +144,24 @@ class CaixaIMAP:
         if remover_unread:
             self.con.uid("STORE", uid, "+FLAGS", r"(\Seen)")
 
+    def devolver_para_fila(self, id_email: str, labels_remover: list[str]) -> bool:
+        """Desfaz o fechamento: remove labels e restaura como nao lida.
+
+        Localiza pelo X-GM-MSGID porque o UID gravado em outra sessao ja nao
+        vale. Com o email de volta a 'is:unread' sem os labels, o proximo
+        ciclo o reprocessa.
+        """
+        ok, dados = self.con.uid("SEARCH", "X-GM-MSGID", id_email)
+        uids = (dados[0] or b"").split() if ok == "OK" else []
+        if not uids:
+            log.warning("Email %s nao encontrado na caixa para devolver", id_email)
+            return False
+        uid = uids[-1].decode()
+        for nome in labels_remover:
+            self.con.uid("STORE", uid, "-X-GM-LABELS", f'("{nome}")')
+        self.con.uid("STORE", uid, "-FLAGS", r"(\Seen)")
+        return True
+
     def pasta_rascunhos(self) -> str:
         """Descobre a pasta de rascunhos pelo atributo \\Drafts.
 
