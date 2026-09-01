@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cotador — Painel</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+</head>
+<body>
+  <aside class="menu">
+    <h1>Cotador</h1>
+    <nav>
+      <a href="/" class="{{ 'ativo' if pagina == 'visao' }}">📊 Visão geral</a>
+      <a href="/revisao" class="{{ 'ativo' if pagina == 'revisao' }}">🔍 Revisão</a>
+      <a href="/cotar" class="{{ 'ativo' if pagina == 'cotar' }}">🧮 Cotar</a>
+      <a href="/agente" class="{{ 'ativo' if pagina == 'agente' }}">⚙️ Agente</a>
+    </nav>
+    <div class="estado-loop {{ 'ligado' if servico.rodando else 'desligado' }}">
+      {{ '● rodando' if servico.rodando else '○ parado' }} · {{ modo }}
+    </div>
+  </aside>
+  <main>
+    {% for mensagem in get_flashed_messages() %}
+      <div class="flash">{{ mensagem }}</div>
+    {% endfor %}
+    {% block conteudo %}{% endblock %}
+  </main>
+</body>
+</html>

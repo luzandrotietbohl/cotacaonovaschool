@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block conteudo %}
+<h2>Visão geral</h2>
+<div class="cartoes">
+  <div class="cartao"><span id="c-cotado" class="numero ok">{{ contadores.cotado }}</span><span>cotados hoje</span></div>
+  <div class="cartao"><span id="c-erro" class="numero ruim">{{ contadores.erro }}</span><span>para revisar</span></div>
+  <div class="cartao"><span id="c-incompleto" class="numero atencao">{{ contadores.incompleto }}</span><span>aguardando dados</span></div>
+  <div class="cartao"><span id="c-sem_rota" class="numero neutro">{{ contadores.sem_rota }}</span><span>sem rota</span></div>
+</div>
+
+<h3>Últimos processados</h3>
+<table>
+  <thead>
+    <tr><th>Quando</th><th>Remetente</th><th>Assunto</th><th>Rota</th><th>Desfecho</th><th>Frete</th></tr>
+  </thead>
+  <tbody>
+    {% for linha in processados %}
+    <tr>
+      <td>{{ linha.quando }}</td>
+      <td>{{ linha.remetente or "—" }}</td>
+      <td>{{ linha.assunto or "—" }}</td>
+      <td>{{ linha.rota }}</td>
+      <td><span class="selo selo-{{ linha.desfecho }}">{{ linha.desfecho }}</span></td>
+      <td>{{ linha.valor_frete | reais }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="vazio">Nenhum email processado ainda.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  setInterval(async () => {
+    try {
+      const resposta = await fetch("/api/status");
+      const status = await resposta.json();
+      for (const chave of ["cotado", "erro", "incompleto", "sem_rota"]) {
+        const el = document.getElementById("c-" + chave);
+        if (el) el.textContent = status.contadores[chave];
+      }
+    } catch (e) { /* servidor reiniciando; tenta no proximo tick */ }
+  }, 10000);
+</script>
+{% endblock %}

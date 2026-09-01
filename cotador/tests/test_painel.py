@@ -342,5 +342,123 @@ class TestConsultas(unittest.TestCase):
         self.assertEqual(itens[0]["extracao"], "{isto nao e json")
 
 
+from cotador.core.precificacao import normalizar_local
+from cotador.tests.test_precificacao import tarifa_exemplo
+
+
+class TarifasFake:
+    """Mesma interface de TabelaTarifas, servida de uma lista em memoria."""
+
+    def __init__(self, tarifas):
+        self._tarifas = list(tarifas)
+        self.carregamentos = 0
+
+    def carregar(self):
+        self.carregamentos += 1
+        return len(self._tarifas)
+
+    def buscar(self, origem, destino, modal=None):
+        o, d = normalizar_local(origem), normalizar_local(destino)
+        for t in self._tarifas:
+            if (
+                normalizar_local(t.chave_origem) == o
+                and normalizar_local(t.chave_destino) == d
+            ):
+                return t
+        return None
+
+    def trecho_cadastrado(self, origem, destino):
+        return self.buscar(origem, destino) is not None
+
+
+class CaixaDevolvedoraFake:
+    def __init__(self):
+        self.devolvidos = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+    def devolver_para_fila(self, id_email, labels_remover):
+        self.devolvidos.append(id_email)
+        return True
+
+
+def cfg_de_teste(tmp: Path):
+    from cotador.config import Config
+
+    return Config(
+        anthropic_api_key="",
+        anthropic_model="claude-sonnet-5",
+        anthropic_workspace_id="",
+        gmail_user="conta@gmail.com",
+        gmail_query="is:unread",
+        sheet_id="sheet",
+        sheet_aba="TABELA_ROTAS",
+        modo_resposta="rascunho",
+        intervalo_segundos=60,
+        exigir_peso=True,
+        smtp_host="smtp",
+        smtp_porta=465,
+        smtp_usuario="conta@gmail.com",
+        smtp_senha="senha",
+        smtp_remetente="",
+        imap_host="imap",
+        imap_porta=993,
+        service_account_json=tmp / "service_account.json",
+        banco=tmp / "cotador.sqlite3",
+    )
+
+
+class BasePainel(unittest.TestCase):
+    def setUp(self):
+        from painel.app import criar_app
+        from painel.servico_agente import ServicoAgente
+
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        tmp = Path(self._tmp.name)
+        self.cfg = cfg_de_teste(tmp)
+        self.banco = Banco(self.cfg.banco)
+        self.tarifas = TarifasFake([tarifa_exemplo()])
+        self.agente_fake = AgenteFake()
+        self.servico = ServicoAgente(lambda: self.agente_fake, intervalo_segundos=60)
+        self.addCleanup(self.servico.desligar)
+        self.caixa = CaixaDevolvedoraFake()
+        self.estado = {"modo": "rascunho"}
+        app = criar_app(
+            self.cfg, self.banco, self.tarifas, self.servico,
+            lambda: self.caixa, self.estado,
+        )
+        app.config["TESTING"] = True
+        self.cliente = app.test_client()
+
+
+class TestVisaoGeral(BasePainel):
+    def test_pagina_mostra_contadores_e_tabela(self):
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="cliente@acme.com",
+            assunto="Cotacao SP-Campinas", desfecho="cotado",
+            origem="Sao Paulo/SP", destino="Campinas/SP",
+            valor_frete=252.5, label="cotador-processado",
+        )
+        resposta = self.cliente.get("/")
+        corpo = resposta.get_data(as_text=True)
+        self.assertEqual(resposta.status_code, 200)
+        self.assertIn("Visão geral", corpo)
+        self.assertIn("cliente@acme.com", corpo)
+        self.assertIn("252,50", corpo)
+
+    def test_api_status_devolve_contadores_e_estado(self):
+        resposta = self.cliente.get("/api/status")
+        self.assertEqual(resposta.status_code, 200)
+        dados = resposta.get_json()
+        self.assertIn("contadores", dados)
+        self.assertFalse(dados["rodando"])
+        self.assertEqual(dados["modo"], "rascunho")
+
+
 if __name__ == "__main__":
     unittest.main()
