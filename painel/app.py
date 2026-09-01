@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
 
+from cotador.core import precificacao
+from cotador.core.modelos import PedidoCotacao
 from painel import consultas
 
 
@@ -70,5 +72,45 @@ def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
             "o agente reprocessa no próximo ciclo."
         )
         return redirect(url_for("revisao"))
+
+    # ---------------- cotacao manual ----------------
+    @app.route("/cotar", methods=["GET", "POST"])
+    def cotar():
+        resultado = None
+        erro = None
+        form = request.form if request.method == "POST" else {}
+        if request.method == "POST":
+            try:
+                tarifas.carregar()
+                pedido = PedidoCotacao(
+                    e_cotacao=True,
+                    confianca=1.0,
+                    origem=form["origem"].strip(),
+                    destino=form["destino"].strip(),
+                    qtd_volumes=int(form["qtd_volumes"]),
+                    valor_nf=float(form["valor_nf"].replace(".", "").replace(",", "."))
+                    if "," in form["valor_nf"]
+                    else float(form["valor_nf"]),
+                    peso_kg=float(form["peso_kg"].replace(",", "."))
+                    if form.get("peso_kg", "").strip()
+                    else None,
+                    modal=form.get("modal") or None,
+                )
+                tarifa = tarifas.buscar(pedido.origem, pedido.destino, pedido.modal)
+                if tarifa is None:
+                    if tarifas.trecho_cadastrado(pedido.origem, pedido.destino):
+                        erro = (
+                            "Trecho cadastrado, porém sem tarifa vigente "
+                            "(INATIVO ou fora da vigência) — verifique a planilha."
+                        )
+                    else:
+                        erro = "Rota não atendida."
+                else:
+                    resultado = precificacao.calcular(pedido, tarifa)
+            except Exception as exc:
+                erro = f"Não foi possível cotar: {exc}"
+        return render_template(
+            "cotar.html", pagina="cotar", resultado=resultado, erro=erro, form=form
+        )
 
     return app

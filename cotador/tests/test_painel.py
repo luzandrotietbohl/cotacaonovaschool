@@ -518,5 +518,41 @@ class TestRevisao(BasePainel):
         self.assertFalse(self.banco.ja_processado("r2"))
 
 
+class TestCotar(BasePainel):
+    def test_cotacao_reproduz_o_exemplo_da_planilha(self):
+        resposta = self.cliente.post("/cotar", data={
+            "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
+            "qtd_volumes": "10", "valor_nf": "8000", "peso_kg": "300",
+            "modal": "",
+        })
+        corpo = resposta.get_data(as_text=True)
+        self.assertIn("252,50", corpo)   # total da aba EXEMPLO_CALCULO
+        self.assertIn("R00001", corpo)   # rota aplicada
+
+    def test_rota_inexistente_avisa_sem_cotar(self):
+        resposta = self.cliente.post("/cotar", data={
+            "origem": "Manaus/AM", "destino": "Campinas/SP",
+            "qtd_volumes": "10", "valor_nf": "8000", "peso_kg": "300",
+            "modal": "",
+        })
+        corpo = resposta.get_data(as_text=True)
+        self.assertIn("Rota não atendida", corpo)
+        self.assertNotIn("252,50", corpo)
+
+    def test_entrada_invalida_nao_estoura(self):
+        resposta = self.cliente.post("/cotar", data={
+            "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
+            "qtd_volumes": "abc", "valor_nf": "8000", "peso_kg": "",
+            "modal": "",
+        })
+        self.assertEqual(resposta.status_code, 200)
+        self.assertIn("Não foi possível cotar", resposta.get_data(as_text=True))
+
+    def test_get_mostra_o_formulario(self):
+        corpo = self.cliente.get("/cotar").get_data(as_text=True)
+        self.assertIn("Origem", corpo)
+        self.assertIn("Valor da NF", corpo)
+
+
 if __name__ == "__main__":
     unittest.main()
