@@ -80,5 +80,91 @@ class TestDevolverParaFila(unittest.TestCase):
         self.assertNotIn("nao encontrado", "\n".join(reg.output))
 
 
+class AgenteFake:
+    """Dubla o Agente: conta ciclos e falha sob demanda."""
+
+    def __init__(self, resumo=None, excecao=None):
+        self.resumo = resumo or {"cotado": 1}
+        self.excecao = excecao
+        self.ciclos = 0
+
+    def rodar_ciclo(self):
+        self.ciclos += 1
+        if self.excecao:
+            raise self.excecao
+        return self.resumo
+
+
+class TestServicoAgente(unittest.TestCase):
+    def test_ciclo_unico_guarda_o_resumo(self):
+        from painel.servico_agente import ServicoAgente
+
+        agente = AgenteFake(resumo={"cotado": 2, "erro": 1})
+        servico = ServicoAgente(lambda: agente, intervalo_segundos=60)
+
+        resumo = servico.ciclo_unico()
+
+        self.assertEqual(resumo, {"cotado": 2, "erro": 1})
+        self.assertEqual(servico.ultimo_resumo, {"cotado": 2, "erro": 1})
+        self.assertIsNone(servico.ultimo_erro)
+        self.assertIsNotNone(servico.ultimo_ciclo_em)
+        self.assertFalse(servico.rodando)
+
+    def test_excecao_no_ciclo_fica_registrada(self):
+        from painel.servico_agente import ServicoAgente
+
+        servico = ServicoAgente(
+            lambda: AgenteFake(excecao=RuntimeError("boom")), intervalo_segundos=60
+        )
+        with self.assertRaises(RuntimeError):
+            servico.ciclo_unico()
+        self.assertIn("boom", servico.ultimo_erro)
+
+    def test_ligar_roda_ciclos_e_desligar_para(self):
+        from painel.servico_agente import ServicoAgente
+
+        agente = AgenteFake()
+        servico = ServicoAgente(lambda: agente, intervalo_segundos=0.01)
+
+        servico.ligar()
+        self.assertTrue(servico.rodando)
+        # Espera ao menos um ciclo acontecer, sem depender de sleep fixo.
+        for _ in range(200):
+            if agente.ciclos >= 1:
+                break
+            import time
+
+            time.sleep(0.01)
+        servico.desligar()
+
+        self.assertFalse(servico.rodando)
+        self.assertGreaterEqual(agente.ciclos, 1)
+        ciclos_apos_desligar = agente.ciclos
+        import time
+
+        time.sleep(0.05)
+        self.assertEqual(agente.ciclos, ciclos_apos_desligar)
+
+    def test_credencial_recusada_desliga_o_loop_e_sinaliza(self):
+        from cotador.integracoes.caixa_imap import CredencialInvalida
+        from painel.servico_agente import ServicoAgente
+
+        agente = AgenteFake(excecao=CredencialInvalida("senha ruim"))
+        servico = ServicoAgente(lambda: agente, intervalo_segundos=0.01)
+
+        servico.ligar()
+        for _ in range(200):
+            if not servico.rodando:
+                break
+            import time
+
+            time.sleep(0.01)
+
+        self.assertFalse(servico.rodando)
+        self.assertTrue(servico.credencial_recusada)
+        self.assertIn("senha ruim", servico.ultimo_erro)
+        self.assertEqual(agente.ciclos, 1)  # nao insiste em credencial ruim
+
+
 if __name__ == "__main__":
     unittest.main()
