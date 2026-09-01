@@ -148,9 +148,13 @@ python main.py --painel
 
 Sobe a interface web local de gestao em http://localhost:8000 (use `--porta` para
 trocar). O painel mostra a operacao do dia, a fila de revisao humana (com botao
-para devolver threads a fila), cotacao manual sem gastar API e o controle do
-loop (ligar/desligar, ciclo unico, modo rascunho/enviar). Inicia sempre com o
-loop desligado e em modo rascunho.
+que devolve a fila os emails em revisao daquela thread), cotacao manual sem
+gastar API e o controle do loop (ligar/desligar, ciclo unico, modo
+rascunho/enviar). Inicia sempre com o loop desligado e em modo rascunho.
+
+A cotacao manual do painel cota mesmo quando o peso estoura o limite da rota,
+exibindo um alerta — de proposito, para o humano ver o numero e decidir. Por
+email o agente **nao** responde esse caso: manda para revisao.
 
 Se algum email falhar por erro tecnico (label `cotador-revisar`), devolva-o a fila:
 
@@ -168,7 +172,7 @@ credencial ruim, e girar em silencio esconde o problema.
 python -m unittest discover -s cotador/tests -t . -v
 ```
 
-126 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de thread, os
+129 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de thread, os
 templates de email, a busca de rota, as rotas do painel e as regressoes conhecidas.
 
 `TestExemploCalculoDaPlanilha` reproduz a aba EXEMPLO_CALCULO: 10 volumes, NF

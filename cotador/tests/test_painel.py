@@ -377,14 +377,24 @@ from cotador.tests.test_precificacao import tarifa_exemplo
 
 
 class TarifasFake:
-    """Mesma interface de TabelaTarifas, servida de uma lista em memoria."""
+    """Mesma interface de TabelaTarifas, servida de uma lista em memoria.
+
+    Como a real, comeca vazia: `tarifas` so tem conteudo depois de `carregar`,
+    que e o que permite testar o cache no processo.
+    """
 
     def __init__(self, tarifas):
-        self._tarifas = list(tarifas)
+        self._catalogo = list(tarifas)  # o que a "planilha" contem
+        self._tarifas = []              # o que ja foi carregado
         self.carregamentos = 0
+
+    @property
+    def tarifas(self):
+        return self._tarifas
 
     def carregar(self):
         self.carregamentos += 1
+        self._tarifas = list(self._catalogo)
         return len(self._tarifas)
 
     def buscar(self, origem, destino, modal=None):
@@ -590,6 +600,24 @@ class TestRevisao(BasePainel):
         self.assertIn("1 de 2", corpo)
         self.assertIn("permanecem na revisão", corpo)
 
+    def test_devolver_nao_toca_no_que_nao_esta_em_revisao(self):
+        # Thread mista: devolver o email ja cotado o deixaria nao lido sem a
+        # linha de idempotencia — resposta duplicada para a cliente.
+        self.registrar_para_revisar(id_email="r1", thread_id="thr-r")
+        self.banco.registrar(
+            id_email="ok1", thread_id="thr-r", remetente="cliente@acme.com",
+            assunto="Cotacao urgente", desfecho="cotado",
+            label="cotador-processado",
+        )
+
+        self.postar(
+            "/revisao/devolver", data={"thread_id": "thr-r"}, follow_redirects=True
+        )
+
+        self.assertEqual(self.caixa.devolvidos, ["r1"])
+        self.assertFalse(self.banco.ja_processado("r1"))
+        self.assertTrue(self.banco.ja_processado("ok1"))  # intocado
+
     def test_devolver_duas_vezes_nao_abre_imap_a_toa(self):
         self.registrar_para_revisar(id_email="r1", thread_id="thr-r")
         dados = {"thread_id": "thr-r"}
@@ -666,6 +694,19 @@ class TestCotar(BasePainel):
         })
         self.assertIn("252,50", resposta.get_data(as_text=True))
 
+    def test_tarifas_carregam_uma_vez_por_processo(self):
+        # Recarregar a planilha a cada cotacao gasta quota do Sheets e trava a
+        # tela; a tabela ja vive em memoria depois do primeiro uso.
+        dados = {
+            "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
+            "qtd_volumes": "10", "valor_nf": "8000", "peso_kg": "300",
+            "modal": "",
+        }
+        self.postar("/cotar", data=dados)
+        self.postar("/cotar", data=dados)
+
+        self.assertEqual(self.tarifas.carregamentos, 1)
+
     def test_rota_inexistente_avisa_sem_cotar(self):
         resposta = self.postar("/cotar", data={
             "origem": "Manaus/AM", "destino": "Campinas/SP",
@@ -736,10 +777,13 @@ class TestPaginaAgente(BasePainel):
         self.assertEqual(self.servico.intervalo_segundos, 300)
 
     def test_intervalo_tem_piso_de_30_segundos(self):
-        self.postar("/agente/acao", data={
+        resposta = self.postar("/agente/acao", data={
             "acao": "config", "intervalo": "1", "modo": "rascunho",
-        })
+        }, follow_redirects=True)
+
         self.assertEqual(self.servico.intervalo_segundos, 30)
+        # Dizer so "aplicada" esconderia que 1s virou 30s.
+        self.assertIn("aplicado 30s", resposta.get_data(as_text=True))
 
     def test_intervalo_nao_numerico_avisa_sem_derrubar(self):
         resposta = self.postar("/agente/acao", data={

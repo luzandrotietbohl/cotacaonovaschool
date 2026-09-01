@@ -105,7 +105,10 @@ def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
     @app.post("/revisao/devolver")
     def revisao_devolver():
         thread_id = request.form["thread_id"]
-        ids = banco.ids_da_thread(thread_id)
+        # So as linhas em revisao. Numa thread mista, devolver as demais
+        # deixaria emails ja resolvidos nao lidos e sem idempotencia — o
+        # proximo ciclo responderia a cliente de novo.
+        ids = banco.ids_da_thread(thread_id, label=cfg.LABEL_REVISAR)
         if not ids:
             # Clique repetido (ou outra aba ja devolveu): nao abre IMAP a toa.
             flash("Nada a devolver: esta thread já saiu da revisão.")
@@ -148,7 +151,10 @@ def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
         form = request.form if request.method == "POST" else {}
         if request.method == "POST":
             try:
-                tarifas.carregar()
+                # Cache no processo: a planilha so vai a rede na primeira
+                # cotacao, depois a tabela ja esta em memoria.
+                if not getattr(tarifas, "tarifas", None):
+                    tarifas.carregar()
                 pedido = PedidoCotacao(
                     e_cotacao=True,
                     confianca=1.0,
@@ -229,11 +235,17 @@ def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
             except (KeyError, ValueError):
                 flash("Intervalo inválido: use um número de segundos.")
                 return redirect(url_for("agente_pagina"))
-            servico.intervalo_segundos = max(30, intervalo)
+            aplicado = max(30, intervalo)
+            servico.intervalo_segundos = aplicado
             estado["modo"] = (
                 "enviar" if request.form.get("modo") == "enviar" else "rascunho"
             )
-            flash("Configuração aplicada aos próximos ciclos.")
+            if intervalo < aplicado:
+                # Confirmar "aplicada" escondendo o clamp faria o operador
+                # achar que o loop roda a cada 1s.
+                flash(f"Intervalo mínimo é 30s; aplicado {aplicado}s.")
+            else:
+                flash("Configuração aplicada aos próximos ciclos.")
         return redirect(url_for("agente_pagina"))
 
     return app

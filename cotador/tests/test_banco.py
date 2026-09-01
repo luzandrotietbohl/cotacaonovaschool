@@ -117,6 +117,16 @@ class TestConsultasDoPainel(BaseComBanco):
         itens = self.banco.por_label("cotador-revisar")
         self.assertEqual([i["id_email"] for i in itens], ["a"])
 
+    def test_ids_da_thread_filtra_por_label(self):
+        # Thread mista: so o que esta em revisao pode voltar para a fila.
+        self.registrar(id_email="a", thread_id="thr-9", label="cotador-revisar")
+        self.registrar(id_email="b", thread_id="thr-9", label="cotador-processado")
+
+        self.assertEqual(
+            self.banco.ids_da_thread("thr-9", label="cotador-revisar"), ["a"]
+        )
+        self.assertEqual(sorted(self.banco.ids_da_thread("thr-9")), ["a", "b"])
+
     def test_ids_da_thread_lista_sem_apagar(self):
         # O painel precisa saber o que devolver ao Gmail ANTES de apagar.
         self.registrar(id_email="a", thread_id="thr-9")

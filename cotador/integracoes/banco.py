@@ -171,17 +171,20 @@ class Banco:
             )
             return [dict(linha) for linha in cur.fetchall()]
 
-    def ids_da_thread(self, thread_id: str) -> list[str]:
-        """Ids da thread, sem apagar nada.
+    def ids_da_thread(self, thread_id: str, label: str | None = None) -> list[str]:
+        """Ids da thread, sem apagar nada; `label` restringe ao label gravado.
 
         Quem devolve email para a fila precisa da lista ANTES de mexer no
-        Gmail, para so apagar o que o IMAP confirmou.
+        Gmail, para so apagar o que o IMAP confirmou. O filtro por label evita
+        arrastar junto emails da mesma thread que ja foram resolvidos.
         """
+        sql = "SELECT id_email FROM processados WHERE thread_id = ?"
+        parametros: tuple = (thread_id,)
+        if label is not None:
+            sql += " AND label = ?"
+            parametros += (label,)
         with closing(self._conectar()) as con:
-            cur = con.execute(
-                "SELECT id_email FROM processados WHERE thread_id = ?", (thread_id,)
-            )
-            return [linha[0] for linha in cur.fetchall()]
+            return [linha[0] for linha in con.execute(sql, parametros).fetchall()]
 
     def apagar_emails(self, ids: list[str]) -> int:
         """Apaga apenas os ids informados; devolve quantos sairam."""
