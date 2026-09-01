@@ -152,15 +152,28 @@ class CaixaIMAP:
         ciclo o reprocessa.
         """
         ok, dados = self.con.uid("SEARCH", "X-GM-MSGID", id_email)
-        uids = (dados[0] or b"").split() if ok == "OK" else []
+        if ok != "OK":
+            log.warning("Busca IMAP pelo email %s falhou: %s", id_email, dados)
+            return False
+        uids = (dados[0] or b"").split()
         if not uids:
             log.warning("Email %s nao encontrado na caixa para devolver", id_email)
             return False
         uid = uids[-1].decode()
+        # Cada STORE precisa ser conferido: se o label ficar ou a mensagem
+        # continuar lida, ela nao volta para 'is:unread -label:...' e o painel
+        # estaria mentindo ao reportar sucesso.
+        tudo_certo = True
         for nome in labels_remover:
-            self.con.uid("STORE", uid, "-X-GM-LABELS", f'("{nome}")')
-        self.con.uid("STORE", uid, "-FLAGS", r"(\Seen)")
-        return True
+            ok, resp = self.con.uid("STORE", uid, "-X-GM-LABELS", f'("{nome}")')
+            if ok != "OK":
+                log.warning("Nao consegui remover o label %s: %s", nome, resp)
+                tudo_certo = False
+        ok, resp = self.con.uid("STORE", uid, "-FLAGS", r"(\Seen)")
+        if ok != "OK":
+            log.warning("Nao consegui restaurar o email %s como nao lido: %s", id_email, resp)
+            tudo_certo = False
+        return tudo_certo
 
     def pasta_rascunhos(self) -> str:
         """Descobre a pasta de rascunhos pelo atributo \\Drafts.
