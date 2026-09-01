@@ -175,9 +175,9 @@ class Banco:
         """Apaga os registros da thread (para reprocessar) e devolve os ids."""
         with closing(self._conectar()) as con:
             cur = con.execute(
-                "SELECT id_email FROM processados WHERE thread_id = ?", (thread_id,)
+                "DELETE FROM processados WHERE thread_id = ? RETURNING id_email",
+                (thread_id,),
             )
             ids = [linha[0] for linha in cur.fetchall()]
-            con.execute("DELETE FROM processados WHERE thread_id = ?", (thread_id,))
             con.commit()
             return ids
