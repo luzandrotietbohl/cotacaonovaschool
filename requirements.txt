@@ -1,0 +1,4 @@
+anthropic>=0.40
+google-api-python-client>=2.150
+google-auth>=2.35
+python-dotenv>=1.0

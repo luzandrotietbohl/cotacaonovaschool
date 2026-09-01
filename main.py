@@ -1,0 +1,271 @@
+"""Ponto de entrada do agente de cotacao.
+
+Uso:
+    python main.py --validar-planilha        # so testa a leitura das tarifas
+    python main.py --testar-texto "..."      # so testa a extracao (nao toca no email)
+    python main.py --cotar "Sao Paulo/SP" "Campinas/SP" 10 8000
+    python main.py --testar-imap             # valida a leitura da caixa
+    python main.py --testar-smtp             # valida a senha de app, sem enviar
+    python main.py --reprocessar-erros       # devolve para a fila os que falharam
+    python main.py --once                    # um ciclo na caixa de entrada
+    python main.py --loop                    # ciclos continuos
+
+Codigos de saida: 0 ok | 1 falha de dados | 2 credencial recusada
+"""
+from __future__ import annotations
+
+import argparse
+import logging
+import sys
+import time
+from datetime import datetime
+from pathlib import Path
+
+from cotador.agente import Agente
+from cotador.config import Config
+from cotador.core import precificacao
+from cotador.core.extracao import Extrator
+from cotador.core.modelos import PedidoCotacao
+from cotador.integracoes import google_sa
+from cotador.integracoes.banco import Banco
+from cotador.integracoes.caixa_imap import CaixaIMAP, CredencialInvalida
+from cotador.integracoes.email_smtp import EnviadorSMTP
+from cotador.integracoes.planilha import TabelaTarifas
+
+log = logging.getLogger("cotador")
+
+ARQUIVO_ALERTA = "ALERTA_CREDENCIAL.txt"
+
+
+def configurar_log(verboso: bool) -> None:
+    logging.basicConfig(
+        level=logging.DEBUG if verboso else logging.INFO,
+        format="%(asctime)s %(levelname)-7s %(name)s: %(message)s",
+        datefmt="%d/%m %H:%M:%S",
+        stream=sys.stdout,
+    )
+    logging.getLogger("googleapiclient").setLevel(logging.WARNING)
+
+
+# ---------------- alerta ----------------
+def caminho_alerta(cfg: Config) -> Path:
+    return cfg.service_account_json.parent / ARQUIVO_ALERTA
+
+
+def registrar_alerta(cfg: Config, mensagem: str) -> Path:
+    """Grava o alerta em arquivo: o Agendador de Tarefas e qualquer monitor
+    conseguem ver que o agente parou sem depender de ler o log."""
+    caminho = caminho_alerta(cfg)
+    texto = [
+        f"[{datetime.now():%d/%m/%Y %H:%M:%S}] AGENTE PARADO - CREDENCIAL RECUSADA",
+        "",
+        mensagem,
+        "",
+        "Para voltar a rodar, corrija o .env e valide com:",
+        "    python main.py --testar-imap",
+        "    python main.py --testar-smtp",
+        "",
+        "A senha de app do Gmail e gerada em:",
+        "    https://myaccount.google.com/apppasswords",
+        "Ela deixa de valer se a verificacao em duas etapas for desligada ou se",
+        "alguem revogar o acesso nas configuracoes da conta.",
+        "",
+    ]
+    caminho.write_text("\n".join(texto), encoding="utf-8")
+    return caminho
+
+
+def limpar_alerta(cfg: Config) -> None:
+    caminho = caminho_alerta(cfg)
+    if caminho.exists():
+        caminho.unlink()
+
+
+def gritar(cfg: Config, exc: Exception) -> int:
+    caminho = registrar_alerta(cfg, str(exc))
+    barra = "!" * 72
+    log.error(barra)
+    log.error("AGENTE PARADO: credencial recusada")
+    log.error("%s", exc)
+    log.error("Alerta gravado em %s", caminho)
+    log.error(barra)
+    return 2
+
+
+# ---------------- fabricas ----------------
+def montar_caixa(cfg: Config) -> CaixaIMAP:
+    return CaixaIMAP(
+        host=cfg.imap_host,
+        porta=cfg.imap_porta,
+        usuario=cfg.smtp_usuario,
+        senha=cfg.smtp_senha,
+    )
+
+
+def montar_enviador(cfg: Config) -> EnviadorSMTP:
+    return EnviadorSMTP(
+        host=cfg.smtp_host,
+        porta=cfg.smtp_porta,
+        usuario=cfg.smtp_usuario,
+        senha=cfg.smtp_senha,
+        remetente_exibido=cfg.remetente,
+    )
+
+
+def main() -> int:
+    """Qualquer comando pode esbarrar na credencial recusada — inclusive no
+    login IMAP, antes do primeiro ciclo. Por isso o alerta e tratado aqui em
+    volta de tudo, nao so dentro do loop."""
+    try:
+        return _executar()
+    except CredencialInvalida as exc:
+        return gritar(Config.carregar(), exc)
+
+
+def _executar() -> int:
+    p = argparse.ArgumentParser(description="Agente de cotacao de frete por email")
+    grupo = p.add_mutually_exclusive_group(required=True)
+    grupo.add_argument("--once", action="store_true", help="processa a caixa uma vez")
+    grupo.add_argument("--loop", action="store_true", help="processa em intervalos")
+    grupo.add_argument("--validar-planilha", action="store_true")
+    grupo.add_argument("--testar-texto", metavar="TEXTO")
+    grupo.add_argument(
+        "--testar-imap",
+        action="store_true",
+        help="valida a leitura da caixa por IMAP sem processar nada",
+    )
+    grupo.add_argument(
+        "--testar-smtp",
+        action="store_true",
+        help="valida a conexao e a senha de app do SMTP sem enviar email",
+    )
+    grupo.add_argument(
+        "--reprocessar-erros",
+        action="store_true",
+        help="limpa do banco os emails com desfecho erro para tentar de novo",
+    )
+    grupo.add_argument(
+        "--cotar",
+        nargs=4,
+        metavar=("ORIGEM", "DESTINO", "QTD_VOLUMES", "VALOR_NF"),
+        help="calcula um frete direto da planilha, sem email",
+    )
+    p.add_argument("-v", "--verboso", action="store_true")
+    args = p.parse_args()
+
+    configurar_log(args.verboso)
+    cfg = Config.carregar()
+
+    if args.testar_texto:
+        pedido = Extrator(
+            cfg.anthropic_api_key, cfg.anthropic_model, cfg.anthropic_workspace_id
+        ).analisar("Teste de extracao", args.testar_texto)
+        print(pedido)
+        print("faltando:", pedido.campos_faltantes(cfg.exigir_peso) or "nada")
+        return 0
+
+    if args.testar_imap:
+        caixa = montar_caixa(cfg)
+        with caixa:
+            achados = caixa.buscar(cfg.gmail_query)
+            print(f"IMAP OK: {cfg.smtp_usuario}@{cfg.imap_host}:{cfg.imap_porta}")
+            print(f"pasta de rascunhos: {caixa.pasta_rascunhos()}")
+            print(f"{len(achados)} email(s) batem com: {cfg.gmail_query}")
+        limpar_alerta(cfg)
+        return 0
+
+    if args.testar_smtp:
+        montar_enviador(cfg).testar_conexao()
+        print(f"SMTP OK: {cfg.smtp_usuario}@{cfg.smtp_host}:{cfg.smtp_porta}")
+        print(f"remetente exibido: {cfg.remetente}")
+        limpar_alerta(cfg)
+        return 0
+
+    if args.reprocessar_erros:
+        removidos = Banco(cfg.banco).limpar_erros()
+        print(f"{removidos} email(s) com erro liberados para reprocessamento")
+        print("Remova tambem o label cotador-revisar no Gmail se quiser rever a thread.")
+        return 0
+
+    cred = google_sa.credenciais(cfg.service_account_json)
+    tabela = TabelaTarifas(cred, cfg.sheet_id, cfg.sheet_aba)
+
+    if args.validar_planilha:
+        total = tabela.carregar()
+        print(f"{total} tarifas carregadas de '{cfg.sheet_aba}'")
+        for t in tabela.tarifas[:3]:
+            print(
+                f"  {t.id_rota} {t.chave_origem} -> {t.chave_destino} "
+                f"[{t.modal}] vol R$ {t.valor_por_volume:.2f} "
+                f"+ pedagio R$ {t.pedagio_por_volume:.2f} | min R$ {t.frete_minimo:.2f} "
+                f"| gris {t.gris_percentual:.2f}% + adv {t.advalorem_percentual:.2f}% "
+                f"| prazo {t.prazo_dias}d"
+            )
+        return 0 if total else 1
+
+    if args.cotar:
+        origem, destino, qtd, valor_nf = args.cotar
+        tabela.carregar()
+        tarifa = tabela.buscar(origem, destino)
+        if tarifa is None:
+            print(f"Rota nao atendida: {origem} -> {destino}")
+            return 1
+        pedido = PedidoCotacao(
+            e_cotacao=True,
+            confianca=1.0,
+            origem=origem,
+            destino=destino,
+            qtd_volumes=int(qtd),
+            valor_nf=float(valor_nf),
+        )
+        c = precificacao.calcular(pedido, tarifa)
+        print(f"rota .............. {tarifa.id_rota} [{tarifa.modal}]")
+        print(f"frete volumes ..... R$ {c.frete_volumes:.2f}")
+        print(f"frete aplicado .... R$ {c.frete_aplicado:.2f}")
+        print(f"gris + advalorem .. R$ {c.gris_advalorem:.2f}")
+        print(f"taxa dificil ...... R$ {c.taxa_entrega_dificil:.2f}")
+        print(f"TOTAL ............. R$ {c.total:.2f}")
+        print(f"prazo ............. {c.prazo_dias} dia(s) uteis")
+        return 0
+
+    agente = Agente(
+        cfg=cfg,
+        caixa=montar_caixa(cfg),
+        tarifas=tabela,
+        extrator=Extrator(
+            cfg.anthropic_api_key, cfg.anthropic_model, cfg.anthropic_workspace_id
+        ),
+        banco=Banco(cfg.banco),
+        # Em modo rascunho nao exigimos SMTP: nada sai pela rede.
+        enviador=montar_enviador(cfg) if cfg.modo_resposta == "enviar" else None,
+    )
+
+    if args.once:
+        try:
+            print(agente.rodar_ciclo())
+        except CredencialInvalida as exc:
+            return gritar(cfg, exc)
+        limpar_alerta(cfg)
+        return 0
+
+    log.info("Loop iniciado (intervalo de %ds). Ctrl+C para parar.", cfg.intervalo_segundos)
+    while True:
+        try:
+            resumo = agente.rodar_ciclo()
+            if resumo:
+                log.info("Ciclo: %s", resumo)
+            limpar_alerta(cfg)
+        except CredencialInvalida as exc:
+            # Insistir nao resolve: precisa de um humano corrigindo a credencial.
+            # Melhor sair com codigo de erro do que girar em silencio.
+            return gritar(cfg, exc)
+        except KeyboardInterrupt:
+            log.info("Encerrado pelo usuario")
+            return 0
+        except Exception:
+            log.exception("Ciclo falhou; tentando novamente no proximo intervalo")
+        time.sleep(cfg.intervalo_segundos)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
