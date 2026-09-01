@@ -1,8 +1,11 @@
 """Testes do painel: IMAP de devolucao, servico do loop e rotas Flask."""
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
 
+from cotador.integracoes.banco import Banco
 from cotador.integracoes.caixa_imap import CaixaIMAP
 
 
@@ -164,6 +167,64 @@ class TestServicoAgente(unittest.TestCase):
         self.assertTrue(servico.credencial_recusada)
         self.assertIn("senha ruim", servico.ultimo_erro)
         self.assertEqual(agente.ciclos, 1)  # nao insiste em credencial ruim
+
+
+class TestConsultas(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.banco = Banco(Path(self._tmp.name) / "t.sqlite3")
+
+    def test_contadores_de_hoje_zera_o_que_nao_ha(self):
+        from painel import consultas
+
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="x@y.com", assunto="s",
+            desfecho="cotado", label="cotador-processado",
+        )
+        contadores = consultas.contadores_de_hoje(self.banco)
+        self.assertEqual(contadores["cotado"], 1)
+        self.assertEqual(contadores["erro"], 0)
+        self.assertEqual(contadores["incompleto"], 0)
+        self.assertEqual(contadores["sem_rota"], 0)
+
+    def test_ultimos_processados_formata_quando_e_rota(self):
+        from painel import consultas
+
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="x@y.com", assunto="s",
+            desfecho="cotado", origem="Sao Paulo/SP", destino="Campinas/SP",
+            valor_frete=252.5, label="cotador-processado",
+        )
+        self.banco.registrar(
+            id_email="b", thread_id="t2", remetente="w@y.com", assunto="s2",
+            desfecho="erro", label="cotador-revisar",
+        )
+        linhas = consultas.ultimos_processados(self.banco)
+        self.assertEqual(len(linhas), 2)
+        por_id = {l["id_email"]: l for l in linhas}
+        self.assertEqual(por_id["a"]["rota"], "Sao Paulo/SP → Campinas/SP")
+        self.assertEqual(por_id["b"]["rota"], "—")
+        self.assertRegex(por_id["a"]["quando"], r"\d{2}/\d{2} \d{2}:\d{2}")
+
+    def test_fila_de_revisao_expande_a_extracao(self):
+        from painel import consultas
+
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="x@y.com", assunto="s",
+            desfecho="erro", label="cotador-revisar",
+            erro="confianca 0.20 abaixo de 0.35",
+            extracao={"e_cotacao": True, "confianca": 0.2, "origem": "SP"},
+        )
+        self.banco.registrar(
+            id_email="b", thread_id="t2", remetente="w@y.com", assunto="s2",
+            desfecho="cotado", label="cotador-processado",
+        )
+        itens = consultas.fila_de_revisao(self.banco, "cotador-revisar")
+        self.assertEqual(len(itens), 1)
+        self.assertEqual(itens[0]["id_email"], "a")
+        self.assertIn("confianca 0.20", itens[0]["erro"])
+        self.assertIn('"origem": "SP"', itens[0]["extracao"])
 
 
 if __name__ == "__main__":
