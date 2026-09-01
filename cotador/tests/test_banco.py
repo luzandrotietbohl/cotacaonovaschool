@@ -88,5 +88,44 @@ class TestMigracaoDeBancoAntigo(unittest.TestCase):
             self.assertTrue(banco.ja_processado("novo"))
 
 
+class TestConsultasDoPainel(BaseComBanco):
+    def test_contar_por_desfecho_filtra_pelo_dia(self):
+        self.registrar(id_email="a", desfecho="cotado")
+        self.registrar(id_email="b", desfecho="cotado")
+        self.registrar(id_email="c", desfecho="erro", label="cotador-revisar")
+        hoje = self.banco.ultimos(1)[0]["criado_em"][:10]
+
+        contagem = self.banco.contar_por_desfecho(prefixo_dia=hoje)
+        self.assertEqual(contagem.get("cotado"), 2)
+        self.assertEqual(contagem.get("erro"), 1)
+
+        ontem = self.banco.contar_por_desfecho(prefixo_dia="1999-01-01")
+        self.assertEqual(ontem, {})
+
+    def test_ultimos_vem_em_ordem_decrescente_como_dicts(self):
+        self.registrar(id_email="a")
+        self.registrar(id_email="b")
+        linhas = self.banco.ultimos(50)
+        self.assertEqual(len(linhas), 2)
+        self.assertIsInstance(linhas[0], dict)
+        # Mesmo timestamp (mesmo segundo): o rowid desempata, ultimo primeiro.
+        self.assertEqual(linhas[0]["id_email"], "b")
+
+    def test_por_label_lista_somente_o_label_pedido(self):
+        self.registrar(id_email="a", desfecho="erro", label="cotador-revisar")
+        self.registrar(id_email="b", desfecho="cotado", label="cotador-processado")
+        itens = self.banco.por_label("cotador-revisar")
+        self.assertEqual([i["id_email"] for i in itens], ["a"])
+
+    def test_apagar_thread_devolve_os_ids_removidos(self):
+        self.registrar(id_email="a", thread_id="thr-9")
+        self.registrar(id_email="b", thread_id="thr-9")
+        self.registrar(id_email="fora", thread_id="outra")
+        removidos = self.banco.apagar_thread("thr-9")
+        self.assertEqual(sorted(removidos), ["a", "b"])
+        self.assertFalse(self.banco.ja_processado("a"))
+        self.assertTrue(self.banco.ja_processado("fora"))
+
+
 if __name__ == "__main__":
     unittest.main()

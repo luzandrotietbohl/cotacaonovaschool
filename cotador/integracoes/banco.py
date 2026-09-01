@@ -138,3 +138,46 @@ class Banco:
                 valores,
             )
             con.commit()
+
+    # ---------------- consultas do painel ----------------
+    def contar_por_desfecho(self, prefixo_dia: str | None = None) -> dict[str, int]:
+        """Contagem por desfecho; `prefixo_dia` ('2026-09-01') filtra o dia UTC."""
+        sql = "SELECT desfecho, COUNT(*) FROM processados"
+        parametros: tuple = ()
+        if prefixo_dia:
+            sql += " WHERE criado_em LIKE ?"
+            parametros = (f"{prefixo_dia}%",)
+        sql += " GROUP BY desfecho"
+        with closing(self._conectar()) as con:
+            return dict(con.execute(sql, parametros).fetchall())
+
+    def ultimos(self, limite: int = 50) -> list[dict]:
+        """Registros mais recentes primeiro. rowid desempata o mesmo segundo."""
+        with closing(self._conectar()) as con:
+            con.row_factory = sqlite3.Row
+            cur = con.execute(
+                "SELECT * FROM processados ORDER BY criado_em DESC, rowid DESC LIMIT ?",
+                (limite,),
+            )
+            return [dict(linha) for linha in cur.fetchall()]
+
+    def por_label(self, label: str) -> list[dict]:
+        with closing(self._conectar()) as con:
+            con.row_factory = sqlite3.Row
+            cur = con.execute(
+                "SELECT * FROM processados WHERE label = ? "
+                "ORDER BY criado_em DESC, rowid DESC",
+                (label,),
+            )
+            return [dict(linha) for linha in cur.fetchall()]
+
+    def apagar_thread(self, thread_id: str) -> list[str]:
+        """Apaga os registros da thread (para reprocessar) e devolve os ids."""
+        with closing(self._conectar()) as con:
+            cur = con.execute(
+                "SELECT id_email FROM processados WHERE thread_id = ?", (thread_id,)
+            )
+            ids = [linha[0] for linha in cur.fetchall()]
+            con.execute("DELETE FROM processados WHERE thread_id = ?", (thread_id,))
+            con.commit()
+            return ids
