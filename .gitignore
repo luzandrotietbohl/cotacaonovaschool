@@ -1,4 +1,5 @@
 .env
+*.env
 service_account.json
 *.sqlite3
 ALERTA_CREDENCIAL.txt
