@@ -113,4 +113,44 @@ def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
             "cotar.html", pagina="cotar", resultado=resultado, erro=erro, form=form
         )
 
+    # ---------------- controle do agente ----------------
+    @app.get("/agente")
+    def agente_pagina():
+        arquivo_alerta = cfg.service_account_json.parent / "ALERTA_CREDENCIAL.txt"
+        alerta = (
+            arquivo_alerta.read_text(encoding="utf-8")
+            if arquivo_alerta.exists()
+            else None
+        )
+        return render_template(
+            "agente.html",
+            pagina="agente",
+            alerta=alerta,
+            intervalo=int(servico.intervalo_segundos),
+        )
+
+    @app.post("/agente/acao")
+    def agente_acao():
+        acao = request.form["acao"]
+        if acao == "ligar":
+            servico.ligar()
+            flash("Loop ligado.")
+        elif acao == "desligar":
+            servico.desligar()
+            flash("Loop desligado.")
+        elif acao == "ciclo":
+            try:
+                resumo = servico.ciclo_unico()
+                flash(f"Ciclo concluído: {resumo or 'nenhum email novo'}")
+            except Exception:
+                # O detalhe ja esta em servico.ultimo_erro, exibido na pagina.
+                flash("Ciclo falhou — veja o último erro abaixo.")
+        elif acao == "config":
+            servico.intervalo_segundos = max(30, int(request.form["intervalo"]))
+            estado["modo"] = (
+                "enviar" if request.form.get("modo") == "enviar" else "rascunho"
+            )
+            flash("Configuração aplicada aos próximos ciclos.")
+        return redirect(url_for("agente_pagina"))
+
     return app

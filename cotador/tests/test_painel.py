@@ -237,6 +237,34 @@ class TestServicoAgente(unittest.TestCase):
         servico.desligar()  # agora sim recolhe o handle, sem erro
         self.assertIsNone(servico._thread)
 
+    def test_desligando_sinaliza_a_espera_do_ciclo_corrente(self):
+        # Entre "pedi para parar" e "parou" o painel precisa dizer algo alem de
+        # '● rodando', senao o botao parece nao ter funcionado.
+        from painel.servico_agente import ServicoAgente
+
+        agente = AgenteTravado()
+        servico = ServicoAgente(
+            lambda: agente, intervalo_segundos=0.01, timeout_desligar=0.05
+        )
+        self.addCleanup(agente.liberar.set)
+
+        self.assertFalse(servico.desligando)
+        servico.ligar()
+        self.assertTrue(agente.entrou.wait(timeout=5))
+        self.assertFalse(servico.desligando)
+
+        with self.assertLogs("painel.servico_agente", "WARNING"):
+            servico.desligar()  # o join estoura com o ciclo ainda dentro do fake
+        self.assertTrue(servico.desligando)
+
+        agente.liberar.set()
+        for _ in range(500):
+            if not servico.rodando:
+                break
+            time.sleep(0.01)
+
+        self.assertFalse(servico.desligando)
+
     def test_ligar_de_novo_apos_credencial_recusada_rearma_o_loop(self):
         from cotador.integracoes.caixa_imap import CredencialInvalida
         from painel.servico_agente import ServicoAgente
@@ -552,6 +580,46 @@ class TestCotar(BasePainel):
         corpo = self.cliente.get("/cotar").get_data(as_text=True)
         self.assertIn("Origem", corpo)
         self.assertIn("Valor da NF", corpo)
+
+
+class TestPaginaAgente(BasePainel):
+    def test_ligar_e_desligar_o_loop(self):
+        self.cliente.post("/agente/acao", data={"acao": "ligar"})
+        self.assertTrue(self.servico.rodando)
+        self.cliente.post("/agente/acao", data={"acao": "desligar"})
+        self.assertFalse(self.servico.rodando)
+
+    def test_ciclo_agora_roda_um_ciclo(self):
+        self.cliente.post("/agente/acao", data={"acao": "ciclo"}, follow_redirects=True)
+        self.assertEqual(self.agente_fake.ciclos, 1)
+        self.assertEqual(self.servico.ultimo_resumo, {"cotado": 1})
+
+    def test_config_muda_modo_e_intervalo(self):
+        self.cliente.post("/agente/acao", data={
+            "acao": "config", "intervalo": "300", "modo": "enviar",
+        })
+        self.assertEqual(self.estado["modo"], "enviar")
+        self.assertEqual(self.servico.intervalo_segundos, 300)
+
+    def test_intervalo_tem_piso_de_30_segundos(self):
+        self.cliente.post("/agente/acao", data={
+            "acao": "config", "intervalo": "1", "modo": "rascunho",
+        })
+        self.assertEqual(self.servico.intervalo_segundos, 30)
+
+    def test_alerta_de_credencial_aparece_na_pagina(self):
+        arquivo = self.cfg.service_account_json.parent / "ALERTA_CREDENCIAL.txt"
+        arquivo.write_text("AGENTE PARADO - CREDENCIAL RECUSADA", encoding="utf-8")
+        corpo = self.cliente.get("/agente").get_data(as_text=True)
+        self.assertIn("CREDENCIAL RECUSADA", corpo)
+
+    def test_erro_num_ciclo_nao_derruba_a_rota(self):
+        self.agente_fake.excecao = RuntimeError("planilha fora do ar")
+        resposta = self.cliente.post(
+            "/agente/acao", data={"acao": "ciclo"}, follow_redirects=True
+        )
+        self.assertEqual(resposta.status_code, 200)
+        self.assertIn("planilha fora do ar", self.servico.ultimo_erro)
 
 
 if __name__ == "__main__":

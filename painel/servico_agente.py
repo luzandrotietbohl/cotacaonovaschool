@@ -43,6 +43,11 @@ class ServicoAgente:
     def rodando(self) -> bool:
         return self._thread is not None and self._thread.is_alive()
 
+    @property
+    def desligando(self) -> bool:
+        # desligar() com timeout estourado: ciclo corrente ainda termina.
+        return self.rodando and self._parar.is_set()
+
     def ligar(self) -> None:
         with self._trava_liga:
             if self.rodando:

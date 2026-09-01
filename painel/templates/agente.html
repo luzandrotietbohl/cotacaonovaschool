@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block conteudo %}
+<h2>Agente</h2>
+
+{% if alerta %}<div class="alerta">{{ alerta }}</div>{% endif %}
+{% if servico.credencial_recusada %}
+<div class="alerta">Credencial recusada no último ciclo — o loop foi desligado. Corrija o .env e valide com --testar-imap.</div>
+{% endif %}
+
+<div class="cartao-detalhe">
+  <h3>Loop</h3>
+  <p>Estado:
+    <strong>
+      {%- if servico.desligando %}◌ desligando…
+      {%- elif servico.rodando %}● rodando
+      {%- else %}○ parado{% endif -%}
+    </strong>
+     · intervalo de {{ intervalo }}s · modo <strong>{{ modo }}</strong></p>
+  {% if servico.desligando %}
+  <p class="subtitulo">Parada pedida; o ciclo em andamento termina antes de a thread encerrar.</p>
+  {% endif %}
+  <form method="post" action="{{ url_for('agente_acao') }}" class="linha">
+    {% if servico.rodando %}
+    <button name="acao" value="desligar" class="perigo" type="submit">Desligar</button>
+    {% else %}
+    <button name="acao" value="ligar" type="submit">Ligar</button>
+    {% endif %}
+    <button name="acao" value="ciclo" class="neutro" type="submit">Rodar 1 ciclo agora</button>
+  </form>
+</div>
+
+<div class="cartao-detalhe">
+  <h3>Configuração</h3>
+  <form method="post" action="{{ url_for('agente_acao') }}" class="linha">
+    <input type="hidden" name="acao" value="config">
+    <label>Intervalo entre ciclos (s)
+      <input name="intervalo" type="number" min="30" value="{{ intervalo }}">
+    </label>
+    <label>Modo de resposta
+      <select name="modo">
+        <option value="rascunho" {{ 'selected' if modo == 'rascunho' }}>rascunho (não envia)</option>
+        <option value="enviar" {{ 'selected' if modo == 'enviar' }}>enviar ao cliente</option>
+      </select>
+    </label>
+    <button type="submit">Aplicar</button>
+  </form>
+  <p class="subtitulo">Em modo rascunho a resposta fica em [Gmail]/Rascunhos e nada é enviado.</p>
+</div>
+
+<div class="cartao-detalhe">
+  <h3>Último ciclo</h3>
+  {% if servico.ultimo_ciclo_em %}
+  <p>{{ servico.ultimo_ciclo_em }}</p>
+  {% if servico.ultimo_resumo is not none %}<pre>{{ servico.ultimo_resumo }}</pre>{% endif %}
+  {% if servico.ultimo_erro %}<p class="motivo">Último erro: {{ servico.ultimo_erro }}</p>{% endif %}
+  {% else %}
+  <p class="subtitulo">Nenhum ciclo rodou ainda nesta sessão.</p>
+  {% endif %}
+</div>
+{% endblock %}
