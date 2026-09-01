@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import sqlite3
 import tempfile
+import threading
 import time
 import unittest
 from pathlib import Path
@@ -100,6 +101,21 @@ class AgenteFake:
         return self.resumo
 
 
+class AgenteTravado:
+    """Fica dentro de rodar_ciclo ate o teste liberar, simulando ciclo longo."""
+
+    def __init__(self):
+        self.entrou = threading.Event()
+        self.liberar = threading.Event()
+        self.ciclos = 0
+
+    def rodar_ciclo(self):
+        self.ciclos += 1
+        self.entrou.set()
+        self.liberar.wait(timeout=10)  # rede de seguranca: nao trava a suite
+        return {"cotado": 0}
+
+
 class TestServicoAgente(unittest.TestCase):
     def test_ciclo_unico_guarda_o_resumo(self):
         from painel.servico_agente import ServicoAgente
@@ -185,6 +201,41 @@ class TestServicoAgente(unittest.TestCase):
         servico.desligar()
 
         self.assertFalse(servico.rodando)
+
+    def test_desligar_com_ciclo_travado_preserva_o_handle(self):
+        from painel.servico_agente import ServicoAgente
+
+        agente = AgenteTravado()
+        servico = ServicoAgente(
+            lambda: agente, intervalo_segundos=0.01, timeout_desligar=0.05
+        )
+        self.addCleanup(agente.liberar.set)  # nunca deixa a thread pendurada
+
+        servico.ligar()
+        self.assertTrue(agente.entrou.wait(timeout=5))
+
+        # O join estoura: o ciclo ainda esta dentro do fake.
+        with self.assertLogs("painel.servico_agente", "WARNING") as reg:
+            servico.desligar()
+        self.assertIn("ainda em andamento", "\n".join(reg.output))
+
+        self.assertTrue(servico.rodando)
+        self.assertIsNotNone(servico._thread)
+        orfa = servico._thread
+
+        servico.ligar()  # com a orfa viva, ligar nao pode criar um segundo laco
+        self.assertIs(servico._thread, orfa)
+
+        agente.liberar.set()
+        for _ in range(500):
+            if not servico.rodando:
+                break
+            time.sleep(0.01)
+
+        self.assertFalse(servico.rodando)
+        self.assertEqual(agente.ciclos, 1)  # o pedido de parada seguiu valendo
+        servico.desligar()  # agora sim recolhe o handle, sem erro
+        self.assertIsNone(servico._thread)
 
     def test_ligar_de_novo_apos_credencial_recusada_rearma_o_loop(self):
         from cotador.integracoes.caixa_imap import CredencialInvalida

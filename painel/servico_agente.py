@@ -17,9 +17,16 @@ log = logging.getLogger(__name__)
 
 
 class ServicoAgente:
-    def __init__(self, fabrica_agente: Callable, intervalo_segundos: float) -> None:
+    def __init__(
+        self,
+        fabrica_agente: Callable,
+        intervalo_segundos: float,
+        timeout_desligar: float = 10.0,
+    ) -> None:
         self._fabrica = fabrica_agente
         self.intervalo_segundos = intervalo_segundos
+        # Quanto desligar() espera o ciclo corrente terminar antes de desistir.
+        self.timeout_desligar = timeout_desligar
         self._parar = threading.Event()
         self._thread: threading.Thread | None = None
         # Um ciclo por vez, mesmo se "rodar agora" coincidir com o loop.
@@ -52,7 +59,7 @@ class ServicoAgente:
             thread = self._thread
             if thread is None:
                 return
-            thread.join(timeout=10)
+            thread.join(timeout=self.timeout_desligar)
             if thread.is_alive():
                 # Sem o handle, `rodando` mentiria e um ligar() seguinte criaria
                 # um segundo laco com o primeiro ainda girando.
