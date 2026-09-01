@@ -1,7 +1,9 @@
 """Testes do painel: IMAP de devolucao, servico do loop e rotas Flask."""
 from __future__ import annotations
 
+import sqlite3
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -135,16 +137,12 @@ class TestServicoAgente(unittest.TestCase):
         for _ in range(200):
             if agente.ciclos >= 1:
                 break
-            import time
-
             time.sleep(0.01)
         servico.desligar()
 
         self.assertFalse(servico.rodando)
         self.assertGreaterEqual(agente.ciclos, 1)
         ciclos_apos_desligar = agente.ciclos
-        import time
-
         time.sleep(0.05)
         self.assertEqual(agente.ciclos, ciclos_apos_desligar)
 
@@ -159,8 +157,6 @@ class TestServicoAgente(unittest.TestCase):
         for _ in range(200):
             if not servico.rodando:
                 break
-            import time
-
             time.sleep(0.01)
 
         self.assertFalse(servico.rodando)
@@ -168,12 +164,61 @@ class TestServicoAgente(unittest.TestCase):
         self.assertIn("senha ruim", servico.ultimo_erro)
         self.assertEqual(agente.ciclos, 1)  # nao insiste em credencial ruim
 
+    def test_ligar_duas_vezes_nao_cria_segunda_thread(self):
+        from painel.servico_agente import ServicoAgente
+
+        servico = ServicoAgente(lambda: AgenteFake(), intervalo_segundos=60)
+
+        servico.ligar()
+        self.addCleanup(servico.desligar)
+        primeira = servico._thread
+        servico.ligar()
+
+        self.assertIs(servico._thread, primeira)
+        self.assertTrue(servico.rodando)
+
+    def test_desligar_sem_ligar_nao_quebra(self):
+        from painel.servico_agente import ServicoAgente
+
+        servico = ServicoAgente(lambda: AgenteFake(), intervalo_segundos=60)
+
+        servico.desligar()
+
+        self.assertFalse(servico.rodando)
+
+    def test_ligar_de_novo_apos_credencial_recusada_rearma_o_loop(self):
+        from cotador.integracoes.caixa_imap import CredencialInvalida
+        from painel.servico_agente import ServicoAgente
+
+        agente = AgenteFake(excecao=CredencialInvalida("senha ruim"))
+        servico = ServicoAgente(lambda: agente, intervalo_segundos=0.01)
+
+        servico.ligar()
+        for _ in range(200):
+            if not servico.rodando:
+                break
+            time.sleep(0.01)
+        self.assertTrue(servico.credencial_recusada)
+
+        agente.excecao = None  # humano corrigiu a senha e religou
+        servico.ligar()
+        self.addCleanup(servico.desligar)
+        for _ in range(200):
+            if not servico.credencial_recusada:
+                break
+            time.sleep(0.01)
+
+        self.assertFalse(servico.credencial_recusada)
+        self.assertEqual(servico.ultimo_resumo, {"cotado": 1})
+        self.assertIsNone(servico.ultimo_erro)
+
 
 class TestConsultas(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self._tmp.cleanup)
-        self.banco = Banco(Path(self._tmp.name) / "t.sqlite3")
+        self.caminho = Path(self._tmp.name) / "t.sqlite3"
+        self.banco = Banco(self.caminho)
 
     def test_contadores_de_hoje_zera_o_que_nao_ha(self):
         from painel import consultas
@@ -225,6 +270,25 @@ class TestConsultas(unittest.TestCase):
         self.assertEqual(itens[0]["id_email"], "a")
         self.assertIn("confianca 0.20", itens[0]["erro"])
         self.assertIn('"origem": "SP"', itens[0]["extracao"])
+
+    def test_fila_de_revisao_tolera_extracao_corrompida(self):
+        from painel import consultas
+
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="x@y.com", assunto="s",
+            desfecho="erro", label="cotador-revisar", extracao={"origem": "SP"},
+        )
+        con = sqlite3.connect(self.caminho)
+        con.execute(
+            "UPDATE processados SET extracao_json = ? WHERE id_email = ?",
+            ("{isto nao e json", "a"),
+        )
+        con.commit()
+        con.close()
+
+        itens = consultas.fila_de_revisao(self.banco, "cotador-revisar")
+
+        self.assertEqual(itens[0]["extracao"], "{isto nao e json")
 
 
 if __name__ == "__main__":

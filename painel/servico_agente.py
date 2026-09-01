@@ -24,6 +24,9 @@ class ServicoAgente:
         self._thread: threading.Thread | None = None
         # Um ciclo por vez, mesmo se "rodar agora" coincidir com o loop.
         self._trava = threading.Lock()
+        # Flask atende em varias threads: dois ligar() simultaneos nao podem
+        # criar dois lacos, nem ligar() correr junto com desligar().
+        self._trava_liga = threading.Lock()
         self.ultimo_resumo: dict[str, int] | None = None
         self.ultimo_erro: str | None = None
         self.ultimo_ciclo_em: str | None = None
@@ -34,18 +37,27 @@ class ServicoAgente:
         return self._thread is not None and self._thread.is_alive()
 
     def ligar(self) -> None:
-        if self.rodando:
-            return
-        self._parar.clear()
-        self._thread = threading.Thread(
-            target=self._laco, daemon=True, name="loop-agente"
-        )
-        self._thread.start()
+        with self._trava_liga:
+            if self.rodando:
+                return
+            self._parar.clear()
+            self._thread = threading.Thread(
+                target=self._laco, daemon=True, name="loop-agente"
+            )
+            self._thread.start()
 
     def desligar(self) -> None:
-        self._parar.set()
-        if self._thread is not None:
-            self._thread.join(timeout=10)
+        with self._trava_liga:
+            self._parar.set()
+            thread = self._thread
+            if thread is None:
+                return
+            thread.join(timeout=10)
+            if thread.is_alive():
+                # Sem o handle, `rodando` mentiria e um ligar() seguinte criaria
+                # um segundo laco com o primeiro ainda girando.
+                log.warning("Ciclo ainda em andamento; a thread encerra ao terminar")
+                return
             self._thread = None
 
     def ciclo_unico(self) -> dict[str, int]:
@@ -74,6 +86,10 @@ class ServicoAgente:
         while not self._parar.is_set():
             try:
                 with self._trava:
+                    # A espera pela trava pode ter atravessado um desligar();
+                    # sem esta conferencia rodariamos um ciclo a mais.
+                    if self._parar.is_set():
+                        return
                     self._um_ciclo()
             except CredencialInvalida:
                 # Insistir nao resolve credencial ruim; o painel exibe o erro.

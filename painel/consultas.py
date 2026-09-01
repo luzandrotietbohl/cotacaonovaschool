@@ -23,6 +23,13 @@ def _quando(iso: str) -> str:
         return iso
 
 
+def _extracao_legivel(bruto: str) -> str:
+    try:
+        return json.dumps(json.loads(bruto), indent=2, ensure_ascii=False)
+    except json.JSONDecodeError:
+        return bruto  # linha corrompida aparece crua, mas nao derruba a tela
+
+
 def ultimos_processados(banco: Banco, limite: int = 50) -> list[dict]:
     linhas = banco.ultimos(limite)
     for linha in linhas:
@@ -40,10 +47,6 @@ def fila_de_revisao(banco: Banco, label_revisar: str) -> list[dict]:
     for item in itens:
         item["quando"] = _quando(item["criado_em"])
         item["extracao"] = (
-            json.dumps(
-                json.loads(item["extracao_json"]), indent=2, ensure_ascii=False
-            )
-            if item["extracao_json"]
-            else None
+            _extracao_legivel(item["extracao_json"]) if item["extracao_json"] else None
         )
     return itens
