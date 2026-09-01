@@ -1,0 +1,1032 @@
+<meta charset="utf-8">
+<title>Cotador de Frete por Email</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+/* ============================================================
+   Cotador de Frete por Email — E4.6, Módulo 1
+   Paleta categórica validada (OKLCH, CVD, contraste) nos dois modos.
+   ============================================================ */
+
+:root{
+  --paper:#f4f2ed;
+  --surface:#fbfaf7;
+  --surface-2:#efece4;
+  --ink:#191712;
+  --ink-2:#4a463d;
+  --muted:#807a6d;
+  --rule:#d9d3c6;
+  --rule-soft:#e8e4da;
+  --accent:#b16512;
+
+  --c1:#b16512;   /* ocre  */
+  --c2:#008f7d;   /* teal  */
+  --c3:#426bce;   /* índigo*/
+  --c4:#c14d66;   /* rosa  */
+
+  --ok:#008f7d;
+  --warn:#b16512;
+  --stop:#c14d66;
+
+  --ok-wash:#008f7d1a;
+  --warn-wash:#b165121a;
+  --stop-wash:#c14d661a;
+
+  --shadow:0 1px 2px #19171208, 0 12px 40px #19171214;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131210;
+    --surface:#1c1a16;
+    --surface-2:#24211b;
+    --ink:#f2efe6;
+    --ink-2:#c4bfb2;
+    --muted:#8f887a;
+    --rule:#3a362c;
+    --rule-soft:#2a2721;
+    --accent:#d08a2e;
+
+    --c1:#be7125;
+    --c2:#0f9b89;
+    --c3:#5c82da;
+    --c4:#cf5971;
+
+    --ok:#0f9b89;
+    --warn:#be7125;
+    --stop:#cf5971;
+
+    --ok-wash:#0f9b8924;
+    --warn-wash:#be712524;
+    --stop-wash:#cf597124;
+
+    --shadow:0 1px 2px #00000040, 0 12px 40px #00000055;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131210;
+  --surface:#1c1a16;
+  --surface-2:#24211b;
+  --ink:#f2efe6;
+  --ink-2:#c4bfb2;
+  --muted:#8f887a;
+  --rule:#3a362c;
+  --rule-soft:#2a2721;
+  --accent:#d08a2e;
+
+  --c1:#be7125;
+  --c2:#0f9b89;
+  --c3:#5c82da;
+  --c4:#cf5971;
+
+  --ok:#0f9b89;
+  --warn:#be7125;
+  --stop:#cf5971;
+
+  --ok-wash:#0f9b8924;
+  --warn-wash:#be712524;
+  --stop-wash:#cf597124;
+
+  --shadow:0 1px 2px #00000040, 0 12px 40px #00000055;
+}
+
+*{box-sizing:border-box}
+
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- chrome ---------- */
+
+.bar{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:10px 18px;
+  border-bottom:1px solid var(--rule);
+  background:var(--surface);
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--muted);
+  flex:0 0 auto;
+  position:sticky;
+  top:0;
+  z-index:20;
+}
+.bar strong{color:var(--ink);font-weight:600}
+.bar .spacer{flex:1}
+.bar button{
+  font:inherit;
+  letter-spacing:inherit;
+  text-transform:inherit;
+  color:var(--ink-2);
+  background:transparent;
+  border:1px solid var(--rule);
+  border-radius:2px;
+  padding:4px 9px;
+  cursor:pointer;
+}
+.bar button:hover{border-color:var(--accent);color:var(--accent)}
+.bar button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.counter{font-variant-numeric:tabular-nums;color:var(--ink)}
+
+.stage-wrap{
+  flex:1 1 auto;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  min-height:0;
+}
+
+.stage{
+  width:min(100%, calc((100vh - 130px) * 16 / 9));
+  aspect-ratio:16/9;
+  background:var(--surface);
+  border:1px solid var(--rule);
+  box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden;
+  container-type:size;
+  container-name:slide;
+}
+
+/* ---------- slide skeleton ---------- */
+
+.slide{
+  position:absolute;
+  inset:0;
+  display:none;
+  flex-direction:column;
+  padding:4.6cqw 5.2cqw 0;
+}
+.slide.on{display:flex}
+
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.32cqw;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  display:flex;
+  align-items:baseline;
+  gap:1.1cqw;
+  flex:0 0 auto;
+}
+.eyebrow b{color:var(--accent);font-weight:600}
+.eyebrow .q{
+  font-family:"Source Serif 4",serif;
+  font-size:1.42cqw;
+  letter-spacing:0;
+  text-transform:none;
+  font-style:italic;
+  color:var(--ink-2);
+}
+
+h2{
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;
+  font-weight:700;
+  font-size:3.2cqw;
+  line-height:1.05;
+  letter-spacing:-.022em;
+  margin:1.2cqw 0 0;
+  text-wrap:balance;
+  max-width:34ch;
+  flex:0 0 auto;
+}
+
+.body{
+  flex:1 1 auto;
+  min-height:0;
+  margin-top:1.8cqw;
+  overflow:hidden;
+  font-size:1.44cqw;
+  line-height:1.4;
+  color:var(--ink-2);
+}
+.body p{margin:0 0 .85em}
+.body strong{color:var(--ink);font-weight:600}
+
+/* the claim strip — one defensible sentence per slide */
+.claim{
+  flex:0 0 auto;
+  margin-top:auto;
+  border-top:1px solid var(--rule);
+  padding:1.5cqw 0 1.9cqw;
+  display:flex;
+  gap:1.5cqw;
+  align-items:baseline;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.26cqw;
+  line-height:1.45;
+  color:var(--ink-2);
+}
+.claim .k{
+  color:var(--accent);
+  letter-spacing:.18em;
+  font-weight:600;
+  white-space:nowrap;
+}
+
+.pagenum{
+  position:absolute;
+  right:2.1cqw;
+  bottom:1.7cqw;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.1cqw;
+  color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- stamps ---------- */
+
+.stamp{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.95cqw;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  font-weight:600;
+  padding:.28em .62em;
+  border:1px solid currentColor;
+  border-radius:2px;
+  white-space:nowrap;
+  display:inline-block;
+  vertical-align:.12em;
+}
+.st-ok{color:var(--ok);background:var(--ok-wash)}
+.st-part{color:var(--warn);background:var(--warn-wash)}
+.st-none{color:var(--stop);background:transparent;border-style:dashed}
+
+/* ---------- generic layout helpers ---------- */
+
+.cols{display:grid;gap:3cqw}
+.c2{grid-template-columns:1fr 1fr}
+.c2w{grid-template-columns:1.15fr .85fr}
+.c2n{grid-template-columns:.86fr 1.14fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+
+.lbl{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.06cqw;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin:0 0 .8cqw;
+  display:flex;
+  gap:.7cqw;
+  align-items:center;
+}
+
+ul.tight{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.62cqw}
+ul.tight li{padding-left:1.4cqw;position:relative}
+ul.tight li::before{
+  content:"";
+  position:absolute;
+  left:0;top:.62em;
+  width:.5cqw;height:.5cqw;
+  background:var(--rule);
+  border-radius:50%;
+}
+ul.tight li.no::before{background:none;border:1px solid var(--stop);border-radius:0;transform:rotate(45deg);top:.55em}
+ul.tight li.yes::before{background:var(--ok)}
+
+/* ---------- tables (Wilke: sem réguas verticais) ---------- */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:1.24cqw;
+  line-height:1.32;
+}
+thead th{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.95cqw;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:500;
+  text-align:left;
+  padding:0 1.1cqw .7cqw 0;
+  border-bottom:1px solid var(--ink);
+  vertical-align:bottom;
+}
+tbody td{
+  padding:.72cqw 1.1cqw .72cqw 0;
+  border-bottom:1px solid var(--rule-soft);
+  vertical-align:top;
+  color:var(--ink-2);
+}
+tbody tr:last-child td{border-bottom:1px solid var(--rule)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;padding-right:0}
+td.who{color:var(--ink);font-weight:600}
+
+/* slides com tabela longa: mesma hierarquia, um degrau abaixo */
+.slide.dense h2{font-size:2.6cqw;max-width:42ch}
+.slide.dense .body{margin-top:1.5cqw;font-size:1.34cqw}
+.slide.dense table{font-size:1.1cqw;line-height:1.28}
+.slide.dense thead th{font-size:.88cqw;padding-bottom:.55cqw}
+.slide.dense tbody td{padding:.48cqw 1cqw .48cqw 0}
+.slide.dense .claim{padding:1.1cqw 0 1.6cqw}
+
+/* ---------- figures ---------- */
+
+figure{margin:0}
+figcaption{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1cqw;
+  line-height:1.5;
+  color:var(--muted);
+  margin-top:1cqw;
+}
+.figtitle{
+  font-family:Archivo,sans-serif;
+  font-weight:600;
+  font-size:1.42cqw;
+  color:var(--ink);
+  letter-spacing:-.01em;
+  margin-bottom:.35cqw;
+}
+.figsub{
+  font-size:1.2cqw;
+  color:var(--muted);
+  margin-bottom:1.6cqw;
+  font-style:italic;
+}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.ax{font-family:"IBM Plex Mono",monospace;font-size:9px;fill:var(--muted)}
+.axl{font-family:"IBM Plex Mono",monospace;font-size:9.5px;fill:var(--ink-2)}
+.val{font-family:"IBM Plex Mono",monospace;font-size:10.5px;fill:var(--ink);font-weight:600}
+.grid{stroke:var(--rule-soft);stroke-width:1}
+.base{stroke:var(--ink);stroke-width:1}
+
+/* ---------- cover ---------- */
+
+.cover{justify-content:center;padding-bottom:5.2cqw}
+.cover h1{
+  font-family:Archivo,sans-serif;
+  font-weight:800;
+  font-size:6.4cqw;
+  line-height:.98;
+  letter-spacing:-.035em;
+  margin:.6cqw 0 0;
+  max-width:20ch;
+  text-wrap:balance;
+}
+.cover .kicker{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:1.24cqw;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.cover .rule{height:1px;background:var(--ink);margin:2.6cqw 0 2cqw;width:14cqw}
+.cover .meta{
+  display:flex;gap:3.4cqw;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:1.14cqw;
+  color:var(--ink-2);
+  line-height:1.6;
+}
+.cover .meta div span{display:block;color:var(--muted);font-size:.94cqw;letter-spacing:.13em;text-transform:uppercase}
+
+/* ---------- overview ---------- */
+
+.overview{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:40;
+  background:var(--paper);
+  overflow:auto;
+  padding:26px;
+}
+.overview.on{display:block}
+.ovgrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+  gap:14px;
+  max-width:1200px;
+  margin:0 auto;
+}
+.ovcard{
+  text-align:left;
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-radius:2px;
+  padding:12px 13px 13px;
+  cursor:pointer;
+  font-family:inherit;
+  color:var(--ink-2);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-height:96px;
+}
+.ovcard:hover{border-color:var(--accent)}
+.ovcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ovcard .n{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;
+  color:var(--muted);font-variant-numeric:tabular-nums;
+}
+.ovcard .t{
+  font-family:Archivo,sans-serif;font-weight:600;font-size:14px;line-height:1.2;color:var(--ink);
+}
+.ovcard.cur{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+
+.hint{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);text-align:center;padding:8px 0 18px;
+}
+
+/* ---------- click zones ---------- */
+.zone{position:absolute;top:0;bottom:0;width:14%;z-index:5;cursor:pointer;border:0;background:transparent}
+.zone.l{left:0}
+.zone.r{right:0}
+.zone:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+
+@media (prefers-reduced-motion:no-preference){
+  .slide.on{animation:fade .18s ease-out}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+}
+
+@media print{
+  .bar,.zone,.overview,.hint{display:none!important}
+  body{background:#fff}
+  .stage-wrap{padding:0;display:block}
+  .stage{width:100%;box-shadow:none;border:0;page-break-after:always;container-type:size}
+  .slide{display:flex!important;position:relative;page-break-after:always}
+}
+</style>
+
+<div class="bar">
+  <strong>Cotador de frete por email</strong>
+  <span>Grupo Ouro e Prata</span>
+  <span class="spacer"></span>
+  <span class="counter"><span id="cur">1</span> / <span id="tot">14</span></span>
+  <button id="btn-ov" type="button">Índice · G</button>
+  <button id="btn-prev" type="button">←</button>
+  <button id="btn-next" type="button">→</button>
+</div>
+
+<div class="stage-wrap">
+<div class="stage" id="stage">
+  <button class="zone l" id="z-prev" type="button" aria-label="Slide anterior"></button>
+  <button class="zone r" id="z-next" type="button" aria-label="Próximo slide"></button>
+
+  <!-- ============ 1 · CAPA ============ -->
+  <section class="slide cover on" data-title="Capa">
+    <div class="kicker">E4.6 · Apresentação final do Módulo 1</div>
+    <h1>Cotador de frete por email</h1>
+    <div class="rule"></div>
+    <div class="meta">
+      <div><span>O que é</span>Um agente que lê a caixa comercial,<br>entende o pedido e devolve o preço da tabela.</div>
+      <div><span>Estágio hoje</span>Piloto enviando de verdade,<br>em caixa de teste com remetentes internos.</div>
+      <div><span>Verificável</span>65 testes automatizados,<br>sem rede e sem credenciais. Verdes.</div>
+    </div>
+    <div class="pagenum">01</div>
+  </section>
+
+  <!-- ============ 2 · LEGENDA ============ -->
+  <section class="slide" data-title="Como ler esta especificação">
+    <div class="eyebrow"><b>Antes de começar</b><span class="q">o que cada carimbo quer dizer</span></div>
+    <h2>Um campo em branco é informação, não falha</h2>
+    <div class="body">
+      <div class="cols c2n">
+        <div>
+          <p>O sistema em uma frase: <strong>responder por email, em minutos e sem intervenção humana, os pedidos de cotação que chegam na caixa comercial, aplicando a tabela de tarifas vigente</strong> — para que a pessoa do comercial trate só o que o agente não sabe resolver.</p>
+          <p>Nos próximos slides, cada afirmação leva um carimbo. Onde não sabemos, dizemos que não sabemos: <strong>é mais barato ouvir isso agora do que descobrir depois.</strong></p>
+        </div>
+        <div>
+          <div class="lbl">Os três carimbos</div>
+          <table>
+            <tbody>
+              <tr><td style="width:26%"><span class="stamp st-ok">Especificado</span></td><td>Está escrito, está no código ou está na planilha. Dá para conferir hoje.</td></tr>
+              <tr><td><span class="stamp st-part">Parcial</span></td><td>Existe a prática, falta o número, a data ou o documento.</td></tr>
+              <tr><td><span class="stamp st-none">Em branco</span></td><td>Não sabemos. Não preenchemos com o que gostaríamos que fosse verdade.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>O agente é uma regra de negócio com um leitor de texto na frente. A IA lê; a tabela é que decide o preço.</span></div>
+    <div class="pagenum">02</div>
+  </section>
+
+  <!-- ============ 3 · BLOCO 1 ============ -->
+  <section class="slide" data-title="1 · O objetivo">
+    <div class="eyebrow"><b>Bloco 1</b> O objetivo <span class="q">para que serve o sistema?</span></div>
+    <h2>Tirar a cotação simples da fila do comercial</h2>
+    <div class="body">
+      <div class="cols c3">
+        <div>
+          <div class="lbl">O que deixa de ser feito <span class="stamp st-ok">Especificado</span></div>
+          <ul class="tight">
+            <li>Transcrever <strong>10 a 30 emails por dia útil</strong> para o sistema de cotação.</li>
+            <li>Digitar a resposta e a composição do preço à mão.</li>
+            <li>Reperguntar o dado que faltou e esperar o cliente voltar.</li>
+          </ul>
+        </div>
+        <div>
+          <div class="lbl">O que ele não se propõe a fazer <span class="stamp st-ok">Especificado</span></div>
+          <ul class="tight">
+            <li class="no">Negociar, dar desconto ou aprovar condição comercial.</li>
+            <li class="no">Criar ou corrigir rota e tarifa — só lê a planilha.</li>
+            <li class="no">Cotar trecho fora da tabela.</li>
+            <li class="no">Fechar venda, emitir CT-e, agendar coleta.</li>
+            <li class="no">Atender WhatsApp, telefone ou portal. Só email.</li>
+          </ul>
+        </div>
+        <div>
+          <div class="lbl">O critério de sucesso <span class="stamp st-part">Parcial</span></div>
+          <ul class="tight">
+            <li><strong>Tempo até a primeira resposta</strong>, mediana em minutos, 24 h por dia.</li>
+            <li><strong>Cotações sem toque humano</strong>, em % dos pedidos recebidos.</li>
+            <li><strong>Divergência de preço:</strong> quantas cotações enviadas diferem do que a tabela produz. Meta zero — este manda nos outros dois.</li>
+          </ul>
+          <p style="margin-top:1cqw"><span class="stamp st-none">Em branco</span> &nbsp;Nenhum dos três está escrito em lugar nenhum, nem acordado com o comercial.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Um ponto de acurácia da extração não diz nada a quem aprova orçamento. Minuto de espera e real de divergência, sim.</span></div>
+    <div class="pagenum">03</div>
+  </section>
+
+  <!-- ============ 4 · FIGURA LATÊNCIA ============ -->
+  <section class="slide" data-title="1 · O critério, em minutos">
+    <div class="eyebrow"><b>Bloco 1</b> O critério <span class="q">quanto o cliente espera, hoje e depois</span></div>
+    <h2>O ganho não é a conta. É a fila.</h2>
+    <div class="body">
+      <div class="cols c2w">
+        <figure>
+          <div class="figtitle">Tempo até a resposta sair, por caminho</div>
+          <div class="figsub">Escala logarítmica — são razões, não diferenças. Pontos, nunca barras: em eixo log não existe zero e o comprimento perderia o sentido.</div>
+          <svg viewBox="0 0 560 172" role="img" aria-label="Gráfico de pontos em escala logarítmica: o agente responde em 2 minutos, valor medido; o comercial hoje leva entre 60 e 480 minutos, estimado, com ponto central em 180 minutos.">
+            <line class="grid" x1="120" y1="16" x2="120" y2="134"/>
+            <line class="grid" x1="266.7" y1="16" x2="266.7" y2="134"/>
+            <line class="grid" x1="413.3" y1="16" x2="413.3" y2="134"/>
+            <line class="grid" x1="560" y1="16" x2="560" y2="134"/>
+            <line class="base" x1="120" y1="134" x2="560" y2="134"/>
+            <text class="ax" x="120" y="150" text-anchor="middle">1 min</text>
+            <text class="ax" x="266.7" y="150" text-anchor="middle">10 min</text>
+            <text class="ax" x="413.3" y="150" text-anchor="middle">100 min</text>
+            <text class="ax" x="560" y="150" text-anchor="end">1 000 min</text>
+
+            <text class="axl" x="0" y="52">Agente</text>
+            <circle cx="164.1" cy="48" r="6.5" fill="var(--c2)"/>
+            <circle cx="164.1" cy="48" r="8.5" fill="none" stroke="var(--surface)" stroke-width="2"/>
+            <text class="val" x="180" y="52">2 min · varredura a cada 120 s</text>
+
+            <text class="axl" x="0" y="104">Comercial hoje</text>
+            <line x1="380.7" y1="100" x2="513.3" y2="100" stroke="var(--c1)" stroke-width="3"/>
+            <line x1="380.7" y1="92" x2="380.7" y2="108" stroke="var(--c1)" stroke-width="2"/>
+            <line x1="513.3" y1="92" x2="513.3" y2="108" stroke="var(--c1)" stroke-width="2"/>
+            <circle cx="450.8" cy="100" r="6.5" fill="var(--surface)" stroke="var(--c1)" stroke-width="2.5"/>
+            <text class="val" x="447" y="84" text-anchor="middle">1 h – 8 h, estimado</text>
+          </svg>
+          <figcaption>Ponto cheio = medido. Ponto vazado com faixa = estimado, não medido. A faixa é a honestidade do número: ninguém cronometrou.</figcaption>
+        </figure>
+        <div>
+          <div class="lbl">O que o gráfico não diz <span class="stamp st-none">Em branco</span></div>
+          <p>Não existe um TPR medido. O «1 h a 8 h» é a percepção do comercial, não um relatório. <strong>Instrumentar isto é o primeiro item do plano</strong> — e o SQLite do agente já grava data e hora de cada email tratado, então o número passa a existir sem projeto novo.</p>
+          <div class="lbl" style="margin-top:1.8cqw">Onde o ganho é maior</div>
+          <p>Fora do horário comercial e no fim de semana, a espera de hoje não é de horas: é até a próxima manhã útil. O agente não tem horário.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Duas ordens de grandeza de diferença — e mesmo assim o número da esquerda é o único dos dois que sabemos medir.</span></div>
+    <div class="pagenum">04</div>
+  </section>
+
+  <!-- ============ 5 · BLOCO 2 ============ -->
+  <section class="slide" data-title="2 · As ações">
+    <div class="eyebrow"><b>Bloco 2</b> As ações <span class="q">o que dá para executar de verdade?</span></div>
+    <h2>O que a operação executa — e o que ela não pode executar</h2>
+    <div class="body">
+      <div class="cols c2n">
+        <div>
+          <div class="lbl">Ações que contam hoje <span class="stamp st-ok">Especificado</span></div>
+          <table>
+            <thead><tr><th style="width:37%">Ação</th><th style="width:26%">Quem executa</th><th>Frequência · mandato</th></tr></thead>
+            <tbody>
+              <tr><td class="who">Enviar a cotação</td><td>agente</td><td>por email, 24/7 · só dentro da tabela vigente</td></tr>
+              <tr><td class="who">Pedir o dado que falta</td><td>agente</td><td>por email · reperguntar até completar</td></tr>
+              <tr><td class="who">Recusar trecho não atendido</td><td>agente</td><td>resposta padrão, sem negociação</td></tr>
+              <tr><td class="who">Triar para revisão</td><td>agente → comercial</td><td>label <code>cotador-revisar</code> · humano responde à mão</td></tr>
+              <tr><td class="who">Conferir o que saiu</td><td>comercial</td><td>amostral, sem cadência escrita</td></tr>
+              <tr><td class="who">Manter a tabela de tarifas</td><td>comercial</td><td>esporádica · dono do preço</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="lbl">Ações que não contam <span class="stamp st-ok">Especificado</span></div>
+          <ul class="tight">
+            <li class="no"><strong>Cotação negociada.</strong> Exige alçada comercial. O agente não tem, e não deve ter.</li>
+            <li class="no"><strong>Cotar fora da tabela.</strong> Exigiria motor de preço por distância. Não existe.</li>
+            <li class="no"><strong>Ler condição contratual do cliente.</strong> Exigiria integração com o ERP. Para passar a contar: API de leitura + regra de qual condição prevalece.</li>
+            <li class="no"><strong>Escrever na tabela.</strong> A conta de serviço é somente leitura, de propósito.</li>
+          </ul>
+          <div class="lbl" style="margin-top:1.6cqw">O teste do bloco</div>
+          <p>Se o tempo de resposta não cair e a proporção tratada sem toque humano não subir, <strong>o propósito do bloco 1 não se alcança por este caminho</strong> — e é isso que teríamos de vir dizer.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>A fronteira do agente é a fronteira da alçada: onde começa a negociação, ele para.</span></div>
+    <div class="pagenum">05</div>
+  </section>
+
+  <!-- ============ 6 · BLOCO 3.1/3.2 ============ -->
+  <section class="slide" data-title="3 · As três fontes">
+    <div class="eyebrow"><b>Bloco 3.1 · 3.2</b> A alegação e a adequação <span class="q">quem afirma o quê, e isso serve?</span></div>
+    <h2>Três fontes, três autores, três interesses</h2>
+    <div class="body">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:15%">Fonte</th>
+            <th style="width:27%">Quem afirma — e que interesse tem</th>
+            <th style="width:29%">Carrega a informação que a ação exige?</th>
+            <th style="width:15%">Grão</th>
+            <th>Latência</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="who">O email<br>do cliente</td>
+            <td>O cliente ou o comprador dele. <strong>Não é neutro:</strong> o valor da nota que ele escreve é o valor sobre o qual ele paga GRIS e advalorem. Subdeclarar barateia.</td>
+            <td>Exige exatamente cinco campos: origem, destino, volumes, valor da NF e peso. <strong>Uma minoria dos emails traz os cinco.</strong> Por isso existe o desfecho «aguardando dados» — que é uma ação, não um erro.</td>
+            <td>1 email = 1 pedido<br><span style="color:var(--muted)">evento</span></td>
+            <td>segundos<br><span style="color:var(--muted)">varredura 120 s</span></td>
+          </tr>
+          <tr>
+            <td class="who">A tabela<br>de tarifas</td>
+            <td>O comercial. É quem responde pela margem — e um valor errado aqui vira preço errado em <strong>todos</strong> os emails daquele trecho, não em um.</td>
+            <td>Sim: valor e pedágio por volume, frete mínimo, GRIS, advalorem, taxa, peso máximo, prazo, vigência e status. É a fonte da fórmula inteira.</td>
+            <td>1 linha = 1 rota × modal<br><span style="color:var(--muted)">= a unidade da ação</span></td>
+            <td>recarrega<br>a cada ciclo</td>
+          </tr>
+          <tr>
+            <td class="who">O SQLite<br>de auditoria</td>
+            <td>O próprio agente. Único autor sem interesse no valor que registra — mas registra só o que o código mandou registrar.</td>
+            <td>Informa a ação «revalidar e desligar» do bloco 4.2: desfecho, rota, volumes, valor, frete, extração completa em JSON e erro.</td>
+            <td>1 email tratado<br><span style="color:var(--muted)">evento</span></td>
+            <td>imediata</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:1.4cqw;font-size:1.3cqw"><span class="stamp st-none">Em branco</span> &nbsp;Não medimos a proporção de emails que chegam completos. É a taxa que decide se o agente é útil ou se só produz reperguntas — e é uma consulta ao SQLite, não um projeto.</p>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Não existe dado bom em abstrato. Existe dado que serve a uma ação nomeada — e a nossa é «emitir preço a partir de cinco campos».</span></div>
+    <div class="pagenum">06</div>
+  </section>
+
+  <!-- ============ 7 · BLOCO 3.3/3.4 ============ -->
+  <section class="slide dense" data-title="3 · Proveniência, curadoria e LGPD">
+    <div class="eyebrow"><b>Bloco 3.3 · 3.4</b> Proveniência e curadoria <span class="q">por onde passou, e o que foi decidido?</span></div>
+    <h2>Toda exclusão é uma escolha, e toda escolha tem autor</h2>
+    <div class="body">
+      <div class="cols c2">
+        <div>
+          <div class="lbl">Por onde o dado passa <span class="stamp st-ok">Especificado</span></div>
+          <p style="font-family:'IBM Plex Mono',monospace;font-size:1.16cqw;line-height:1.75;color:var(--ink-2)">
+            Gmail → IMAP → decodificação MIME →<br>
+            <strong style="color:var(--stop)">corte do histórico citado</strong> → Claude API →<br>
+            merge com a extração anterior da thread →<br>
+            tabela de tarifas → fórmula → SMTP → SQLite
+          </p>
+          <div class="lbl" style="margin-top:1.6cqw">As regras de curadoria, com dono</div>
+          <ul class="tight">
+            <li><strong>Normalização de local</strong> — acento, caixa, separador e CEP viram uma chave só. <span style="color:var(--muted)">Dono: TI.</span></li>
+            <li><strong>Corte do histórico citado</strong> — a cotação antiga colada no rodapé da resposta não vai ao modelo. Sem isso, o agente cotaria o pedido errado. <span style="color:var(--muted)">Dono: TI.</span></li>
+            <li><strong>Merge da thread</strong> — o campo novo vence, o vazio é preenchido pelo anterior, a confiança é a maior das duas. <span style="color:var(--muted)">Dono: TI.</span></li>
+            <li><strong>Só tarifa ATIVA e vigente</strong> é cotada; linha ilegível é descartada com registro em log. <span style="color:var(--muted)">Dono: comercial.</span></li>
+          </ul>
+        </div>
+        <div>
+          <div class="lbl">O número antes e depois <span class="stamp st-none">Em branco</span></div>
+          <p>O comando <code>--validar-planilha</code> já imprime linhas lidas contra tarifas vigentes. <strong>Não trouxemos o número para esta apresentação</strong> — e é exatamente a diferença entre um dado tratado e um dado maquiado.</p>
+          <div class="lbl" style="margin-top:1.5cqw">Dado pessoal e base legal <span class="stamp st-part">Parcial</span></div>
+          <p>Hoje o piloto roda em <strong>caixa de teste com remetentes internos</strong>: não há dado pessoal de terceiro em tratamento. Na caixa real, email, nome e telefone do cliente são dado pessoal, e a base prevista é o <strong>art. 7.º, V da LGPD</strong> — procedimentos preliminares a pedido do titular. Cotação é literalmente isso. Não é consentimento.</p>
+          <div class="lbl" style="margin-top:1.5cqw">Prazo de retenção <span class="stamp st-none">Em branco</span></div>
+          <p>O SQLite guarda tudo, para sempre, numa máquina, sem backup. «Por via das dúvidas» não é resposta — é a ausência de uma.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Se ninguém souber responder «por onde passou», a decisão que se apoiar no dado não resiste a ser contestada.</span></div>
+    <div class="pagenum">07</div>
+  </section>
+
+  <!-- ============ 8 · BLOCO 4.1 A ============ -->
+  <section class="slide" data-title="4.1 · Regra, não modelo">
+    <div class="eyebrow"><b>Bloco 4.1</b> A adequação da análise <span class="q">por que este método?</span></div>
+    <h2>Isto não precisa de IA para decidir o preço. Precisa de uma regra e de um dono.</h2>
+    <div class="body">
+      <div class="cols c2">
+        <div>
+          <p>O preço é uma <strong>fórmula fechada da planilha</strong>: não há nada a estimar. A IA entra em <strong>um passo só</strong> — transformar texto livre em cinco campos —, que é justamente onde uma regra falharia. Toda a aritmética é determinística e testada.</p>
+          <figure style="margin-top:1.2cqw">
+            <div class="figtitle">Composição de uma cotação: R$ 252,50</div>
+            <div class="figsub">10 volumes · NF R$ 8 000 · rota R00001, São Paulo → Campinas. Na ordem da fórmula, a partir do zero.</div>
+            <svg viewBox="0 0 560 118" role="img" aria-label="Barra de composição do total de 252 reais e 50 centavos: frete por volume 208,50 e GRIS mais advalorem 44,00. Taxa de entrega difícil é zero. Linha de referência do frete mínimo em 55 reais.">
+              <line class="base" x1="0" y1="70" x2="0" y2="86"/>
+              <line class="base" x1="0" y1="86" x2="558" y2="86"/>
+              <!-- 208,50 / 252,50 = 82,57% de 556 px; 2 px de folga entre segmentos -->
+              <rect x="0" y="30" width="459.1" height="34" fill="var(--c1)"/>
+              <rect x="461.1" y="30" width="96.9" height="34" fill="var(--c2)"/>
+              <text class="val" x="10" y="52" fill="#fff">R$ 208,50</text>
+              <text class="ax" x="0" y="22" fill="var(--c1)" style="font-weight:600">FRETE POR VOLUME · 10 × (16,65 + 4,20)</text>
+              <text class="val" x="466" y="52" fill="#fff">R$ 44,00</text>
+              <text class="ax" x="558" y="22" text-anchor="end" fill="var(--c2)" style="font-weight:600">GRIS + ADVALOREM · 0,55% DA NF</text>
+              <!-- linha de referência: frete mínimo 55/252,50 = 21,78% -->
+              <line x1="121.1" y1="26" x2="121.1" y2="96" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3"/>
+              <text class="ax" x="127" y="103" fill="var(--ink-2)">frete mínimo R$ 55,00 — não se aplicou</text>
+              <text class="ax" x="558" y="103" text-anchor="end">taxa de entrega difícil: R$ 0,00</text>
+            </svg>
+            <figcaption>Uma linha de referência só: a que responde à pergunta da figura — o mínimo pegou? Não pegou.</figcaption>
+          </figure>
+        </div>
+        <div>
+          <div class="lbl">A fórmula, inteira</div>
+          <p style="font-family:'IBM Plex Mono',monospace;font-size:1.1cqw;line-height:1.7;background:var(--surface-2);padding:1.2cqw;border-left:2px solid var(--accent)">
+            MAX(volumes × (valor_volume + pedágio_volume),<br>&nbsp;&nbsp;&nbsp;&nbsp;frete_mínimo)<br>
+            + valor_NF × (GRIS + advalorem) / 100<br>
+            + taxa_entrega_difícil
+          </p>
+          <div class="lbl" style="margin-top:1.5cqw">O peso não entra no preço</div>
+          <p>Não há cobrança por peso nem por cubagem nesta tabela. O peso serve para <strong>uma coisa só</strong>: se o peso médio por volume estourar o limite da rota, o agente <strong>não responde</strong> e manda para revisão humana. É uma recusa por segurança, não um cálculo.</p>
+          <div class="lbl" style="margin-top:1.5cqw">Regressão <span class="stamp st-ok">Especificado</span></div>
+          <p><strong>65 testes</strong>, sem rede e sem credenciais, rodando em 4 segundos. Um deles reproduz a aba EXEMPLO_CALCULO da planilha e exige exatamente os R$ 252,50 acima.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Concluir que uma regra basta é uma resposta forte. A nossa: regra para o preço, modelo só para ler o português do cliente.</span></div>
+    <div class="pagenum">08</div>
+  </section>
+
+  <!-- ============ 9 · BLOCO 4.1 B ============ -->
+  <section class="slide dense" data-title="4.1 · Como sabemos que serve">
+    <div class="eyebrow"><b>Bloco 4.1</b> A adequação <span class="q">contra o quê comparamos, e o que custa errar?</span></div>
+    <h2>Dois cortes, porque os dois erros custam diferente</h2>
+    <div class="body">
+      <div class="cols c2w">
+        <figure>
+          <div class="figtitle">O que o agente pode fazer, por faixa de confiança</div>
+          <div class="figsub">A confiança vem do próprio modelo, de 0 a 1. Os dois cortes estão no código, em <code>cotador/agente.py</code>.</div>
+          <svg viewBox="0 0 560 92" role="img" aria-label="Escala de confiança de zero a um, dividida em três faixas: abaixo de 0,35 vai para revisão humana; entre 0,35 e 0,60 pode pedir dados mas não emitir preço; acima de 0,60 emite preço.">
+            <rect x="0" y="26" width="194.6" height="32" fill="var(--stop)" opacity=".9"/>
+            <rect x="196.6" y="26" width="137" height="32" fill="var(--c1)" opacity=".9"/>
+            <rect x="335.6" y="26" width="224.4" height="32" fill="var(--c2)" opacity=".9"/>
+            <text class="val" x="10" y="47" fill="#fff">Revisão humana</text>
+            <text class="val" x="206.6" y="47" fill="#fff">Pode perguntar</text>
+            <text class="val" x="345.6" y="47" fill="#fff">Pode emitir preço</text>
+            <line class="base" x1="0" y1="58" x2="560" y2="58"/>
+            <line x1="195.6" y1="58" x2="195.6" y2="70" stroke="var(--ink)" stroke-width="1.5"/>
+            <line x1="334.6" y1="58" x2="334.6" y2="70" stroke="var(--ink)" stroke-width="1.5"/>
+            <text class="val" x="195.6" y="83" text-anchor="middle">0,35</text>
+            <text class="val" x="334.6" y="83" text-anchor="middle">0,60</text>
+            <text class="ax" x="0" y="83">0</text>
+            <text class="ax" x="560" y="83" text-anchor="end">1</text>
+          </svg>
+          <figcaption>Pedir dado a um falso positivo é inofensivo; mandar um preço errado é caro — por isso o corte sobe justamente onde um número sairia pela porta. Um pedido vago («quanto fica um frete de SP para Vitória?») sai do modelo com ~0,55: é cotação de verdade, só incompleta. Ele pergunta, não cota.</figcaption>
+        </figure>
+        <div>
+          <div class="lbl">Como estabelecemos a adequação</div>
+          <table>
+            <tbody>
+              <tr>
+                <td style="width:31%"><strong>Linha de base</strong><br><span class="stamp st-ok">Especificado</span></td>
+                <td>A resposta manual do comercial consultando <strong>a mesma tabela</strong>. É o padrão-ouro, e é contra ele que qualquer número nosso tem de ser comparado.</td>
+              </tr>
+              <tr>
+                <td><strong>A métrica</strong><br><span class="stamp st-ok">Especificado</span></td>
+                <td><strong>Divergência de preço</strong>: o valor enviado contra o que a tabela produz para os mesmos cinco campos. Não acurácia — ela sobe sozinha quando a maioria dos emails nem é cotação.</td>
+              </tr>
+              <tr>
+                <td><strong>O custo de cada erro</strong><br><span class="stamp st-none">Em branco</span></td>
+                <td>Cotar a menos = margem perdida na viagem. Cotar a mais = pedido perdido, e o cliente não avisa. <strong>Não precificamos nenhum dos dois</strong> — por isso 0,35 e 0,60 são julgamento, não calibração.</td>
+              </tr>
+              <tr>
+                <td><strong>Fuga de dados</strong><br><span class="stamp st-ok">Especificado</span></td>
+                <td>Não há treino, logo não há fuga estrita. O análogo é o histórico citado — cortado antes de ir ao modelo, para não cotar o pedido de ontem.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>A análise falharia de forma visível se estivesse errada: o preço sai escrito no email, com a composição aberta, e o cliente confere.</span></div>
+    <div class="pagenum">09</div>
+  </section>
+
+  <!-- ============ 10 · BLOCO 4.2 ============ -->
+  <section class="slide dense" data-title="4.2 · A gestão">
+    <div class="eyebrow"><b>Bloco 4.2</b> A gestão <span class="q">quem mantém isto vivo depois do piloto?</span></div>
+    <h2>Aqui não há deriva estatística. Há deriva de cadastro.</h2>
+    <div class="body">
+      <div class="cols c2n">
+        <div>
+          <div class="lbl">Donos <span class="stamp st-part">Parcial</span></div>
+          <p><strong>Comercial</strong> responde pelo preço enviado. <strong>TI</strong> responde pelo código e pela disponibilidade. O fórum dessa prestação de contas e a consequência de um preço errado <strong>não estão escritos</strong> — e um dono sem fórum e sem consequência não é um dono.</p>
+          <div class="lbl" style="margin-top:1.4cqw">O sinal a monitorar</div>
+          <p>A tabela muda de forma <strong>esporádica</strong>, sem cadência: uma tarifa vencida é indistinguível de uma esquecida. Dois indicadores revelam isso:</p>
+          <ul class="tight">
+            <li>Taxa de <code>cotador-revisar</code> por motivo, semana a semana.</li>
+            <li>Idade da linha de tarifa mais velha ainda vigente.</li>
+          </ul>
+          <p style="margin-top:.7cqw">Por desenho, um trecho cadastrado <strong>sem tarifa vigente nunca vira «não atendemos»</strong>: vai para revisão humana, porque é falha de cadastro, não ausência de rota.</p>
+        </div>
+        <div>
+          <div class="lbl">Portões go/no-go</div>
+          <table>
+            <thead><tr><th style="width:12%">Portão</th><th style="width:52%">Critério, escrito antes</th><th>Data</th></tr></thead>
+            <tbody>
+              <tr><td class="who">G1</td><td>65 testes verdes e piloto enviando em caixa de teste. <span class="stamp st-ok">Cumprido</span></td><td>hoje</td></tr>
+              <tr><td class="who">G2</td><td>4 semanas de caixa real em <code>MODO_RESPOSTA=rascunho</code>, com zero divergência de preço na amostra conferida → passa a <code>enviar</code>.</td><td><span class="stamp st-none">Em branco</span></td></tr>
+              <tr><td class="who">G3</td><td>90 dias em <code>enviar</code>, tempo mediano de resposta abaixo de 5 min e zero divergência → amplia para toda a caixa comercial.</td><td><span class="stamp st-none">Em branco</span></td></tr>
+            </tbody>
+          </table>
+          <div class="lbl" style="margin-top:1.5cqw">A condição de desistência</div>
+          <ul class="tight">
+            <li>Uma cotação com preço divergente que chegue ao cliente.</li>
+            <li>Duas semanas em que a maioria dos emails caia em <code>revisar</code> — aí o agente não resolve a fila, cria uma segunda.</li>
+          </ul>
+          <p style="margin-top:.7cqw">O freio já existe e é reversível numa variável de ambiente: <code>MODO_RESPOSTA=rascunho</code> grava a resposta e não envia.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Um portão sem critério escrito antes e sem data no calendário é uma reunião. Temos os critérios; faltam as datas.</span></div>
+    <div class="pagenum">10</div>
+  </section>
+
+  <!-- ============ 11 · BLOCO 5 ============ -->
+  <section class="slide" data-title="5 · A ética">
+    <div class="eyebrow"><b>Bloco 5</b> A ética, nesta aplicação <span class="q">quem é afetado e não está nesta sala?</span></div>
+    <h2>O que acontece quando ele funciona exatamente como foi desenhado</h2>
+    <div class="body">
+      <div class="cols c3">
+        <div>
+          <div class="lbl" style="color:var(--stop)">O cliente que escreve mal</div>
+          <p>Email confuso, foto da nota, áudio transcrito → confiança baixa → cai em <code>revisar</code> e <strong>espera mais do que esperava antes</strong>, numa fila que ninguém prometeu atender.</p>
+          <p>O sistema, funcionando como desenhado, cria uma segunda classe de cliente definida pela clareza da escrita. <strong>Isto é legal e ainda assim errado.</strong></p>
+        </div>
+        <div>
+          <div class="lbl" style="color:var(--stop)">O cliente de trecho não atendido</div>
+          <p>Recebe um «não atendemos» automático <strong>sem que ninguém no comercial saiba que ele pediu</strong>.</p>
+          <p>Antes, uma pessoa podia abrir exceção, repassar a um parceiro ou reconhecer um cliente grande. A exceção desaparece — e desaparece em silêncio, que é o modo mais caro de desaparecer.</p>
+        </div>
+        <div>
+          <div class="lbl" style="color:var(--stop)">A pessoa do comercial</div>
+          <p>Quanto mais o agente resolve, <strong>menos ela pratica cotação</strong> — e é chamada a intervir justamente nos casos difíceis, que é quando está mais destreinada.</p>
+          <p>E a conferência amostral tende a concordar: quando o sistema sugere um número, as pessoas seguem a sugestão mesmo com a evidência à frente.</p>
+        </div>
+      </div>
+      <div style="margin-top:1.6cqw;border-top:1px solid var(--rule);padding-top:1.4cqw">
+        <div class="cols c2">
+          <div>
+            <div class="lbl">O que essas pessoas saberiam, se alguém explicasse</div>
+            <p>Que a resposta veio de um sistema automático; que o preço vem de uma tabela, não de negociação; que existe alguém a quem pedir revisão.</p>
+          </div>
+          <div>
+            <div class="lbl">O recurso concreto <span class="stamp st-none">Em branco</span></div>
+            <p><strong>Hoje o email não se identifica como automático nem oferece caminho para uma pessoa.</strong> São duas frases em <code>mensagens.py</code>: a mudança de menor custo e maior efeito desta apresentação.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Cumprir a LGPD responde ao bloco 3. A pergunta aqui é outra: o que a pessoa afetada pode fazer? Hoje, nada.</span></div>
+    <div class="pagenum">11</div>
+  </section>
+
+  <!-- ============ 12 · BLOCO 6 ============ -->
+  <section class="slide dense" data-title="6 · A configuração da decisão">
+    <div class="eyebrow"><b>Bloco 6</b> A configuração da decisão <span class="q">quem decide o quê, passo a passo?</span></div>
+    <h2>Automação não é um interruptor. É um nível por passo.</h2>
+    <div class="body">
+      <table>
+        <thead>
+          <tr><th style="width:19%">Passo do fluxo</th><th style="width:13%">Quem decide</th><th style="width:13%">Nível</th><th style="width:16%">Quem reverte, e quando</th><th>O que acontece quando erra — e quem percebe</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="who">Escolher o que tratar na caixa</td><td>agente</td><td><span class="stamp st-part">Automático</span></td><td>ninguém</td><td>o email fica na caixa sem label. <strong>Ninguém percebe até alguém olhar.</strong></td></tr>
+          <tr><td class="who">É cotação, sim ou não?</td><td>agente, corte 0,35</td><td><span class="stamp st-part">Automático</span></td><td>comercial, ao abrir a thread</td><td>falso negativo = pedido tratado como spam e arquivado em silêncio. <strong>É a pior falha do sistema, e é a única invisível.</strong></td></tr>
+          <tr><td class="who">Extrair os cinco campos</td><td>agente</td><td><span class="stamp st-part">Automático</span></td><td>o próprio cliente, na resposta seguinte</td><td>campo errado → preço errado. O corte 0,60 é o que segura.</td></tr>
+          <tr><td class="who">Escolher rota e tarifa</td><td>a tabela (regra)</td><td><span class="stamp st-part">Automático</span></td><td>comercial, editando a planilha</td><td>tarifa vencida → não cota, vai para revisão. <strong>Falha visível, por desenho.</strong></td></tr>
+          <tr><td class="who">Calcular o preço</td><td>ninguém — é aritmética</td><td><span class="stamp st-part">Automático</span></td><td>—</td><td>aparece no teste, não no cliente. 65 testes cobrem a conta.</td></tr>
+          <tr style="background:var(--stop-wash)"><td class="who">Emitir o preço ao cliente</td><td>agente, se confiança ≥ 0,60</td><td><span class="stamp st-none">Automático hoje</span></td><td>conferência amostral, <strong>depois</strong> do envio</td><td>o cliente já recebeu. <strong>Irreversível na prática — e é aqui que a fronteira está no lugar errado.</strong></td></tr>
+          <tr><td class="who">Dizer «não atendemos»</td><td>agente</td><td><span class="stamp st-none">Automático</span></td><td>ninguém</td><td>oportunidade perdida, em silêncio</td></tr>
+          <tr><td class="who">Negociar, dar desconto, abrir exceção · mudar a tarifa</td><td>comercial, sempre</td><td><span class="stamp st-ok">Nunca automático</span></td><td>—</td><td>a conta de serviço é somente leitura: o agente não escreve na tabela nem por engano. A alçada nunca sai de mãos humanas.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>O freio existe — <code>MODO_RESPOSTA=rascunho</code> — e não está puxado. Essa é a decisão que sai desta apresentação.</span></div>
+    <div class="pagenum">12</div>
+  </section>
+
+  <!-- ============ 13 · EM BRANCO ============ -->
+  <section class="slide dense" data-title="O que ficou em branco">
+    <div class="eyebrow"><b>Consolidado</b> <span class="q">o que não sabemos, dito em voz alta</span></div>
+    <h2>Nove campos em branco — e nenhum deles é um projeto</h2>
+    <div class="body">
+      <table>
+        <thead><tr><th style="width:9%">Bloco</th><th style="width:36%">O que não sabemos</th><th style="width:26%">Por que importa</th><th>Como se preenche</th></tr></thead>
+        <tbody>
+          <tr><td class="who">1</td><td>Nenhum dos três KPIs está escrito nem acordado</td><td>sem critério, o piloto não tem como terminar</td><td>uma página, assinada por comercial e TI</td></tr>
+          <tr><td class="who">1</td><td>Tempo de resposta atual, medido</td><td>é a linha de base de tudo</td><td>consulta ao SQLite; os carimbos de hora já estão lá</td></tr>
+          <tr><td class="who">3.2</td><td>% de emails que chegam com os cinco campos</td><td>decide se o agente resolve ou só repergunta</td><td>uma consulta por desfecho no SQLite</td></tr>
+          <tr><td class="who">3.4</td><td>Linhas lidas × tarifas vigentes na planilha</td><td>é a diferença entre dado tratado e dado maquiado</td><td><code>python main.py --validar-planilha</code></td></tr>
+          <tr><td class="who">3.3</td><td>Prazo de retenção do SQLite; não há backup</td><td>vira obrigação quando a caixa for real</td><td>definir prazo, escrever, apagar o resto</td></tr>
+          <tr><td class="who">4.1</td><td>Custo em reais de cotar a menos e de cotar a mais</td><td>é o que calibraria 0,35 e 0,60 por custo, não por intuição</td><td>duas conversas com o comercial</td></tr>
+          <tr><td class="who">4.2</td><td>Fórum e consequência do dono nomeado</td><td>dono sem fórum não é dono</td><td>ponto fixo na reunião comercial semanal</td></tr>
+          <tr><td class="who">4.2</td><td>Datas de G2 e G3</td><td>portão sem data é reunião</td><td>duas datas no calendário</td></tr>
+          <tr style="background:var(--warn-wash)"><td class="who">5</td><td>O email não se identifica como automático nem oferece um humano</td><td>é o recurso da pessoa afetada</td><td><strong>duas frases em <code>mensagens.py</code></strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Sete dos nove se resolvem com uma consulta, uma conversa ou uma data. Nenhum precisa de mais tecnologia.</span></div>
+    <div class="pagenum">13</div>
+  </section>
+
+  <!-- ============ 14 · FECHO ============ -->
+  <section class="slide cover" data-title="Fecho">
+    <div class="kicker">O que levamos daqui</div>
+    <h1 style="font-size:4.6cqw;max-width:26ch">Um agente que lê português<br>e uma planilha que decide o preço.</h1>
+    <div class="rule"></div>
+    <div class="meta" style="font-size:1.24cqw">
+      <div><span>O que está pronto</span>A regra, a fórmula, os 65 testes,<br>a triagem e o freio de mão.</div>
+      <div><span>O que falta</span>Os números que provariam<br>que ele está servindo.</div>
+      <div><span>A decisão de hoje</span>Puxar o freio: voltar a <code>rascunho</code><br>até o portão G2 ter data.</div>
+    </div>
+    <div class="pagenum">14</div>
+  </section>
+</div>
+</div>
+
+<div class="hint">← → navegam · G abre o índice · Esc fecha</div>
+
+<div class="overview" id="ov">
+  <div class="hint" style="padding-top:0;padding-bottom:20px">Índice — clique para ir ao slide · Esc fecha</div>
+  <div class="ovgrid" id="ovgrid"></div>
+</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var i = 0;
+  var cur = document.getElementById('cur');
+  var tot = document.getElementById('tot');
+  var ov  = document.getElementById('ov');
+  var ovgrid = document.getElementById('ovgrid');
+  tot.textContent = slides.length;
+
+  slides.forEach(function(s, n){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ovcard';
+    b.innerHTML = '<span class="n">' + String(n+1).padStart(2,'0') + '</span>' +
+                  '<span class="t"></span>';
+    b.querySelector('.t').textContent = s.dataset.title || ('Slide ' + (n+1));
+    b.addEventListener('click', function(){ go(n); closeOv(); });
+    ovgrid.appendChild(b);
+  });
+  var cards = Array.prototype.slice.call(ovgrid.children);
+
+  function go(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function(s, k){ s.classList.toggle('on', k === i); });
+    cards.forEach(function(c, k){ c.classList.toggle('cur', k === i); });
+    cur.textContent = i + 1;
+    try { location.hash = String(i + 1); } catch(e){}
+  }
+  function openOv(){ ov.classList.add('on'); }
+  function closeOv(){ ov.classList.remove('on'); }
+
+  document.getElementById('btn-next').addEventListener('click', function(){ go(i+1); });
+  document.getElementById('btn-prev').addEventListener('click', function(){ go(i-1); });
+  document.getElementById('z-next').addEventListener('click', function(){ go(i+1); });
+  document.getElementById('z-prev').addEventListener('click', function(){ go(i-1); });
+  document.getElementById('btn-ov').addEventListener('click', function(){
+    ov.classList.contains('on') ? closeOv() : openOv();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { go(i+1); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { go(i-1); e.preventDefault(); }
+    else if (e.key === 'Home') { go(0); }
+    else if (e.key === 'End') { go(slides.length-1); }
+    else if (e.key === 'g' || e.key === 'G') { ov.classList.contains('on') ? closeOv() : openOv(); }
+    else if (e.key === 'Escape') { closeOv(); }
+  });
+
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  go(isNaN(start) ? 0 : start - 1);
+})();
+</script>
