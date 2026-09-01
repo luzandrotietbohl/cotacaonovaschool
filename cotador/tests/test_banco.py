@@ -117,15 +117,6 @@ class TestConsultasDoPainel(BaseComBanco):
         itens = self.banco.por_label("cotador-revisar")
         self.assertEqual([i["id_email"] for i in itens], ["a"])
 
-    def test_apagar_thread_devolve_os_ids_removidos(self):
-        self.registrar(id_email="a", thread_id="thr-9")
-        self.registrar(id_email="b", thread_id="thr-9")
-        self.registrar(id_email="fora", thread_id="outra")
-        removidos = self.banco.apagar_thread("thr-9")
-        self.assertEqual(sorted(removidos), ["a", "b"])
-        self.assertFalse(self.banco.ja_processado("a"))
-        self.assertTrue(self.banco.ja_processado("fora"))
-
     def test_ids_da_thread_lista_sem_apagar(self):
         # O painel precisa saber o que devolver ao Gmail ANTES de apagar.
         self.registrar(id_email="a", thread_id="thr-9")

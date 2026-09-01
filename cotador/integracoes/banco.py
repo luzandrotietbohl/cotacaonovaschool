@@ -171,17 +171,6 @@ class Banco:
             )
             return [dict(linha) for linha in cur.fetchall()]
 
-    def apagar_thread(self, thread_id: str) -> list[str]:
-        """Apaga os registros da thread (para reprocessar) e devolve os ids."""
-        with closing(self._conectar()) as con:
-            cur = con.execute(
-                "DELETE FROM processados WHERE thread_id = ? RETURNING id_email",
-                (thread_id,),
-            )
-            ids = [linha[0] for linha in cur.fetchall()]
-            con.commit()
-            return ids
-
     def ids_da_thread(self, thread_id: str) -> list[str]:
         """Ids da thread, sem apagar nada.
 

@@ -828,6 +828,16 @@ class TestTokenAntiCSRF(BasePainel):
                 self.assertEqual(corpo.count('<form'), formularios)
                 self.assertEqual(corpo.count(esperado), formularios)
 
+    def test_token_nao_ascii_e_recusado_sem_estourar(self):
+        # compare_digest com str exige ASCII: sem encode, um 'á' viraria
+        # TypeError (500) em vez do 403 uniforme.
+        resposta = self.cliente.post(
+            "/agente/acao", data={"acao": "ligar", "_token": "á"}
+        )
+
+        self.assertEqual(resposta.status_code, 403)
+        self.assertFalse(self.servico.rodando)
+
     def test_get_nao_exige_token(self):
         self.assertEqual(self.cliente.get("/").status_code, 200)
         self.assertEqual(self.cliente.get("/api/status").status_code, 200)

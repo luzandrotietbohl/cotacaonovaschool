@@ -24,7 +24,7 @@ from painel import consultas
 log = logging.getLogger(__name__)
 
 # '1.234.567' — pontos como separador de milhar, sem decimais.
-_SO_MILHAR = re.compile(r"-?\d{1,3}(\.\d{3})+$")
+_SO_MILHAR = re.compile(r"-?\d{1,3}(\.\d{3})+")
 
 
 def _reais(valor) -> str:
@@ -64,8 +64,10 @@ def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
 
     @app.before_request
     def _conferir_token():
+        # Bytes dos dois lados: compare_digest recusa str nao-ASCII com
+        # TypeError, e um token exotico deve dar 403 como qualquer outro.
         if request.method == "POST" and not secrets.compare_digest(
-            request.form.get("_token", ""), token
+            request.form.get("_token", "").encode(), token.encode()
         ):
             abort(403)
 
