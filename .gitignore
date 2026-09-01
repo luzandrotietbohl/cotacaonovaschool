@@ -4,3 +4,4 @@ service_account.json
 ALERTA_CREDENCIAL.txt
 __pycache__/
 .venv/
+.superpowers/
