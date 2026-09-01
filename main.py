@@ -9,12 +9,14 @@ Uso:
     python main.py --reprocessar-erros       # devolve para a fila os que falharam
     python main.py --once                    # um ciclo na caixa de entrada
     python main.py --loop                    # ciclos continuos
+    python main.py --painel                  # interface web local de gestao
 
 Codigos de saida: 0 ok | 1 falha de dados | 2 credencial recusada
 """
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import logging
 import sys
 import time
@@ -150,6 +152,12 @@ def _executar() -> int:
         metavar=("ORIGEM", "DESTINO", "QTD_VOLUMES", "VALOR_NF"),
         help="calcula um frete direto da planilha, sem email",
     )
+    grupo.add_argument(
+        "--painel",
+        action="store_true",
+        help="sobe a interface web local de gestao (http://localhost:8000)",
+    )
+    p.add_argument("--porta", type=int, default=8000, help="porta do --painel")
     p.add_argument("-v", "--verboso", action="store_true")
     args = p.parse_args()
 
@@ -226,6 +234,37 @@ def _executar() -> int:
         print(f"taxa dificil ...... R$ {c.taxa_entrega_dificil:.2f}")
         print(f"TOTAL ............. R$ {c.total:.2f}")
         print(f"prazo ............. {c.prazo_dias} dia(s) uteis")
+        return 0
+
+    if args.painel:
+        from painel.app import criar_app
+        from painel.servico_agente import ServicoAgente
+
+        banco = Banco(cfg.banco)
+        # Estado mutavel do painel. Inicia seguro: rascunho, loop desligado,
+        # independentemente do MODO_RESPOSTA do .env.
+        estado = {"modo": "rascunho"}
+
+        def fabrica_agente() -> Agente:
+            cfg_vigente = dataclasses.replace(cfg, modo_resposta=estado["modo"])
+            return Agente(
+                cfg=cfg_vigente,
+                caixa=montar_caixa(cfg),
+                tarifas=tabela,
+                extrator=Extrator(
+                    cfg.anthropic_api_key,
+                    cfg.anthropic_model,
+                    cfg.anthropic_workspace_id,
+                ),
+                banco=banco,
+                enviador=montar_enviador(cfg) if estado["modo"] == "enviar" else None,
+            )
+
+        servico = ServicoAgente(fabrica_agente, cfg.intervalo_segundos)
+        app = criar_app(cfg, banco, tabela, servico, lambda: montar_caixa(cfg), estado)
+        print(f"Painel em http://localhost:{args.porta} (loop desligado, modo rascunho)")
+        app.run(host="127.0.0.1", port=args.porta, debug=False)
+        servico.desligar()
         return 0
 
     agente = Agente(

@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import sqlite3
+import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -841,6 +843,29 @@ class TestTokenAntiCSRF(BasePainel):
     def test_get_nao_exige_token(self):
         self.assertEqual(self.cliente.get("/").status_code, 200)
         self.assertEqual(self.cliente.get("/api/status").status_code, 200)
+
+
+class TestCLIPainel(unittest.TestCase):
+    """A flag so existe de verdade se o argparse do main.py a conhecer.
+
+    O --help e o unico caminho que exercita a CLI sem .env nem planilha:
+    argparse imprime e sai antes de Config.carregar().
+    """
+
+    def test_help_anuncia_painel_e_porta(self):
+        raiz = Path(__file__).resolve().parents[2]
+
+        r = subprocess.run(
+            [sys.executable, "main.py", "--help"],
+            capture_output=True,
+            text=True,
+            cwd=raiz,
+            timeout=60,
+        )
+
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("--painel", r.stdout)
+        self.assertIn("--porta", r.stdout)
 
 
 if __name__ == "__main__":

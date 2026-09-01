@@ -142,6 +142,16 @@ python main.py --once
 python main.py --loop
 ```
 
+```bash
+python main.py --painel
+```
+
+Sobe a interface web local de gestao em http://localhost:8000 (use `--porta` para
+trocar). O painel mostra a operacao do dia, a fila de revisao humana (com botao
+para devolver threads a fila), cotacao manual sem gastar API e o controle do
+loop (ligar/desligar, ciclo unico, modo rascunho/enviar). Inicia sempre com o
+loop desligado e em modo rascunho.
+
 Se algum email falhar por erro tecnico (label `cotador-revisar`), devolva-o a fila:
 
 ```bash
@@ -158,8 +168,8 @@ credencial ruim, e girar em silencio esconde o problema.
 python -m unittest discover -s cotador/tests -t . -v
 ```
 
-65 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de thread, os
-templates de email, a busca de rota e as regressoes conhecidas.
+126 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de thread, os
+templates de email, a busca de rota, as rotas do painel e as regressoes conhecidas.
 
 `TestExemploCalculoDaPlanilha` reproduz a aba EXEMPLO_CALCULO: 10 volumes, NF
 R$ 8.000, rota R00001 -> total R$ 252,50.
@@ -173,6 +183,9 @@ R$ 8.000, rota R00001 -> total R$ 252,50.
 - O historico citado e cortado antes de ir ao LLM, para nao cotar dados antigos.
 - Um email problematico nao derruba o ciclo: falha isolada, os demais seguem.
 - `.env` e `service_account.json` estao no `.gitignore`. Nunca versione os dois.
+- O painel escuta so em `127.0.0.1` (nao fica exposto na rede), protege cada POST
+  com um token anti-CSRF gerado por processo e sobe com o loop desligado e em modo
+  rascunho, independentemente do `MODO_RESPOSTA` do `.env`.
 
 ## Estrutura
 
@@ -190,4 +203,7 @@ cotador/integracoes/mime.py         decodificacao de email cru
 cotador/integracoes/planilha.py     TABELA_ROTAS -> Tarifa normalizada
 cotador/integracoes/google_sa.py    credencial da conta de servico
 cotador/integracoes/banco.py        SQLite (idempotencia + auditoria)
+painel/app.py                       rotas e telas do painel web
+painel/servico_agente.py            loop do agente em thread (liga/desliga)
+painel/consultas.py                 leituras do SQLite para as telas
 ```
