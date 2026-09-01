@@ -459,6 +459,64 @@ class TestVisaoGeral(BasePainel):
         self.assertFalse(dados["rodando"])
         self.assertEqual(dados["modo"], "rascunho")
 
+    def test_banco_vazio_mostra_a_linha_de_tabela_vazia(self):
+        corpo = self.cliente.get("/").get_data(as_text=True)
+        self.assertIn("Nenhum email processado ainda.", corpo)
+
+    def test_frete_ausente_vira_travessao_na_tabela(self):
+        # Desfecho sem cotacao (sem_rota) nao tem valor_frete: a celula precisa
+        # de um placeholder, nao do "None" cru.
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="cliente@acme.com",
+            assunto="Cotacao", desfecho="sem_rota",
+            origem="Manaus/AM", destino="Campinas/SP",
+            label="cotador-processado",
+        )
+        corpo = self.cliente.get("/").get_data(as_text=True)
+        self.assertNotIn("None", corpo)
+        self.assertIn("<td>—</td>", corpo)
+
+    def test_assunto_com_html_sai_escapado(self):
+        # O assunto vem de email de terceiro: nada de |safe no template.
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="cliente@acme.com",
+            assunto="<script>alert(1)</script>", desfecho="cotado",
+            label="cotador-processado",
+        )
+        corpo = self.cliente.get("/").get_data(as_text=True)
+        self.assertNotIn("<script>alert(1)</script>", corpo)
+        self.assertIn("&lt;script&gt;", corpo)
+
+
+class TestRevisao(BasePainel):
+    def registrar_para_revisar(self, id_email="r1", thread_id="thr-r"):
+        self.banco.registrar(
+            id_email=id_email, thread_id=thread_id, remetente="cliente@acme.com",
+            assunto="Cotacao urgente", desfecho="erro", label="cotador-revisar",
+            erro="confianca 0.20 abaixo de 0.35",
+            extracao={"e_cotacao": True, "confianca": 0.2},
+        )
+
+    def test_lista_o_que_esta_em_revisao_com_motivo(self):
+        self.registrar_para_revisar()
+        corpo = self.cliente.get("/revisao").get_data(as_text=True)
+        self.assertIn("cliente@acme.com", corpo)
+        self.assertIn("confianca 0.20", corpo)
+        self.assertIn("Devolver à fila", corpo)
+
+    def test_devolver_apaga_do_banco_e_aciona_o_imap(self):
+        self.registrar_para_revisar(id_email="r1", thread_id="thr-r")
+        self.registrar_para_revisar(id_email="r2", thread_id="thr-r")
+
+        resposta = self.cliente.post(
+            "/revisao/devolver", data={"thread_id": "thr-r"}, follow_redirects=True
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertEqual(sorted(self.caixa.devolvidos), ["r1", "r2"])
+        self.assertFalse(self.banco.ja_processado("r1"))
+        self.assertFalse(self.banco.ja_processado("r2"))
+
 
 if __name__ == "__main__":
     unittest.main()

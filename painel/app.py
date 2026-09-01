@@ -2,7 +2,7 @@
 para os testes injetarem fakes (mesmo padrao do Agente)."""
 from __future__ import annotations
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
 
 from painel import consultas
 
@@ -44,5 +44,31 @@ def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
             ultimo_erro=servico.ultimo_erro,
             credencial_recusada=servico.credencial_recusada,
         )
+
+    # ---------------- revisao ----------------
+    @app.get("/revisao")
+    def revisao():
+        return render_template(
+            "revisao.html",
+            pagina="revisao",
+            itens=consultas.fila_de_revisao(banco, cfg.LABEL_REVISAR),
+        )
+
+    @app.post("/revisao/devolver")
+    def revisao_devolver():
+        thread_id = request.form["thread_id"]
+        ids = banco.apagar_thread(thread_id)
+        devolvidos = 0
+        # Conexao IMAP propria da acao: abre, devolve e fecha (mesmo padrao
+        # do ciclo do agente — nada de sessao ociosa pendurada).
+        with fabrica_caixa() as caixa:
+            for id_email in ids:
+                if caixa.devolver_para_fila(id_email, [cfg.LABEL_REVISAR]):
+                    devolvidos += 1
+        flash(
+            f"{devolvidos} de {len(ids)} email(s) devolvidos à fila; "
+            "o agente reprocessa no próximo ciclo."
+        )
+        return redirect(url_for("revisao"))
 
     return app
