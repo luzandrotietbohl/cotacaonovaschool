@@ -4,6 +4,7 @@
 <p class="subtitulo">Usa a mesma tabela de tarifas do agente. Não consome a Claude API.</p>
 
 <form method="post" class="linha">
+  <input type="hidden" name="_token" value="{{ csrf_token }}">
   <label>Origem
     <input name="origem" required placeholder="Sao Paulo/SP" value="{{ form.get('origem', '') }}">
   </label>

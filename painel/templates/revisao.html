@@ -16,6 +16,7 @@
   {% endif %}
   <form method="post" action="{{ url_for('revisao_devolver') }}"
         onsubmit="return confirm('Devolver a thread inteira à fila do agente?')">
+    <input type="hidden" name="_token" value="{{ csrf_token }}">
     <input type="hidden" name="thread_id" value="{{ item.thread_id }}">
     <button class="perigo" type="submit">Devolver à fila</button>
   </form>

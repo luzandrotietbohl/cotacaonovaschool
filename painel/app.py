@@ -2,11 +2,29 @@
 para os testes injetarem fakes (mesmo padrao do Agente)."""
 from __future__ import annotations
 
-from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
+import logging
+import re
+import secrets
+
+from flask import (
+    Flask,
+    abort,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 
 from cotador.core import precificacao
 from cotador.core.modelos import PedidoCotacao
 from painel import consultas
+
+log = logging.getLogger(__name__)
+
+# '1.234.567' — pontos como separador de milhar, sem decimais.
+_SO_MILHAR = re.compile(r"-?\d{1,3}(\.\d{3})+$")
 
 
 def _reais(valor) -> str:
@@ -15,15 +33,41 @@ def _reais(valor) -> str:
     return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
+def _para_float_ptbr(texto: str) -> float:
+    """Le numero digitado em teclado brasileiro sem perder ordem de grandeza.
+
+    float('8.000') daria 8.0 — a nota de oito mil viraria oito reais e a
+    cotacao sairia mil vezes menor. Regras: virgula manda (e o decimal, e os
+    pontos sao milhar); so pontos, decide o formato '1.234' vs '8000.50'.
+    """
+    limpo = texto.strip().replace(" ", "")
+    if "," in limpo:
+        return float(limpo.replace(".", "").replace(",", "."))
+    if _SO_MILHAR.fullmatch(limpo):
+        return float(limpo.replace(".", ""))
+    return float(limpo)
+
+
 def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
     app = Flask(__name__)
-    # So para flash() de mensagens; o painel e local e sem login.
-    app.config["SECRET_KEY"] = "painel-local"
+    # So para assinar o cookie de flash(); o painel e local e sem login.
+    app.config["SECRET_KEY"] = secrets.token_hex(32)
+    # Token por processo: o painel nao tem login, entao sem isto qualquer
+    # pagina aberta no navegador poderia postar /agente/acao num form oculto.
+    token = secrets.token_hex(16)
+    app.config["CSRF_TOKEN"] = token
     app.jinja_env.filters["reais"] = _reais
 
     @app.context_processor
     def _globais():
-        return {"servico": servico, "modo": estado["modo"]}
+        return {"servico": servico, "modo": estado["modo"], "csrf_token": token}
+
+    @app.before_request
+    def _conferir_token():
+        if request.method == "POST" and not secrets.compare_digest(
+            request.form.get("_token", ""), token
+        ):
+            abort(403)
 
     # ---------------- visao geral ----------------
     @app.get("/")
@@ -59,18 +103,39 @@ def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
     @app.post("/revisao/devolver")
     def revisao_devolver():
         thread_id = request.form["thread_id"]
-        ids = banco.apagar_thread(thread_id)
-        devolvidos = 0
-        # Conexao IMAP propria da acao: abre, devolve e fecha (mesmo padrao
-        # do ciclo do agente — nada de sessao ociosa pendurada).
-        with fabrica_caixa() as caixa:
-            for id_email in ids:
-                if caixa.devolver_para_fila(id_email, [cfg.LABEL_REVISAR]):
-                    devolvidos += 1
-        flash(
-            f"{devolvidos} de {len(ids)} email(s) devolvidos à fila; "
-            "o agente reprocessa no próximo ciclo."
-        )
+        ids = banco.ids_da_thread(thread_id)
+        if not ids:
+            # Clique repetido (ou outra aba ja devolveu): nao abre IMAP a toa.
+            flash("Nada a devolver: esta thread já saiu da revisão.")
+            return redirect(url_for("revisao"))
+        try:
+            # Conexao IMAP propria da acao: abre, devolve e fecha (mesmo padrao
+            # do ciclo do agente — nada de sessao ociosa pendurada).
+            with fabrica_caixa() as caixa:
+                devolvidos = [
+                    id_email
+                    for id_email in ids
+                    if caixa.devolver_para_fila(id_email, [cfg.LABEL_REVISAR])
+                ]
+        except Exception as exc:
+            # Apagar antes de falar com o Gmail perderia o email de vez: sem
+            # registro e sem voltar para 'is:unread', ninguem mais o veria.
+            log.exception("Falha ao devolver a thread %s", thread_id)
+            flash(f"Nada foi devolvido: falha ao falar com o Gmail ({exc}).")
+            return redirect(url_for("revisao"))
+
+        # So sai do banco o que o IMAP confirmou; o resto segue na revisao.
+        banco.apagar_emails(devolvidos)
+        if len(devolvidos) == len(ids):
+            flash(
+                f"{len(devolvidos)} email(s) devolvidos à fila; "
+                "o agente reprocessa no próximo ciclo."
+            )
+        else:
+            flash(
+                f"{len(devolvidos)} de {len(ids)} devolvidos; "
+                "os demais permanecem na revisão."
+            )
         return redirect(url_for("revisao"))
 
     # ---------------- cotacao manual ----------------
@@ -88,14 +153,20 @@ def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
                     origem=form["origem"].strip(),
                     destino=form["destino"].strip(),
                     qtd_volumes=int(form["qtd_volumes"]),
-                    valor_nf=float(form["valor_nf"].replace(".", "").replace(",", "."))
-                    if "," in form["valor_nf"]
-                    else float(form["valor_nf"]),
-                    peso_kg=float(form["peso_kg"].replace(",", "."))
+                    valor_nf=_para_float_ptbr(form["valor_nf"]),
+                    peso_kg=_para_float_ptbr(form["peso_kg"])
                     if form.get("peso_kg", "").strip()
                     else None,
                     modal=form.get("modal") or None,
                 )
+                # Numero negativo passa pelo parse, mas nao e cotacao: sem esta
+                # barreira sairia um "frete" negativo com cara de valido.
+                if pedido.qtd_volumes < 1:
+                    raise ValueError("informe ao menos 1 volume")
+                if pedido.valor_nf <= 0:
+                    raise ValueError("o valor da NF deve ser maior que zero")
+                if pedido.peso_kg is not None and pedido.peso_kg < 0:
+                    raise ValueError("o peso não pode ser negativo")
                 tarifa = tarifas.buscar(pedido.origem, pedido.destino, pedido.modal)
                 if tarifa is None:
                     if tarifas.trecho_cadastrado(pedido.origem, pedido.destino):
@@ -137,7 +208,12 @@ def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
             flash("Loop ligado.")
         elif acao == "desligar":
             servico.desligar()
-            flash("Loop desligado.")
+            # O join pode ter estourado com um ciclo longo em andamento;
+            # dizer "desligado" ali seria mentira visivel na propria sidebar.
+            if servico.desligando:
+                flash("Parada solicitada; o ciclo em andamento termina sozinho.")
+            else:
+                flash("Loop desligado.")
         elif acao == "ciclo":
             try:
                 resumo = servico.ciclo_unico()
@@ -146,7 +222,12 @@ def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
                 # O detalhe ja esta em servico.ultimo_erro, exibido na pagina.
                 flash("Ciclo falhou — veja o último erro abaixo.")
         elif acao == "config":
-            servico.intervalo_segundos = max(30, int(request.form["intervalo"]))
+            try:
+                intervalo = int(request.form["intervalo"])
+            except (KeyError, ValueError):
+                flash("Intervalo inválido: use um número de segundos.")
+                return redirect(url_for("agente_pagina"))
+            servico.intervalo_segundos = max(30, intervalo)
             estado["modo"] = (
                 "enviar" if request.form.get("modo") == "enviar" else "rascunho"
             )

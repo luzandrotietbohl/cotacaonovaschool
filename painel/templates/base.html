@@ -15,8 +15,10 @@
       <a href="/cotar" class="{{ 'ativo' if pagina == 'cotar' }}">🧮 Cotar</a>
       <a href="/agente" class="{{ 'ativo' if pagina == 'agente' }}">⚙️ Agente</a>
     </nav>
-    <div class="estado-loop {{ 'ligado' if servico.rodando else 'desligado' }}">
-      {{ '● rodando' if servico.rodando else '○ parado' }} · {{ modo }}
+    <div class="estado-loop {{ 'ligado' if servico.rodando and not servico.desligando else 'desligado' }}">
+      {% if servico.desligando %}◌ desligando…
+      {%- elif servico.rodando %}● rodando
+      {%- else %}○ parado{% endif %} · {{ modo }}
     </div>
   </aside>
   <main>

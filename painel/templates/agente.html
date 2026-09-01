@@ -20,6 +20,7 @@
   <p class="subtitulo">Parada pedida; o ciclo em andamento termina antes de a thread encerrar.</p>
   {% endif %}
   <form method="post" action="{{ url_for('agente_acao') }}" class="linha">
+    <input type="hidden" name="_token" value="{{ csrf_token }}">
     {% if servico.rodando %}
     <button name="acao" value="desligar" class="perigo" type="submit">Desligar</button>
     {% else %}
@@ -32,6 +33,7 @@
 <div class="cartao-detalhe">
   <h3>Configuração</h3>
   <form method="post" action="{{ url_for('agente_acao') }}" class="linha">
+    <input type="hidden" name="_token" value="{{ csrf_token }}">
     <input type="hidden" name="acao" value="config">
     <label>Intervalo entre ciclos (s)
       <input name="intervalo" type="number" min="30" value="{{ intervalo }}">

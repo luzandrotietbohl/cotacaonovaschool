@@ -400,8 +400,11 @@ class TarifasFake:
 
 
 class CaixaDevolvedoraFake:
-    def __init__(self):
+    """Devolve tudo com sucesso, salvo os ids listados em `falham`."""
+
+    def __init__(self, falham=()):
         self.devolvidos = []
+        self.falham = set(falham)
 
     def __enter__(self):
         return self
@@ -410,8 +413,23 @@ class CaixaDevolvedoraFake:
         pass
 
     def devolver_para_fila(self, id_email, labels_remover):
+        if id_email in self.falham:
+            return False
         self.devolvidos.append(id_email)
         return True
+
+
+class CaixaQueNaoConecta:
+    """Explode ao entrar no `with`, como uma credencial recusada no login."""
+
+    def __init__(self, excecao):
+        self._excecao = excecao
+
+    def __enter__(self):
+        raise self._excecao
+
+    def __exit__(self, *args):
+        pass
 
 
 def cfg_de_teste(tmp: Path):
@@ -456,12 +474,20 @@ class BasePainel(unittest.TestCase):
         self.addCleanup(self.servico.desligar)
         self.caixa = CaixaDevolvedoraFake()
         self.estado = {"modo": "rascunho"}
-        app = criar_app(
+        # Indireta para um teste poder trocar a caixa (ou faze-la explodir).
+        self.app = criar_app(
             self.cfg, self.banco, self.tarifas, self.servico,
             lambda: self.caixa, self.estado,
         )
-        app.config["TESTING"] = True
-        self.cliente = app.test_client()
+        self.app.config["TESTING"] = True
+        self.token = self.app.config["CSRF_TOKEN"]
+        self.cliente = self.app.test_client()
+
+    def postar(self, url, data=None, **kw):
+        """POST com o token anti-CSRF que o formulario do painel enviaria."""
+        dados = dict(data or {})
+        dados.setdefault("_token", self.token)
+        return self.cliente.post(url, data=dados, **kw)
 
 
 class TestVisaoGeral(BasePainel):
@@ -536,7 +562,7 @@ class TestRevisao(BasePainel):
         self.registrar_para_revisar(id_email="r1", thread_id="thr-r")
         self.registrar_para_revisar(id_email="r2", thread_id="thr-r")
 
-        resposta = self.cliente.post(
+        resposta = self.postar(
             "/revisao/devolver", data={"thread_id": "thr-r"}, follow_redirects=True
         )
 
@@ -545,10 +571,83 @@ class TestRevisao(BasePainel):
         self.assertFalse(self.banco.ja_processado("r1"))
         self.assertFalse(self.banco.ja_processado("r2"))
 
+    def test_email_que_o_imap_recusa_continua_na_revisao(self):
+        # Apagar do banco o que o Gmail nao devolveu perderia o email de vez:
+        # sem registro e sem voltar para 'is:unread', ninguem mais o veria.
+        self.registrar_para_revisar(id_email="r1", thread_id="thr-r")
+        self.registrar_para_revisar(id_email="r2", thread_id="thr-r")
+        self.caixa.falham = {"r2"}
+
+        resposta = self.postar(
+            "/revisao/devolver", data={"thread_id": "thr-r"}, follow_redirects=True
+        )
+        corpo = resposta.get_data(as_text=True)
+
+        self.assertFalse(self.banco.ja_processado("r1"))  # devolvido, pode sair
+        self.assertTrue(self.banco.ja_processado("r2"))   # ficou, segue listado
+        self.assertIn("1 de 2", corpo)
+        self.assertIn("permanecem na revisão", corpo)
+
+    def test_devolver_duas_vezes_nao_abre_imap_a_toa(self):
+        self.registrar_para_revisar(id_email="r1", thread_id="thr-r")
+        dados = {"thread_id": "thr-r"}
+
+        self.postar("/revisao/devolver", data=dados, follow_redirects=True)
+        segunda = self.postar("/revisao/devolver", data=dados, follow_redirects=True)
+
+        self.assertIn("já saiu da revisão", segunda.get_data(as_text=True))
+        self.assertEqual(self.caixa.devolvidos, ["r1"])  # nao devolveu de novo
+
+    def test_falha_ao_abrir_a_caixa_nao_apaga_nada(self):
+        # Credencial recusada na hora de conectar: o registro TEM que sobreviver.
+        from cotador.integracoes.caixa_imap import CredencialInvalida
+
+        self.registrar_para_revisar(id_email="r1", thread_id="thr-r")
+        # A fabrica do app le self.caixa a cada acao, entao basta trocar aqui.
+        self.caixa = CaixaQueNaoConecta(CredencialInvalida("senha ruim"))
+
+        with self.assertLogs("painel.app", "ERROR"):  # a causa fica no log
+            resposta = self.postar(
+                "/revisao/devolver", data={"thread_id": "thr-r"}, follow_redirects=True
+            )
+        corpo = resposta.get_data(as_text=True)
+
+        self.assertEqual(resposta.status_code, 200)  # nada de 500 na cara do usuario
+        self.assertTrue(self.banco.ja_processado("r1"))
+        self.assertIn("Nada foi devolvido", corpo)
+
+
+class TestDinheiroPtBR(unittest.TestCase):
+    """'8.000,50' e '8.000' vem de teclado brasileiro; float() cru os destroi
+    silenciosamente (8.0), cotando a nota errada por 3 ordens de grandeza."""
+
+    def test_formatos_aceitos(self):
+        from painel.app import _para_float_ptbr
+
+        casos = {
+            "8.000": 8000.0,      # ponto de milhar, sem decimais
+            "8.000,50": 8000.5,   # pt-BR completo
+            "8000.50": 8000.5,    # ponto decimal (teclado numerico)
+            "300": 300.0,
+            "1.234.567,89": 1234567.89,
+            " 8000 ": 8000.0,
+            "0,50": 0.5,
+            "-100": -100.0,       # negativo passa; quem valida e a rota
+        }
+        for texto, esperado in casos.items():
+            with self.subTest(texto=texto):
+                self.assertEqual(_para_float_ptbr(texto), esperado)
+
+    def test_texto_sem_numero_estoura_para_a_rota_tratar(self):
+        from painel.app import _para_float_ptbr
+
+        with self.assertRaises(ValueError):
+            _para_float_ptbr("oito mil")
+
 
 class TestCotar(BasePainel):
     def test_cotacao_reproduz_o_exemplo_da_planilha(self):
-        resposta = self.cliente.post("/cotar", data={
+        resposta = self.postar("/cotar", data={
             "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
             "qtd_volumes": "10", "valor_nf": "8000", "peso_kg": "300",
             "modal": "",
@@ -557,8 +656,16 @@ class TestCotar(BasePainel):
         self.assertIn("252,50", corpo)   # total da aba EXEMPLO_CALCULO
         self.assertIn("R00001", corpo)   # rota aplicada
 
+    def test_valor_nf_em_formato_ptbr_cota_igual(self):
+        resposta = self.postar("/cotar", data={
+            "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
+            "qtd_volumes": "10", "valor_nf": "8.000,00", "peso_kg": "300",
+            "modal": "",
+        })
+        self.assertIn("252,50", resposta.get_data(as_text=True))
+
     def test_rota_inexistente_avisa_sem_cotar(self):
-        resposta = self.cliente.post("/cotar", data={
+        resposta = self.postar("/cotar", data={
             "origem": "Manaus/AM", "destino": "Campinas/SP",
             "qtd_volumes": "10", "valor_nf": "8000", "peso_kg": "300",
             "modal": "",
@@ -568,13 +675,38 @@ class TestCotar(BasePainel):
         self.assertNotIn("252,50", corpo)
 
     def test_entrada_invalida_nao_estoura(self):
-        resposta = self.cliente.post("/cotar", data={
+        resposta = self.postar("/cotar", data={
             "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
             "qtd_volumes": "abc", "valor_nf": "8000", "peso_kg": "",
             "modal": "",
         })
         self.assertEqual(resposta.status_code, 200)
         self.assertIn("Não foi possível cotar", resposta.get_data(as_text=True))
+
+    def test_valor_nf_nao_positivo_nao_cota(self):
+        # GRIS/advalorem sobre NF negativa devolveria um "frete" menor que o
+        # minimo — numero sem sentido para mandar a cliente.
+        for valor in ("-100", "0"):
+            with self.subTest(valor_nf=valor):
+                resposta = self.postar("/cotar", data={
+                    "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
+                    "qtd_volumes": "10", "valor_nf": valor, "peso_kg": "300",
+                    "modal": "",
+                })
+                corpo = resposta.get_data(as_text=True)
+                self.assertIn("Não foi possível cotar", corpo)
+                # "R$ " so aparece via filtro reais; o rotulo do form e "(R$)".
+                self.assertNotIn("R$ ", corpo)
+
+    def test_peso_negativo_nao_cota(self):
+        resposta = self.postar("/cotar", data={
+            "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
+            "qtd_volumes": "10", "valor_nf": "8000", "peso_kg": "-5",
+            "modal": "",
+        })
+        corpo = resposta.get_data(as_text=True)
+        self.assertIn("Não foi possível cotar", corpo)
+        self.assertNotIn("R$ ", corpo)
 
     def test_get_mostra_o_formulario(self):
         corpo = self.cliente.get("/cotar").get_data(as_text=True)
@@ -584,28 +716,38 @@ class TestCotar(BasePainel):
 
 class TestPaginaAgente(BasePainel):
     def test_ligar_e_desligar_o_loop(self):
-        self.cliente.post("/agente/acao", data={"acao": "ligar"})
+        self.postar("/agente/acao", data={"acao": "ligar"})
         self.assertTrue(self.servico.rodando)
-        self.cliente.post("/agente/acao", data={"acao": "desligar"})
+        self.postar("/agente/acao", data={"acao": "desligar"})
         self.assertFalse(self.servico.rodando)
 
     def test_ciclo_agora_roda_um_ciclo(self):
-        self.cliente.post("/agente/acao", data={"acao": "ciclo"}, follow_redirects=True)
+        self.postar("/agente/acao", data={"acao": "ciclo"}, follow_redirects=True)
         self.assertEqual(self.agente_fake.ciclos, 1)
         self.assertEqual(self.servico.ultimo_resumo, {"cotado": 1})
 
     def test_config_muda_modo_e_intervalo(self):
-        self.cliente.post("/agente/acao", data={
+        self.postar("/agente/acao", data={
             "acao": "config", "intervalo": "300", "modo": "enviar",
         })
         self.assertEqual(self.estado["modo"], "enviar")
         self.assertEqual(self.servico.intervalo_segundos, 300)
 
     def test_intervalo_tem_piso_de_30_segundos(self):
-        self.cliente.post("/agente/acao", data={
+        self.postar("/agente/acao", data={
             "acao": "config", "intervalo": "1", "modo": "rascunho",
         })
         self.assertEqual(self.servico.intervalo_segundos, 30)
+
+    def test_intervalo_nao_numerico_avisa_sem_derrubar(self):
+        resposta = self.postar("/agente/acao", data={
+            "acao": "config", "intervalo": "abc", "modo": "enviar",
+        }, follow_redirects=True)
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertIn("Intervalo inválido", resposta.get_data(as_text=True))
+        self.assertEqual(self.servico.intervalo_segundos, 60)  # intacto
+        self.assertEqual(self.estado["modo"], "rascunho")      # nada aplicado
 
     def test_alerta_de_credencial_aparece_na_pagina(self):
         arquivo = self.cfg.service_account_json.parent / "ALERTA_CREDENCIAL.txt"
@@ -615,11 +757,80 @@ class TestPaginaAgente(BasePainel):
 
     def test_erro_num_ciclo_nao_derruba_a_rota(self):
         self.agente_fake.excecao = RuntimeError("planilha fora do ar")
-        resposta = self.cliente.post(
+        resposta = self.postar(
             "/agente/acao", data={"acao": "ciclo"}, follow_redirects=True
         )
         self.assertEqual(resposta.status_code, 200)
         self.assertIn("planilha fora do ar", self.servico.ultimo_erro)
+
+    def _ligar_com_ciclo_travado(self):
+        """Deixa o loop preso dentro de um ciclo, para exercitar 'desligando'."""
+        travado = AgenteTravado()
+        self.agente_fake = travado  # a fabrica le o atributo a cada ciclo
+        self.addCleanup(travado.liberar.set)
+        self.servico.intervalo_segundos = 0.01
+        self.servico.timeout_desligar = 0.05
+        self.postar("/agente/acao", data={"acao": "ligar"})
+        self.assertTrue(travado.entrou.wait(timeout=5))
+        return travado
+
+    def test_desligar_com_ciclo_em_andamento_avisa_que_a_parada_e_assincrona(self):
+        # "Loop desligado." seria mentira: a thread ainda esta viva.
+        self._ligar_com_ciclo_travado()
+
+        with self.assertLogs("painel.servico_agente", "WARNING"):
+            resposta = self.postar(
+                "/agente/acao", data={"acao": "desligar"}, follow_redirects=True
+            )
+
+        self.assertIn("Parada solicitada", resposta.get_data(as_text=True))
+        self.assertTrue(self.servico.desligando)
+
+    def test_sidebar_mostra_desligando_enquanto_o_ciclo_termina(self):
+        self._ligar_com_ciclo_travado()
+        with self.assertLogs("painel.servico_agente", "WARNING"):
+            self.servico.desligar()
+
+        # A visao geral so mostra o estado pela sidebar do base.html.
+        corpo = self.cliente.get("/").get_data(as_text=True)
+
+        self.assertIn("desligando", corpo)
+        self.assertNotIn("● rodando", corpo)
+
+
+class TestTokenAntiCSRF(BasePainel):
+    """O painel nao tem login: sem token, qualquer aba aberta no navegador
+    poderia postar /agente/acao ou /revisao/devolver via form escondido."""
+
+    def test_post_sem_token_e_recusado(self):
+        resposta = self.cliente.post("/agente/acao", data={"acao": "ligar"})
+
+        self.assertEqual(resposta.status_code, 403)
+        self.assertFalse(self.servico.rodando)  # a acao nao rodou
+
+    def test_post_com_token_errado_e_recusado(self):
+        resposta = self.cliente.post(
+            "/agente/acao", data={"acao": "ligar", "_token": "x" * 32}
+        )
+
+        self.assertEqual(resposta.status_code, 403)
+        self.assertFalse(self.servico.rodando)
+
+    def test_todo_formulario_carrega_o_token(self):
+        self.banco.registrar(
+            id_email="r1", thread_id="thr-r", remetente="cliente@acme.com",
+            assunto="s", desfecho="erro", label="cotador-revisar",
+        )
+        esperado = f'value="{self.token}"'
+        for url, formularios in (("/revisao", 1), ("/cotar", 1), ("/agente", 2)):
+            with self.subTest(url=url):
+                corpo = self.cliente.get(url).get_data(as_text=True)
+                self.assertEqual(corpo.count('<form'), formularios)
+                self.assertEqual(corpo.count(esperado), formularios)
+
+    def test_get_nao_exige_token(self):
+        self.assertEqual(self.cliente.get("/").status_code, 200)
+        self.assertEqual(self.cliente.get("/api/status").status_code, 200)
 
 
 if __name__ == "__main__":

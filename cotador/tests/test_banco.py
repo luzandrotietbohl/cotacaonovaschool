@@ -126,6 +126,34 @@ class TestConsultasDoPainel(BaseComBanco):
         self.assertFalse(self.banco.ja_processado("a"))
         self.assertTrue(self.banco.ja_processado("fora"))
 
+    def test_ids_da_thread_lista_sem_apagar(self):
+        # O painel precisa saber o que devolver ao Gmail ANTES de apagar.
+        self.registrar(id_email="a", thread_id="thr-9")
+        self.registrar(id_email="b", thread_id="thr-9")
+        self.registrar(id_email="fora", thread_id="outra")
+
+        ids = self.banco.ids_da_thread("thr-9")
+
+        self.assertEqual(sorted(ids), ["a", "b"])
+        self.assertTrue(self.banco.ja_processado("a"))  # nada foi removido
+
+    def test_apagar_emails_remove_so_os_ids_pedidos(self):
+        self.registrar(id_email="a", thread_id="thr-9")
+        self.registrar(id_email="b", thread_id="thr-9")
+        self.registrar(id_email="c", thread_id="thr-9")
+
+        apagados = self.banco.apagar_emails(["a", "c"])
+
+        self.assertEqual(apagados, 2)
+        self.assertFalse(self.banco.ja_processado("a"))
+        self.assertTrue(self.banco.ja_processado("b"))
+        self.assertFalse(self.banco.ja_processado("c"))
+
+    def test_apagar_emails_com_lista_vazia_nao_apaga_nada(self):
+        self.registrar(id_email="a")
+        self.assertEqual(self.banco.apagar_emails([]), 0)
+        self.assertTrue(self.banco.ja_processado("a"))
+
 
 class TestAgenteGravaLabel(unittest.TestCase):
     """O label Gmail aplicado ao fechar o email deve ir para o SQLite,

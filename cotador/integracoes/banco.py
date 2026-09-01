@@ -181,3 +181,28 @@ class Banco:
             ids = [linha[0] for linha in cur.fetchall()]
             con.commit()
             return ids
+
+    def ids_da_thread(self, thread_id: str) -> list[str]:
+        """Ids da thread, sem apagar nada.
+
+        Quem devolve email para a fila precisa da lista ANTES de mexer no
+        Gmail, para so apagar o que o IMAP confirmou.
+        """
+        with closing(self._conectar()) as con:
+            cur = con.execute(
+                "SELECT id_email FROM processados WHERE thread_id = ?", (thread_id,)
+            )
+            return [linha[0] for linha in cur.fetchall()]
+
+    def apagar_emails(self, ids: list[str]) -> int:
+        """Apaga apenas os ids informados; devolve quantos sairam."""
+        if not ids:
+            return 0
+        marcadores = ",".join("?" * len(ids))
+        with closing(self._conectar()) as con:
+            cur = con.execute(
+                f"DELETE FROM processados WHERE id_email IN ({marcadores})",
+                tuple(ids),
+            )
+            con.commit()
+            return cur.rowcount
