@@ -7,6 +7,10 @@ import numpy as np
 import pandas as pd
 
 RAIO_TERRA_KM = 6371.0088
+ARQUIVOS_OLIST = {
+    "olist_customers_dataset.csv", "olist_geolocation_dataset.csv", "olist_order_items_dataset.csv",
+    "olist_orders_dataset.csv", "olist_products_dataset.csv", "olist_sellers_dataset.csv",
+}
 NUMERICAS = ["distance_km", "weight_total_kg", "quantity_items", "declared_value", "month"]
 CATEGORICAS = ["origin_state", "dest_state", "route", "same_state", "geo_profile"]
 FEATURES = NUMERICAS + CATEGORICAS
@@ -49,3 +53,14 @@ def preparar_features(dados: pd.DataFrame) -> pd.DataFrame:
     for coluna in LOG_NUMERICAS:
         x[coluna] = np.log1p(x[coluna])
     return x
+
+
+def mapa_geografico(geo: pd.DataFrame) -> pd.DataFrame:
+    coordenadas = geo.groupby("geolocation_zip_code_prefix", as_index=False)[["geolocation_lat", "geolocation_lng"]].median()
+    rotulos = geo.groupby("geolocation_zip_code_prefix")[["geolocation_city", "geolocation_state"]].agg(
+        lambda s: s.mode().iloc[0] if not s.mode().empty else s.iloc[0]
+    ).reset_index()
+    return coordenadas.merge(rotulos, on="geolocation_zip_code_prefix").rename(columns={
+        "geolocation_zip_code_prefix": "zip_prefix", "geolocation_lat": "lat", "geolocation_lng": "lng",
+        "geolocation_city": "city", "geolocation_state": "state",
+    })

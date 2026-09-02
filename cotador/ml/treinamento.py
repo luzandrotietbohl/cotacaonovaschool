@@ -15,12 +15,10 @@ from sklearn.metrics import mean_absolute_error, median_absolute_error
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from .features import CATEGORICAS, FEATURES, NUMERICAS, haversine_km, perfil_geografico, preparar_features
-
-ARQUIVOS_OLIST = {
-    "olist_customers_dataset.csv", "olist_geolocation_dataset.csv", "olist_order_items_dataset.csv",
-    "olist_orders_dataset.csv", "olist_products_dataset.csv", "olist_sellers_dataset.csv",
-}
+from .features import (
+    ARQUIVOS_OLIST, CATEGORICAS, FEATURES, NUMERICAS, haversine_km, mapa_geografico,
+    perfil_geografico, preparar_features,
+)
 
 
 def localizar_zip_olist(pasta: Path) -> Path:
@@ -40,17 +38,6 @@ def _ler(arquivo: zipfile.ZipFile, nome: str) -> pd.DataFrame:
     membro = next(n for n in arquivo.namelist() if Path(n).name == nome)
     with arquivo.open(membro) as stream:
         return pd.read_csv(stream, low_memory=False)
-
-
-def mapa_geografico(geo: pd.DataFrame) -> pd.DataFrame:
-    coordenadas = geo.groupby("geolocation_zip_code_prefix", as_index=False)[["geolocation_lat", "geolocation_lng"]].median()
-    rotulos = geo.groupby("geolocation_zip_code_prefix")[["geolocation_city", "geolocation_state"]].agg(
-        lambda s: s.mode().iloc[0] if not s.mode().empty else s.iloc[0]
-    ).reset_index()
-    return coordenadas.merge(rotulos, on="geolocation_zip_code_prefix").rename(columns={
-        "geolocation_zip_code_prefix": "zip_prefix", "geolocation_lat": "lat", "geolocation_lng": "lng",
-        "geolocation_city": "city", "geolocation_state": "state",
-    })
 
 
 def carregar_embarques(caminho_zip: Path) -> tuple[pd.DataFrame, pd.DataFrame]:

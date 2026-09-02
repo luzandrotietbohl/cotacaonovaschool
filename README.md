@@ -21,9 +21,18 @@ Treino atual: 97.311 embarques, com 70% para treino, 15% para calibração e 15%
 teste temporal. Resultados: MAE P50 de R$ 5,62, mediana absoluta de R$ 2,11,
 mediana percentual de 12,10% e cobertura P25-P75 de 47,42%.
 
+`scripts/clusterizar_olist.py` segmenta os mesmos embarques com KMeans para expor os
+regimes logisticos da base. O frete fica fora das features de proposito: entra apenas
+no perfil dos grupos. Aceita o ZIP Olist ou uma pasta de CSVs e grava CSV de rotulos,
+perfil, figura, metadata e relatorio em `relatorios/clusterizacao/`. Com k=6 saem seis
+regimes: local metropolitano, miudo de baixo valor, denso compacto, volumoso leve,
+multi-item e carga pesada. E um recorte operacional, nao estrutura latente comprovada
+- a silhueta fica em torno de 0,22 porque os dados sao um continuo log-normal.
+
 ```bash
 python scripts/treinar_olist.py --zip caminho/para/archive_olist.zip
 python scripts/gerar_tsne.py --zip caminho/para/archive_olist.zip
+python scripts/clusterizar_olist.py --dados caminho/para/archive_olist
 python main.py --modelo-info
 ```
 
@@ -280,9 +289,9 @@ credencial ruim, e girar em silencio esconde o problema.
 python -m unittest discover -s cotador/tests -t . -v
 ```
 
-202 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de
+215 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de
 thread, os templates de email, a busca de rota, a curadoria da tabela, a fila de
-revisao humana, as rotas do painel e as regressoes conhecidas.
+revisao humana, as rotas do painel, a clusterizacao e as regressoes conhecidas.
 
 `TestExemploCalculoDaPlanilha` reproduz a aba EXEMPLO_CALCULO: 10 volumes, NF
 R$ 8.000, rota R00001 -> total R$ 252,50.
@@ -320,8 +329,10 @@ cotador/core/precificacao.py        formula da planilha + limite de peso
 cotador/ml/historico.py             inferencia P25/P50/P75 e bloqueio de outlier
 cotador/ml/geografia.py             resolucao por CEP ou cidade/UF
 cotador/ml/treinamento.py           agregacao order+seller, treino e calibracao
+cotador/ml/clusterizacao.py         segmentacao KMeans dos embarques e relatorio
 scripts/treinar_olist.py            CLI reproduzivel de treinamento
 scripts/gerar_tsne.py               visualizacao exploratoria e outliers de preco
+scripts/clusterizar_olist.py        CLI da clusterizacao e do relatorio
 modelos/olist/atual/                modelos, mapa geografico e metadados
 cotador/core/mensagens.py           templates dos emails
 cotador/integracoes/caixa_imap.py   leitura, labels e rascunhos por IMAP
