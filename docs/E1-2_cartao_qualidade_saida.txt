@@ -1,0 +1,301 @@
+==============================================================================
+E1.2 - CARTAO DE QUALIDADE DOS DADOS - fonte: Olist (archive_olist/)
+==============================================================================
+Linhas na tabela de entregas construida: 99,441  (1 linha = 1 pedido)
+Janela temporal: 2016-09-04 a 2018-10-17
+Apoio: 112,650 itens, 103,886 pagamentos, 99,224 avaliacoes, 1,000,163 geolocalizacoes
+Pedidos com status delivered: 96,478
+
+------------------------------------------------------------------------------
+1) COMPLETUDE - campos vazios, por coluna e por filial
+------------------------------------------------------------------------------
+  order_delivered_customer_date         2,965  ( 2.98%)
+  order_delivered_carrier_date          1,783  ( 1.79%)
+  product_width_cm                        791  ( 0.80%)
+  product_weight_g                        791  ( 0.80%)
+  product_length_cm                       791  ( 0.80%)
+  product_height_cm                       791  ( 0.80%)
+  product_id                              775  ( 0.78%)
+  seller_city                             775  ( 0.78%)
+  frete_total                             775  ( 0.78%)
+  seller_id                               775  ( 0.78%)
+  shipping_limit_date                     775  ( 0.78%)
+  n_itens                                 775  ( 0.78%)
+  filial                                  775  ( 0.78%)
+  valor_total                             775  ( 0.78%)
+  order_approved_at                       160  ( 0.16%)
+
+  Buraco critico: data de entrega ausente em pedidos NAO cancelados
+    2,346 linhas (2.37% dos nao cancelados)
+    por status: shipped=1107, unavailable=609, invoiced=314, processing=301, delivered=8, created=5, approved=2
+
+  Ausencias por filial (UF do vendedor) - base = TODOS os pedidos nao cancelados
+  (medir so sobre status=delivered esconde o problema: por definicao esses tem data)
+           pedidos  sem_dt_transportadora  sem_dt_cliente  sem_peso  sem_aprovacao  pct_sem_transp  pct_sem_dt_cliente
+   filial                                                                                                             
+   SP        69636                    407            1221        15             12            0.58                1.75
+   MG         7794                     44             147         0              0            0.56                1.89
+   PR         7564                     62             135         1              1            0.82                1.78
+   RJ         4290                     57             105         0              0            1.33                2.45
+   SC         3598                     16              47         0              1            0.44                1.31
+   RS         1970                     13              21         0              0            0.66                1.07
+   DF          816                      6              13         0              0            0.74                1.59
+   BA          566                     12              17         0              0            2.12                3.00
+   GO          460                      2               9         0              0            0.43                1.96
+   PE          405                      0               2         0              0            0.00                0.49
+   MA          391                      0               3         0              0            0.00                0.77
+   ES          315                      2               7         0              0            0.63                2.22
+   MT          135                      0               1         0              0            0.00                0.74
+   CE           89                      1               4         0              0            1.12                4.49
+
+  Filiais com pct_sem_dt_cliente acima da media geral (2.37%), min. 100 pedidos:
+           pedidos  sem_dt_cliente  pct_sem_dt_cliente  pct_sem_transp
+   filial                                                             
+   BA          566              17                3.00            2.12
+   RJ         4290             105                2.45            1.33
+   ES          315               7                2.22            0.63
+   GO          460               9                1.96            0.43
+   MG         7794             147                1.89            0.56
+   PR         7564             135                1.78            0.82
+   SP        69636            1221                1.75            0.58
+   DF          816              13                1.59            0.74
+
+  Linhas sem UF de vendedor (seller_id nulo/orfao): 775
+
+------------------------------------------------------------------------------
+2) UNICIDADE - duplicados exatos e quase-duplicados
+------------------------------------------------------------------------------
+  orders: linhas duplicadas exatas ............... 0
+  orders: order_id repetido ...................... 0
+  order_items: linhas duplicadas exatas ......... 0
+  order_items: QUASE-duplicados (mesmo pedido+produto+vendedor+preco+frete,
+               separados so por order_item_id) .. 17,313 linhas em 6,968 pedidos
+  reviews: review_id repetido ................... 814
+  reviews: mesmo order_id com >1 avaliacao ...... 1,098 linhas em 547 pedidos
+  payments: order_id com >1 linha de pagamento .. 7,407
+  geolocation: linhas duplicadas exatas ......... 261,831 de 1,000,163 (26.2%)
+  customers: customer_unique_id repetido ........ 3,345 (mesma pessoa com varios ids tecnicos)
+
+------------------------------------------------------------------------------
+3) CONSISTENCIA - mesma entidade escrita de formas diferentes
+------------------------------------------------------------------------------
+  geolocation_city: 8,011 grafias distintas -> 5,939 cidades apos normalizar acento/caixa/pontuacao
+  Cidades com >=3 grafias diferentes: 18
+
+  'Sao Paulo' escrito de quantas formas? Varredura nos 3 campos de cidade:
+  12 variantes distintas encontradas:
+    geolocation_city     4 variantes: sao paulo | sp | são paulo | sãopaulo
+    seller_city         10 variantes: sao  paulo | sao paulo | sao paulo - sp | sao paulo / sao paulo | sao paulo sp | sao paulop | sao pauo | são paulo | sp | sp / sp
+    customer_city        1 variantes: sao paulo
+
+  Top 8 cidades por numero de grafias:
+    santa barbara d oeste          4 grafias  ex.: santa barbara d oeste, santa barbara d'oeste, santa bárbara d'oeste, santa bárbara d`oeste
+    santo estevao                  3 grafias  ex.: santo estevao, santo estevão, santo estêvão
+    barra de santo antonio         3 grafias  ex.: barra de  santo antônio, barra de santo antonio, barra de santo antônio
+    tome-acu                       3 grafias  ex.: tome-acu, tomé-açu, tomé-açú
+    sao sebastiao do passe         3 grafias  ex.: sao sebastiao do passe, são sebastião do passe, são sebastião do passé
+    teresopolis                    3 grafias  ex.: teresopolis, teresópolis, ´teresopolis
+    sao joao d alianca             3 grafias  ex.: sao joao d alianca, sao joao d'alianca, são joão d'aliança
+    trairao                        3 grafias  ex.: trairao, trairâo, trairão
+
+  customer_city: 4,119 grafias -> 4,114 normalizadas
+  seller_city:   611 grafias -> 605 normalizadas
+  seller_city com UF ou barra dentro do proprio campo: 15 ex.: ['auriflama/sp', 'sao paulo / sao paulo', 'cariacica / es', 'sbc/sp', 'santo andre/sao paulo', 'sp / sp']
+  product_category_name sem traducao na tabela de dominio: 2 -> ['pc_gamer', 'portateis_cozinha_e_preparadores_de_alimentos']
+
+------------------------------------------------------------------------------
+4) VALIDADE - valores fora do dominio possivel
+------------------------------------------------------------------------------
+  Entrega ANTES da compra (chegada antes da partida) ....... 0
+  Entrega ao cliente ANTES da coleta pela transportadora ... 23
+  Aprovacao ANTES da compra ................................ 0
+  Prazo-limite de expedicao ANTES da compra ................ 0
+  product_weight_g <= 0 .................................... 4   (nulos: 2)
+  Dimensao <= 0 em algum eixo .............................. 0
+  price <= 0 (itens) ....................................... 0
+  freight_value < 0 ........................................ 0
+  freight_value == 0 em pedido entregue .................... 336  (frete gratis ou registo ausente?)
+  payment_value <= 0 ....................................... 9
+  installments == 0 com credit_card ........................ 2
+  payment_type = not_defined ............................... 3
+  review_score fora de 1..5 ................................ 0
+  ZIP de cliente sem correspondencia em geolocation ........ 278
+
+------------------------------------------------------------------------------
+5) EXATIDAO - valores possiveis mas implausiveis
+------------------------------------------------------------------------------
+  Lead time compra->entrega (dias):
+   count    96470.00
+   mean        12.56
+   std          9.55
+   min          0.53
+   50%         10.22
+   90%         23.10
+   99%         46.05
+   max        209.63
+  Lead time > 100 dias ..................................... 64  (max 210 dias)
+  Lead time < 12 horas ..................................... 0
+  product_weight_g > 30.000 g em pacote de e-commerce ...... 1  (max 40,425 g)
+  Soma das tres dimensoes > 250 cm ......................... 0
+  Frete > 3x o valor da mercadoria ......................... 73
+  Pagamento != mercadoria+frete (dif > R$1) ................ 246 pedidos (dif mediana R$0.00)
+
+------------------------------------------------------------------------------
+6) ATUALIDADE - atrasos entre o evento e o registo
+------------------------------------------------------------------------------
+  compra -> aprovacao (h)      mediana     0.3 | p90     34.7 | max    4509.2 | negativos     0
+  aprovacao -> despacho (h)    mediana    43.6 | p90    143.8 | max    3018.3 | negativos 1,350
+  avaliacao -> resposta (h)    mediana    40.2 | p90    116.6 | max   12448.8 | negativos     0
+
+  Ultima compra registada: 2018-10-17 -> dataset com 2,876 dias de idade
+  Ultima entrega registada: 2018-10-17
+  Ultimos 60 dias da janela: 1,503 pedidos, 52 (3.5%) sem data de entrega -> cauda incompleta
+
+------------------------------------------------------------------------------
+7) PROVENIENCIA - a qualidade varia por origem do registo?
+------------------------------------------------------------------------------
+  Por porte do vendedor (quem registra o despacho) - base nao cancelados:
+                  pedidos  pct_sem_transp  pct_sem_dt_cliente  pct_sem_peso  lead_mediano
+   tier_vendedor                                                                         
+   1-10 pedidos      6677            3.55                4.40          0.00           9.2
+   11-100           32689            0.63                1.76          0.00          10.0
+   101-1000         45112            0.37                1.51          0.03          10.7
+   >1000            13727            0.09                1.34          0.00          10.3
+   NaN                611           99.84              100.00        100.00           NaN
+  Nota: a linha NaN = pedidos sem seller_id (sem item registado) - 100% sem entrega.
+
+  Por canal de pagamento (origem do registo comercial):
+                 pedidos  pct_atraso  pct_sem_dt_cliente
+   payment_type                                         
+   boleto          19689        8.65                2.53
+   credit_card     74955        7.76                2.32
+   debit_card       1520        7.76                2.43
+   voucher          2651        7.05                2.60
+   NaN                 1      100.00                0.00
+
+==============================================================================
+PERGUNTA OBRIGATORIA - atraso por filial vs. dados em falta por filial
+==============================================================================
+
+  (A) pct_atraso_reportado = atrasos / pedidos COM data de entrega  <- o KPI de hoje
+  (B) pct_atraso_honesto   = (atrasos + prazos vencidos sem registo) / TODOS os pedidos
+
+  Ranking pelo KPI de hoje (melhor primeiro) - todas as filiais:
+           pedidos  mensuraveis  sem_registo  pct_sem_registo  pct_atraso_reportado  pct_atraso_honesto  salto_pp  lead_mediano
+   filial                                                                                                                      
+   PI           12           11            1             8.33                  0.00                8.33      8.33          13.0
+   RO           13           13            0             0.00                  0.00                0.00      0.00          17.9
+   SE            7            7            0             0.00                  0.00                0.00      0.00          13.8
+   GO          460          451            9             1.96                  3.99                5.87      1.88          11.0
+   RS         1970         1949           21             1.07                  4.31                5.33      1.02           9.6
+   PE          405          403            2             0.49                  4.47                4.94      0.47          11.1
+   MT          135          134            1             0.74                  4.48                5.19      0.71          13.0
+   MG         7794         7647          147             1.89                  5.64                7.42      1.78          10.8
+   BA          566          549           17             3.00                  5.83                8.66      2.83          11.8
+   DF          816          803           13             1.59                  5.98                7.48      1.50          10.5
+   SC         3598         3551           47             1.31                  6.05                7.28      1.23          11.7
+   PB           34           33            1             2.94                  6.06                8.82      2.76          11.0
+   PR         7564         7429          135             1.78                  6.53                8.20      1.67          11.2
+   ES          315          308            7             2.22                  7.14                9.21      2.07          11.2
+   RJ         4290         4185          105             2.45                  8.46               10.70      2.24          10.0
+   MS           47           47            0             0.00                  8.51                8.51      0.00          10.5
+   SP        69636        68415         1221             1.75                  8.77               10.37      1.60          10.0
+   CE           89           85            4             4.49                  9.41               13.48      4.07          14.2
+   RN           51           51            0             0.00                  9.80                9.80      0.00           8.5
+   PA            8            8            0             0.00                 12.50               12.50      0.00          12.7
+   MA          391          388            3             0.77                 23.20               23.79      0.59          15.8
+   AM            3            3            0             0.00                 66.67               66.67      0.00          29.5
+   AC            1            0            1           100.00                   NaN              100.00       NaN           NaN
+   NaN         611            0          611           100.00                   NaN              100.00       NaN           NaN
+
+  Somente filiais com >= 200 pedidos, ordenado pelo KPI de hoje:
+           pedidos  mensuraveis  sem_registo  pct_sem_registo  pct_atraso_reportado  pct_atraso_honesto  salto_pp  lead_mediano
+   filial                                                                                                                      
+   GO          460          451            9             1.96                  3.99                5.87      1.88          11.0
+   RS         1970         1949           21             1.07                  4.31                5.33      1.02           9.6
+   PE          405          403            2             0.49                  4.47                4.94      0.47          11.1
+   MG         7794         7647          147             1.89                  5.64                7.42      1.78          10.8
+   BA          566          549           17             3.00                  5.83                8.66      2.83          11.8
+   DF          816          803           13             1.59                  5.98                7.48      1.50          10.5
+   SC         3598         3551           47             1.31                  6.05                7.28      1.23          11.7
+   PR         7564         7429          135             1.78                  6.53                8.20      1.67          11.2
+   ES          315          308            7             2.22                  7.14                9.21      2.07          11.2
+   RJ         4290         4185          105             2.45                  8.46               10.70      2.24          10.0
+   SP        69636        68415         1221             1.75                  8.77               10.37      1.60          10.0
+   MA          391          388            3             0.77                 23.20               23.79      0.59          15.8
+   NaN         611            0          611           100.00                   NaN              100.00       NaN           NaN
+
+  As MESMAS filiais, reordenadas pela metrica honesta:
+           pedidos  mensuraveis  sem_registo  pct_sem_registo  pct_atraso_reportado  pct_atraso_honesto  salto_pp  lead_mediano
+   filial                                                                                                                      
+   PE          405          403            2             0.49                  4.47                4.94      0.47          11.1
+   RS         1970         1949           21             1.07                  4.31                5.33      1.02           9.6
+   GO          460          451            9             1.96                  3.99                5.87      1.88          11.0
+   SC         3598         3551           47             1.31                  6.05                7.28      1.23          11.7
+   MG         7794         7647          147             1.89                  5.64                7.42      1.78          10.8
+   DF          816          803           13             1.59                  5.98                7.48      1.50          10.5
+   PR         7564         7429          135             1.78                  6.53                8.20      1.67          11.2
+   BA          566          549           17             3.00                  5.83                8.66      2.83          11.8
+   ES          315          308            7             2.22                  7.14                9.21      2.07          11.2
+   SP        69636        68415         1221             1.75                  8.77               10.37      1.60          10.0
+   RJ         4290         4185          105             2.45                  8.46               10.70      2.24          10.0
+   MA          391          388            3             0.77                 23.20               23.79      0.59          15.8
+   NaN         611            0          611           100.00                   NaN              100.00       NaN           NaN
+
+  Melhor filial pelo ranking ingenuo (sem filtro de volume): PI (12 pedidos)
+  Melhor com >=200 pedidos pelo KPI de hoje: GO  (3.99% reportado / 5.87% honesto)
+  Melhor com >=200 pedidos pela metrica honesta: PE  (4.94% honesto)
+
+  Correlacao (filiais com >=50 pedidos) entre KPI reportado e % sem registo: -0.093
+  Maior salto reportado -> honesto: BA +2.83pp, RJ +2.24pp, ES +2.07pp, GO +1.88pp, MG +1.78pp
+
+  Pedidos nao cancelados SEM data de entrega: 2,346
+  Destes, com prazo estimado JA vencido no fim da janela: 2,346 (100%)
+  -> atrasos quase certos que nao entram em nenhuma estatistica de SLA
+  Status desses pedidos: shipped=1107, unavailable=609, invoiced=314, processing=301, delivered=8, created=5, approved=2
+
+==============================================================================
+OS TRES DEFEITOS MAIS GRAVES + CUSTO ESTIMADO / ANO
+==============================================================================
+Pressupostos comuns: multa 3.5% do frete (faixa 2-5% do enunciado), reentrega R$180,
+frete mediano por pedido R$17.17, janela = 772 dias -> anualizacao 0.47x
+
+[1] Data de entrega ausente em pedidos com prazo vencido (atraso invisivel)
+    Linhas afetadas: 2,346 (de 2,346 sem data de entrega)
+    Decisao que estraga: ranking de filiais e apuracao de SLA. A filial que nao
+    registra a entrega aparece como a melhor; bonus e contrato premiam pior registo.
+    Custo/ano: 2,346 x (3,5% x R$17.17 + R$180) x 0.47 = R$ 200,320
+    Pressuposto: cada prazo vencido sem registo e um atraso real com multa + reentrega.
+
+[2] Duplicacao: 261,831 linhas duplicadas exatas em geolocation (26.2% do ficheiro)
+    + 17,313 quase-duplicados em order_items (6,968 pedidos)
+    Decisao que estraga: calculo de frete e custo por rota. Contagem de itens e
+    centroide de CEP enviesados -> tabela de preco e faturamento errados.
+    Custo/ano (reemissao de frete dos pedidos afetados): R$ 1,980
+    Pressuposto: 1 reemissao de frete por pedido afetado, ao valor da multa.
+
+[3] Inconsistencia de nome de cidade: 12 grafias so para sao paulo (176,971 linhas);
+    18 cidades com >=3 grafias
+    Decisao que estraga: agrupamento por praca, escolha de hub e roteirizacao.
+    Sao Paulo vira varios mercados distintos; o volume real fica escondido.
+    Custo/ano: 18 cidades x 4 entregas mal roteadas x (multa+reentrega) x 0.47 = R$ 6,148
+    Pressuposto: 4 entregas/ano mal roteadas por cidade com grafia ambigua.
+
+TOTAL ESTIMADO DOS TRES DEFEITOS: R$ 208,447 / ano
+
+==============================================================================
+NOTAS 1-5 POR DIMENSAO (5 = sem problema material)
+==============================================================================
+Dimensao      Nota   Evidencia
+Completude    2/5    2,346 pedidos nao cancelados sem data de entrega; 2 produtos sem peso; ausencia concentrada por filial
+Unicidade     2/5    261,831 dups exatas em geolocation; 17,313 quase-dups em order_items; 547 pedidos com avaliacao repetida
+Consistencia  1/5    8,011 grafias -> 5,939 cidades; 12 grafias de sao paulo; 2 categorias fora do dominio
+Validade      3/5    23 entregas antes da coleta; 0 prazos-limite antes da compra; 4 pesos <= 0
+Exatidao      2/5    lead time ate 210 dias; peso ate 40,425 g; 246 pedidos com pagamento != mercadoria+frete
+Atualidade    2/5    dataset com 2,876 dias de idade; cauda dos ultimos 60 dias com 3.5% sem entrega
+Proveniencia  2/5    vendedores de 1-10 pedidos e canais de pagamento tem taxas de ausencia diferentes -> qualidade depende de quem registra
+
+Nota global (media): 2.0/5
+
+Veredito: os dados servem para ver tendencia, NAO para premiar filial nem fechar
+contrato de SLA. Corrigir completude e consistencia antes de qualquer ranking.

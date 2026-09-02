@@ -11,3 +11,5 @@ __pycache__/
 catboost_info/
 *olist*.zip
 relatorios/
+/olist_*.csv
+/product_category_name_translation.csv
