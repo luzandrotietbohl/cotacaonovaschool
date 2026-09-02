@@ -402,6 +402,12 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 .ax{font-family:"IBM Plex Mono",monospace;font-size:9px;fill:var(--muted)}
 .axl{font-family:"IBM Plex Mono",monospace;font-size:9.5px;fill:var(--ink-2)}
 .val{font-family:"IBM Plex Mono",monospace;font-size:10.5px;fill:var(--ink);font-weight:600}
+/* O caminho de 5 minutos: os 11 slides que cobrem os seis blocos.
+   Os restantes ficam como reserva para as duas perguntas. */
+.ovcard.core{border-color:var(--accent)}
+.ovcard.core .n{color:var(--accent)}
+.ovcard.core .n::after{content:" ·"}
+
 .grid{stroke:var(--rule-soft);stroke-width:1}
 .base{stroke:var(--ink);stroke-width:1}
 
@@ -535,7 +541,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <button class="zone r" id="z-next" type="button" aria-label="Próximo slide"></button>
 
   <!-- ============ 01 · CAPA ============ -->
-  <section class="slide cover on" data-title="Capa">
+  <section class="slide cover on" data-title="Capa" data-core="1">
     <div class="kicker">E4.6 · Dia 4 · Especificação de um sistema, não relatório técnico</div>
     <h1>O atraso que o modelo<br>não aprendeu</h1>
     <div class="rule"></div>
@@ -548,7 +554,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 02 · BLOCO 1 ============ -->
-  <section class="slide dense" data-title="1 · O objetivo">
+  <section class="slide dense" data-title="1 · O objetivo" data-core="1">
     <div class="eyebrow"><b>Bloco 1 · O objetivo</b><span class="q">para que serve o sistema?</span></div>
     <h2>Avisar a expedição de que uma entrega vai atrasar, enquanto ainda dá para fazer algo.</h2>
     <div class="body">
@@ -592,7 +598,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 03 · BLOCO 2 ============ -->
-  <section class="slide dense" data-title="2 · As ações">
+  <section class="slide dense" data-title="2 · As ações" data-core="1">
     <div class="eyebrow"><b>Bloco 2 · As ações</b><span class="q">o que dá para executar de verdade?</span></div>
     <h2>Três ações contam hoje. Duas não contam — e é por isso que estão na lista à parte.</h2>
     <div class="body">
@@ -625,36 +631,48 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 04 · BLOCO 3.1 + 3.2 ============ -->
-  <section class="slide dense" data-title="3.1/3.2 · Autoria e grão">
-    <div class="eyebrow"><b>Bloco 3.1 · 3.2</b><span class="q">quem afirma o quê, e em que grão?</span></div>
-    <h2>Cada campo é uma alegação de alguém que é medido por ela.</h2>
+  <section class="slide dense" data-title="3.1/3.2 · Autoria e adequação" data-core="1">
+    <div class="eyebrow"><b>Bloco 3.1 · 3.2</b><span class="q">quem afirma, que informação a ação exige, em que grão?</span></div>
+    <h2>A ação precisa de quatro coisas. Os dados carregam duas.</h2>
     <div class="body">
-      <div class="cols c2w">
+      <div class="cols c3">
         <div>
+          <div class="lbl">3.2 · primeiro, o que a ação exige</div>
           <table>
-            <thead><tr><th>Campo</th><th>Quem produz</th><th>Que interesse tem no valor</th></tr></thead>
+            <thead><tr><th>A ação precisa saber</th><th>Os dados carregam?</th></tr></thead>
             <tbody>
-              <tr class="hi"><td class="mono">dt_entrega</td><td class="who">transportadora / vendedor</td><td>é <em>medido</em> pelo prazo: não registar tira o pedido do denominador</td></tr>
-              <tr><td class="mono">dt_prazo</td><td class="who">plataforma, no checkout</td><td>prometer folgado protege o SLA e piora a conversão</td></tr>
-              <tr><td class="mono">dt_limite_expedicao</td><td class="who">contrato com o vendedor</td><td>é a obrigação dele; define de quem é a culpa</td></tr>
-              <tr><td class="mono">peso_g</td><td class="who">vendedor, no cadastro</td><td>peso menor pode baratear o frete que ele paga</td></tr>
-              <tr><td class="mono">cliente_cidade</td><td class="who">cliente, digitando</td><td>nenhum — e é por isso que há 12 grafias de «São Paulo»</td></tr>
+              <tr><td>que <em>este</em> pedido vai atrasar, em t0</td><td class="who">em parte</td></tr>
+              <tr><td>a tempo de reordenar a fila</td><td class="who">sim</td></tr>
+              <tr class="hi"><td><em>por que</em> vai atrasar, para agir na causa</td><td class="who">não</td></tr>
+              <tr class="hi"><td>quantos dias vai atrasar</td><td class="who">não</td></tr>
             </tbody>
           </table>
-          <p style="margin-top:1.1cqw"><strong>Latência:</strong> todas as 14 features existem em t0. O <em>rótulo</em> só existe <strong>10,2 dias</strong> depois, na mediana — é isso que limita a revalidação a mensal.</p>
+          <p style="margin-top:1cqw">«Em parte» é AUC 0,72, e instável — o slide 11. O <strong>«não» da terceira linha</strong> é o que limita o sistema: sem <code>motivo_atraso</code>, ele avisa e não diz o que fazer.</p>
         </div>
         <div>
-          <div class="lbl">O grão nos quatro eixos</div>
+          <div class="lbl">3.1 · cada campo é a alegação de alguém</div>
+          <table>
+            <thead><tr><th>Campo</th><th>Quem, e que interesse tem</th></tr></thead>
+            <tbody>
+              <tr class="hi"><td class="mono">dt_entrega</td><td>transportadora: é <em>medida</em> pelo prazo, e não registar tira o pedido do denominador</td></tr>
+              <tr><td class="mono">dt_prazo</td><td>plataforma: prometer folgado protege o SLA e piora a conversão</td></tr>
+              <tr><td class="mono">peso_g</td><td>vendedor: peso menor pode baratear o frete que ele paga</td></tr>
+              <tr><td class="mono">cliente_cidade</td><td>cliente, a digitar: nenhum interesse — daí 12 grafias de «São Paulo»</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="lbl">3.2 · o grão nos quatro eixos</div>
           <ul class="tight">
-            <li><strong>Temporal:</strong> o dado é por evento (compra, aprovação, coleta, entrega). A decisão é em t0, um único instante.</li>
-            <li class="no"><strong>Espacial:</strong> cliente pelo centroide do <em>prefixo de CEP</em>; filial pelo centroide da <em>cidade</em>. Não é o mesmo grão, e a distância herda o pior dos dois. Sem distância: <strong>2,41%</strong>.</li>
-            <li><strong>De entidade:</strong> a linha é o pedido, e a ação executa-se por pedido. Coincidem — é a única coisa que sai de graça aqui.</li>
-            <li class="no"><strong>De atributo:</strong> não existe <code>motivo_atraso</code>. O campo que explicaria o atraso não foi registado, e não se recupera depois.</li>
+            <li><strong>Temporal:</strong> o dado é por evento; a decisão é em t0, um instante. <strong>Latência:</strong> as 14 features em t0, o rótulo <strong>10,2 dias</strong> depois.</li>
+            <li class="no"><strong>Espacial:</strong> cliente pelo centroide do <em>prefixo de CEP</em>, filial pelo da <em>cidade</em>. Grãos diferentes, e a distância herda o pior. Sem distância: 2,41%.</li>
+            <li><strong>De entidade:</strong> a linha é o pedido e a ação executa-se por pedido. Coincidem — a única coisa que sai de graça.</li>
+            <li class="no"><strong>De atributo:</strong> <code>motivo_atraso</code> não existe. Grão fino não registado não se recupera depois.</li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">AUTORIA</span><span>Quem é medido pelo número raramente é neutro ao registá-lo. O buraco de 2 346 datas de entrega não está distribuído ao acaso: está onde correu mal.</span></div>
+    <div class="claim"><span class="k">A ORDEM</span><span>Não existe dado bom em abstrato. O 3.2 só tem resposta depois de o bloco 2 nomear a ação — e nomeada, ela pede uma informação que a base não tem.</span></div>
     <div class="pagenum">04</div>
   </section>
 
@@ -701,7 +719,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 06 · BLOCO 3.3 ============ -->
-  <section class="slide dense" data-title="3.3 · Proveniência">
+  <section class="slide dense" data-title="3.3 · Proveniência" data-core="1">
     <div class="eyebrow"><b>Bloco 3.3 · Proveniência</b><span class="q">por onde passou até chegar aqui?</span></div>
     <h2>Oito ficheiros com hash na entrada, seis com hash na saída. A versão é o que torna a decisão contestável.</h2>
     <div class="body">
@@ -724,7 +742,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
             <li class="no">Na nossa operação o dado pessoal é <strong>o CEP e a cidade do cliente</strong>: identificam pessoa natural. Base legal <strong>art. 7.º, V</strong> — execução de contrato, que é a própria entrega.</li>
             <li class="no">O <strong>score de atraso é dado pessoal derivado</strong>. O <strong>art. 20</strong> dá ao titular direito a pedir revisão — e a exigência de que quem revê fosse pessoa natural <em>foi vetada</em>. Que haja humano no circuito é decisão nossa, não da lei.</li>
             <li>Retenção declarada: <strong>24 meses</strong>, para auditar o SLA publicado. Depois, o art. 16 manda eliminar.</li>
-            <li class="no">Quem tem acesso hoje: quem tem a máquina. <strong>Não há controle de acesso</strong> — está aberto e é preciso dizê-lo.</li>
+            <li class="no">Acesso: <strong>desde 2026-09-02</strong>, data da <code>v1</code>, a base está na máquina de quem a gerou — TI, 1 pessoa. Antes disso, ninguém: os CSV brutos são públicos. <strong>Não há controle de acesso</strong>, e é preciso dizê-lo.</li>
           </ul>
         </div>
       </div>
@@ -734,7 +752,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 07 · BLOCO 3.4 ============ -->
-  <section class="slide dense" data-title="3.4 · Curadoria">
+  <section class="slide dense" data-title="3.4 · Curadoria" data-core="1">
     <div class="eyebrow"><b>Bloco 3.4 · Curadoria</b><span class="q">o número antes e depois de cada regra</span></div>
     <h2>99 441 pedidos entram, 99 441 saem. A exclusão que movia o KPI em 2,18 p.p. era o denominador.</h2>
     <div class="body">
@@ -758,11 +776,12 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         <div>
           <div class="lbl">Onze regras, e o que cada uma decide</div>
           <ul class="tight">
-            <li class="yes"><strong>Nenhuma linha é removida.</strong> A quarentena (1 391, 1,4%) é um <em>extrato</em>, não um corte: 85 398 pedidos ficam sem flag e os outros continuam contáveis.</li>
-            <li class="no">O que a quarentena tira <strong>não é igual ao que fica</strong>: frete mediano <strong>R$ 18,45</strong> contra R$ 17,16 — sai o mais caro.</li>
+            <li class="yes"><strong>Nenhuma linha é removida.</strong> A quarentena (1 391, 1,4%) é um <em>extrato</em>, não um corte: 85 398 pedidos ficam sem flag.</li>
+            <li class="no">O que a quarentena tira <strong>não é igual ao que fica</strong>: frete mediano R$ 18,45 contra R$ 17,16 — sai o mais caro.</li>
             <li class="no">Sinal invertido em <code>lag_despacho_negativo</code> e <code>frete_zero</code>: <strong>a flag apanha pedido bom</strong>, e excluí-los <em>baixaria</em> o KPI de 10,4% para 3,1%.</li>
-            <li><strong>Implausibilidade é marcada, nunca corrigida.</strong> Peso ≤ 0 vira nulo, com o original em <code>peso_g_original</code>; grafia suspeita de cidade vai para <code>cidades_suspeitas.csv</code>, sem união automática.</li>
-            <li class="no">Dono declarado das onze regras: <strong>quem mantém <code>scripts/curar_dados.py</code></strong>. Nenhuma foi decidida pelo comercial — e é isso que precisa mudar antes do piloto.</li>
+            <li><strong>Implausibilidade é marcada, nunca corrigida.</strong> Peso ≤ 0 vira nulo, com o original em <code>peso_g_original</code>.</li>
+            <li class="no"><strong>Imputação: nenhuma na base.</strong> A mediana entra só no pipeline da logística e do random forest. Aqui a ausência é <strong>MNAR</strong> — falta <em>porque</em> correu mal — e a mediana inventaria um pedido normal a partir de um que falhou.</li>
+            <li class="no">Dono das onze regras: <strong>quem mantém <code>curar_dados.py</code></strong>. Nenhuma foi decidida pela operação, e é isso que muda antes do piloto.</li>
           </ul>
         </div>
       </div>
@@ -867,7 +886,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 10 · BLOCO 4.1 LINHA DE BASE ============ -->
-  <section class="slide dense" data-title="4.1 · Linha de base">
+  <section class="slide dense" data-title="4.1 · Linha de base" data-core="1">
     <div class="eyebrow"><b>Bloco 4.1 · adequação</b><span class="q">contra o que isto é comparado?</span></div>
     <h2>Sete candidatos no mesmo teste temporal. Dois ficam abaixo do acaso.</h2>
     <div class="body">
@@ -905,7 +924,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 11 · O SINAL APARECEU ============ -->
-  <section class="slide dense" data-title="4.1 · O sinal apareceu">
+  <section class="slide dense" data-title="4.1 · O sinal apareceu" data-core="1">
     <div class="eyebrow"><b>Bloco 4.1 · adequação</b><span class="q">o modelo aprendeu, ou apanhou uma mudança?</span></div>
     <h2>No treino o prazo prometido não separa atraso. No teste separa. O sinal apareceu — não foi aprendido.</h2>
     <div class="body">
@@ -944,7 +963,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 12 · CUSTO DO ERRO ============ -->
-  <section class="slide dense" data-title="4.1 · Custo do erro">
+  <section class="slide dense" data-title="4.1 · Custo do erro" data-core="1">
     <div class="eyebrow"><b>Bloco 4.1 · adequação</b><span class="q">quanto custa cada tipo de erro?</span></div>
     <h2>Com o limiar no melhor ponto, o sistema poupa R$ 9,8 mil por ano. Não paga um projeto.</h2>
     <div class="body">
@@ -981,7 +1000,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 13 · BLOCO 4.2 ============ -->
-  <section class="slide dense" data-title="4.2 · Deriva e gestão">
+  <section class="slide dense" data-title="4.2 · Deriva e gestão" data-core="1">
     <div class="eyebrow"><b>Bloco 4.2 · a gestão</b><span class="q">quem mantém o sistema vivo depois do piloto?</span></div>
     <h2>O modelo degrada-se de 0,84 para 0,60 dentro dos próprios 90 dias de teste.</h2>
     <div class="body">
@@ -1009,8 +1028,8 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           </ul>
           <div class="lbl" style="margin-top:1.2cqw">Os portões, com data</div>
           <ul class="tight">
-            <li>Piloto em 1 filial, 60 dias. Go se recall ≥ 40% com precisão ≥ 20% em dois meses seguidos.</li>
-            <li class="no"><strong>Condição de desistência:</strong> AUC mensal &lt; 0,65 em dois meses consecutivos, ou poupança anualizada &lt; R$ 30 mil. Nas duas, desligamos — e a segunda já está violada hoje.</li>
+            <li><strong>15/09/2026</strong> piloto arranca em 1 filial (SP). <strong>15/10</strong> portão 1: recall ≥ 40% com precisão ≥ 20%. <strong>13/11</strong> portão 2: o mesmo, no segundo mês. <strong>30/11</strong> decisão de escalar ou desligar.</li>
+            <li class="no"><strong>Condição de desistência:</strong> AUC mensal &lt; 0,65 em dois meses consecutivos, ou poupança anualizada &lt; R$ 30 mil. Nas duas, desligamos — e a segunda <strong>já está violada hoje</strong>, antes de o piloto começar.</li>
           </ul>
         </div>
       </div>
@@ -1020,15 +1039,15 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 14 · BLOCO 5 ÉTICA ============ -->
-  <section class="slide dense" data-title="5 · A ética">
+  <section class="slide dense" data-title="5 · A ética" data-core="1">
     <div class="eyebrow"><b>Bloco 5 · a ética, nesta aplicação</b><span class="q">quem é afetado e não está nesta sala?</span></div>
     <h2>Funcionando exatamente como foi desenhado, o sistema avisa quem está longe e abandona quem está perto.</h2>
     <div class="body">
-      <div class="cols c2w">
+      <div class="cols c3">
         <div>
-          <div class="lbl">Recall por decil de distância, no limiar escolhido</div>
+          <div class="lbl">Recall por decil de distância</div>
           <table>
-            <thead><tr><th class="num">decil</th><th class="num">km p50</th><th class="num">atraso</th><th class="num">recall</th></tr></thead>
+            <thead><tr><th class="num">decil</th><th class="num">km</th><th class="num">atraso</th><th class="num">recall</th></tr></thead>
             <tbody>
               <tr class="hi"><td class="num">1</td><td class="num">12</td><td class="num">12,64%</td><td class="num">0,4%</td></tr>
               <tr class="hi"><td class="num">2</td><td class="num">52</td><td class="num">11,53%</td><td class="num">1,4%</td></tr>
@@ -1036,33 +1055,44 @@ svg{display:block;width:100%;height:auto;overflow:visible}
               <tr><td class="num">10</td><td class="num">2 085</td><td class="num">6,30%</td><td class="num">31,6%</td></tr>
             </tbody>
           </table>
-          <p style="margin-top:1cqw">O decil <strong>1</strong> tem a <strong>maior</strong> taxa de atraso — 12,64% — e <strong>0,4%</strong> de recall. O decil 10 tem metade do atraso e <strong>31,6%</strong>. O modelo aprendeu «longe é risco».</p>
-        </div>
-        <div>
-          <div class="lbl">Por região do cliente</div>
+          <p style="margin-top:1cqw">O decil <strong>1</strong> tem a <strong>maior</strong> taxa de atraso e <strong>0,4%</strong> de recall; o 10 tem metade do atraso e <strong>31,6%</strong>. O modelo aprendeu «longe é risco».</p>
+          <div class="lbl" style="margin-top:1.1cqw">Por região do cliente</div>
           <table>
-            <thead><tr><th>região</th><th class="num">pedidos</th><th class="num">atraso</th><th class="num">recall</th></tr></thead>
+            <thead><tr><th>reg.</th><th class="num">pedidos</th><th class="num">atraso</th><th class="num">recall</th></tr></thead>
             <tbody>
               <tr class="hi"><td class="mono">N</td><td class="num">317</td><td class="num">2,84%</td><td class="num">0,0%</td></tr>
               <tr><td class="mono">NE</td><td class="num">1 755</td><td class="num">7,07%</td><td class="num">25,8%</td></tr>
               <tr class="hi"><td class="mono">SE</td><td class="num">13 284</td><td class="num">7,14%</td><td class="num">5,1%</td></tr>
             </tbody>
           </table>
-          <div class="lbl" style="margin-top:1.2cqw">O que seria legal e ainda assim errado</div>
+        </div>
+        <div>
+          <div class="lbl">O que seria legal e ainda assim errado</div>
           <ul class="tight">
-            <li class="no">Dizer «apanha 30% dos atrasos» sem dizer que no decil urbano apanha 0,4%: verdade no agregado, falso para quem mora perto.</li>
-            <li class="no">Os <strong>390 pedidos sem CEP georreferenciado</strong> têm 13,08% de atraso e 62,7% de recall. O buraco de dados virou sorte.</li>
-            <li class="no"><strong>Recurso hoje: nenhum.</strong> O cliente não sabe que há um score, logo não discorda dele.</li>
+            <li class="no">Dizer «apanha 30% dos atrasos» sem dizer que no decil urbano apanha <strong>0,4%</strong>: verdade no agregado, falso para quem mora perto.</li>
+            <li class="no">Os <strong>390 pedidos sem CEP georreferenciado</strong> têm 13,08% de atraso e 62,7% de recall. O buraco de dados virou sorte, e ninguém o desenhou.</li>
+            <li class="no">Priorizar a fila por score é <strong>despriorizar</strong> quem não tem score. Ninguém decidiu isso; é o outro lado da mesma ordenação.</li>
+          </ul>
+          <div class="lbl" style="margin-top:1.2cqw">Quem colhe e quem carrega</div>
+          <p>O benefício é da operação, que reordena a fila com informação melhor. O risco é do <strong>cliente urbano de pequeno vendedor</strong>: é ele que atrasa mais e é ele que o sistema não vê.</p>
+        </div>
+        <div>
+          <div class="lbl">O que saberiam, se alguém lhes explicasse</div>
+          <ul class="tight">
+            <li>Que existe um <strong>score de atraso</strong> sobre a compra deles, calculado antes de o pedido sair — e que ninguém lho comunicou.</li>
+            <li class="no">Que ele usa o CEP: <strong>morar perto reduz a chance de serem avisados</strong>, não a de atrasarem.</li>
+            <li class="no">Que a fila é ordenada por esse número, e estar sem score é ficar no fim dela.</li>
+            <li class="no">E que <strong>recurso não há nenhum</strong>. O art. 20 dá direito a pedir revisão de decisão automatizada — mas só se souberem que ela existe. Cumprir a LGPD é o mínimo, não a resposta.</li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">QUEM CARREGA</span><span>O benefício é da operação, que reordena a fila. O risco é do cliente urbano de pequeno vendedor: é ele que atrasa mais e é ele que o sistema não vê.</span></div>
+    <div class="claim"><span class="k">A PERGUNTA</span><span>Se explicássemos isto a um cliente de São Paulo que recebeu com três dias de atraso e nunca foi avisado, ele aceitaria a explicação? É esse o teste, e hoje falhamos nele.</span></div>
     <div class="pagenum">14</div>
   </section>
 
   <!-- ============ 15 · BLOCO 6 ============ -->
-  <section class="slide dense" data-title="6 · A decisão">
+  <section class="slide dense" data-title="6 · A decisão" data-core="1">
     <div class="eyebrow"><b>Bloco 6 · a configuração da decisão</b><span class="q">dentro do sistema, quem decide o quê?</span></div>
     <h2>Um passo é automático, dois têm humano no circuito, e um nunca sai de mãos humanas.</h2>
     <div class="body">
@@ -1099,7 +1129,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 16 · FECHO ============ -->
-  <section class="slide cover" data-title="Fecho">
+  <section class="slide cover" data-title="Fecho" data-core="1">
     <div class="kicker">O que fica em branco — e é informação, não falha</div>
     <h1 style="font-size:4.2cqw;max-width:32ch">Isto não precisa de IA.<br>Precisa de um registo e de um dono.</h1>
     <div class="rule"></div>
@@ -1280,7 +1310,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 </div>
 </div>
 
-<div class="hint">← → navegam · G abre o índice · Esc fecha</div>
+<div class="hint">← → navegam · G abre o índice · Esc fecha · em laranja, o caminho de 5 minutos</div>
 
 <div class="overview" id="ov">
   <div class="hint" style="padding-top:0;padding-bottom:20px">Índice — clique para ir ao slide · Esc fecha</div>
@@ -1303,6 +1333,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
     b.className = 'ovcard';
     b.innerHTML = '<span class="n">' + String(n+1).padStart(2,'0') + '</span>' +
                   '<span class="t"></span>';
+    if (s.dataset.core) { b.classList.add('core'); }
     b.querySelector('.t').textContent = s.dataset.title || ('Slide ' + (n+1));
     b.addEventListener('click', function(){ go(n); closeOv(); });
     ovgrid.appendChild(b);
@@ -1318,7 +1349,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
     b.style.fontSize = '';
     var base = parseFloat(getComputedStyle(b).fontSize);
     if (!base) return;
-    for (var p = 0; p < 4 && b.scrollHeight > b.clientHeight + 1; p++){
+    for (var p = 0; p < 6 && b.scrollHeight > b.clientHeight + 1; p++){
       b.style.fontSize = (base * (1 - 0.02 * (p + 1))).toFixed(3) + 'px';
     }
   }
