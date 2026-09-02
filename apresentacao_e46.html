@@ -556,7 +556,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <!-- ============ 02 · BLOCO 1 ============ -->
   <section class="slide dense" data-title="1 · O objetivo" data-core="1">
     <div class="eyebrow"><b>Bloco 1 · O objetivo</b><span class="q">para que serve o sistema?</span></div>
-    <h2>Propósito: sinalizar, no instante da compra, os pedidos com risco de incumprimento do prazo prometido.</h2>
+    <h2>Avisar, no instante da compra, quais pedidos vão furar o prazo prometido.</h2>
     <div class="body">
       <div class="cols c2">
         <div>
@@ -595,7 +595,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <!-- ============ 03 · BLOCO 2 ============ -->
   <section class="slide dense" data-title="2 · As ações" data-core="1">
     <div class="eyebrow"><b>Bloco 2 · As ações</b><span class="q">o que é efetivamente executável?</span></div>
-    <h2>Três ações executáveis com o mandato e os sistemas actuais; duas fora do alcance da organização.</h2>
+    <h2>Três ações que dão para executar hoje. Duas que não dão — e por quê.</h2>
     <div class="body">
       <div class="cols c2">
         <div>
@@ -642,27 +642,27 @@ svg{display:block;width:100%;height:auto;overflow:visible}
               <tr class="hi"><td>quantos dias vai atrasar</td><td class="who">não</td></tr>
             </tbody>
           </table>
-          <p style="margin-top:1cqw">«Em parte» corresponde a AUC 0,72, instável — slide 11. O <strong>«não» da terceira linha</strong> delimita o alcance do sistema: sem <code>motivo_atraso</code>, ele sinaliza sem indicar a intervenção.</p>
+          <p style="margin-top:1cqw">«Em parte» é AUC 0,72, e instável — slide 11. O <strong>«não» da terceira linha</strong> delimita o sistema: sem o motivo, ele avisa sem dizer o que fazer.</p>
         </div>
         <div>
           <div class="lbl">3.1 · cada campo é a alegação de alguém</div>
           <table>
             <thead><tr><th>Campo</th><th>Quem, e que interesse tem</th></tr></thead>
             <tbody>
-              <tr class="hi"><td class="mono">dt_entrega</td><td>transportadora: é <em>medida</em> pelo prazo, e não registrar tira o pedido do denominador</td></tr>
-              <tr><td class="mono">dt_prazo</td><td>plataforma: prometer folgado protege o SLA e piora a conversão</td></tr>
-              <tr><td class="mono">peso_g</td><td>vendedor: peso menor pode baratear o frete que ele paga</td></tr>
-              <tr><td class="mono">cliente_cidade</td><td>cliente, a digitar: nenhum interesse — daí 12 grafias de «São Paulo»</td></tr>
+              <tr class="hi"><td class="who">A data de entrega</td><td>transportadora: é <em>medida</em> pelo prazo, e não registrar tira o pedido do denominador</td></tr>
+              <tr><td class="who">O prazo prometido</td><td>plataforma: prometer folgado protege o SLA e piora a conversão</td></tr>
+              <tr><td class="who">O peso do produto</td><td>vendedor: peso menor pode baratear o frete que ele paga</td></tr>
+              <tr><td class="who">A cidade do cliente</td><td>digitada por ele: nenhum interesse — daí 12 grafias de «São Paulo»</td></tr>
             </tbody>
           </table>
         </div>
         <div>
           <div class="lbl">3.2 · granularidade: o que uma linha representa</div>
           <ul class="tight">
-            <li><strong>Temporal:</strong> o dado é por evento; a decisão é em t0, um instante. <strong>Latência:</strong> as 14 features em t0, o rótulo <strong>10,2 dias</strong> depois.</li>
-            <li class="no"><strong>Espacial:</strong> cliente pelo centroide do <em>prefixo de CEP</em>, filial pelo da <em>cidade</em>. Granularidades distintas, e a distância herda a menos fina. Sem distância: 2,41%.</li>
-            <li><strong>De entidade:</strong> a linha é o pedido e a ação executa-se por pedido. Coincidem, evitando concluir por um agregado o que se decide por pedido.</li>
-            <li class="no"><strong>De atributo:</strong> <code>motivo_atraso</code> não existe. Detalhe que não foi registrado fino não se recupera depois.</li>
+            <li><strong>Temporal:</strong> o dado é por evento; a decisão é num instante. As 14 variáveis existem na compra; a resposta, <strong>10,2 dias</strong> depois.</li>
+            <li class="no"><strong>Espacial:</strong> o cliente entra pelo CEP, a filial pela cidade. Detalhes diferentes, e a distância herda o pior dos dois. Sem distância: 2,41%.</li>
+            <li><strong>De entidade:</strong> a linha é o pedido, e a ação também. Coincidem — é a única coisa que sai de graça aqui.</li>
+            <li class="no"><strong>De atributo:</strong> não existe campo de <strong>motivo do atraso</strong>. O que não foi registrado em detalhe não se recupera depois.</li>
           </ul>
         </div>
       </div>
@@ -674,7 +674,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <!-- ============ 05 · ANTES DA CURADORIA ============ -->
   <section class="slide dense" data-title="Antes · o diagnóstico">
     <div class="eyebrow"><b>Bloco 3.4 · antes</b><span class="q">o que estava errado, e quanto custava</span></div>
-    <h2>Sete dimensões avaliadas: média de 2,0 em 5, com degradação monótona na origem do registro.</h2>
+    <h2>Sete dimensões avaliadas: média de 2,0 em 5. E a qualidade piora com quem registra menos.</h2>
     <div class="body">
       <div class="cols c2w">
         <div>
@@ -682,7 +682,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
             <thead><tr><th>Dimensão</th><th class="num">nota</th><th>A evidência que a define</th></tr></thead>
             <tbody>
               <tr><td>Completude</td><td class="num">2/5</td><td>2 965 pedidos sem data de entrega; <strong>2 346 não cancelados</strong></td></tr>
-              <tr><td>Unicidade</td><td class="num">2/5</td><td><strong>261 831</strong> linhas duplicadas exatas em <code>geolocation</code> (26,2%)</td></tr>
+              <tr><td>Unicidade</td><td class="num">2/5</td><td><strong>261 831</strong> linhas duplicadas na geolocalização (26,2%)</td></tr>
               <tr class="hi"><td>Consistência</td><td class="num">1/5</td><td><strong>12 grafias</strong> de «São Paulo» em 176 971 linhas</td></tr>
               <tr><td>Validade</td><td class="num">3/5</td><td>23 entregas <em>antes</em> da coleta; 1 350 despachos antes da aprovação</td></tr>
               <tr><td>Exatidão</td><td class="num">2/5</td><td>lead até 210 dias (mediana 10,2); 73 fretes &gt; 3× a mercadoria</td></tr>
@@ -752,60 +752,45 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <!-- ============ 07 · BLOCO 3.4 ============ -->
   <section class="slide dense" data-title="3.4 · Curadoria" data-core="1">
     <div class="eyebrow"><b>Bloco 3.4 · Curadoria</b><span class="q">o número antes e depois de cada regra</span></div>
-    <h2>Nenhum pedido é removido. Três exclusões existem, e estão todas no derivado.</h2>
+    <h2>Nenhum pedido foi removido. As três exclusões que existem estão no cálculo geográfico.</h2>
     <div class="body">
-      <div class="cols c3">
+      <div class="cols c2w">
         <div>
-          <div class="lbl">Atraso com e sem cada regra · n = 98 816</div>
+          <div class="lbl">O que cada regra faz ao indicador · 98 816 pedidos</div>
           <table>
-            <thead><tr><th>Regra (flag)</th><th class="num">n</th><th class="num">com</th><th class="num">sem</th></tr></thead>
+            <thead><tr><th>Pedidos marcados por</th><th class="num">quantos</th><th class="num">com</th><th class="num">sem</th></tr></thead>
             <tbody>
-              <tr><td class="mono">sem_dt_entrega</td><td class="num">2 346</td><td class="num">100,0%</td><td class="num">8,1%</td></tr>
-              <tr><td class="mono">sem_dt_coleta</td><td class="num">1 233</td><td class="num">100,0%</td><td class="num">9,2%</td></tr>
-              <tr><td class="mono">sem_item</td><td class="num">611</td><td class="num">100,0%</td><td class="num">9,7%</td></tr>
-              <tr><td class="mono">sem_peso</td><td class="num">627</td><td class="num">97,5%</td><td class="num">9,7%</td></tr>
-              <tr class="hi"><td class="mono">lag_despacho_neg.</td><td class="num">1 359</td><td class="num">3,1%</td><td class="num">10,4%</td></tr>
-              <tr class="hi"><td class="mono">frete_zero</td><td class="num">338</td><td class="num">4,7%</td><td class="num">10,3%</td></tr>
+              <tr><td>não ter data de entrega</td><td class="num">2 346</td><td class="num">100,0%</td><td class="num">8,1%</td></tr>
+              <tr><td>não ter data de coleta</td><td class="num">1 233</td><td class="num">100,0%</td><td class="num">9,2%</td></tr>
+              <tr><td>não ter item registrado</td><td class="num">611</td><td class="num">100,0%</td><td class="num">9,7%</td></tr>
+              <tr><td>não ter peso do produto</td><td class="num">627</td><td class="num">97,5%</td><td class="num">9,7%</td></tr>
+              <tr class="hi"><td>despacho antes da aprovação</td><td class="num">1 359</td><td class="num">3,1%</td><td class="num">10,4%</td></tr>
+              <tr class="hi"><td>frete igual a zero</td><td class="num">338</td><td class="num">4,7%</td><td class="num">10,3%</td></tr>
             </tbody>
             <tfoot><tr><td>SLA reportado → honesto</td><td class="num">2 346</td><td class="num">8,11%</td><td class="num">10,29%</td></tr></tfoot>
           </table>
-          <p style="margin-top:1cqw">As quatro primeiras são <strong>tautológicas</strong>: excluí-las produz o SLA de 8,11%. Nas duas destacadas o sinal <strong>inverte</strong> — excluí-las reduziria o KPI a 3,1%.</p>
+          <p style="margin-top:1.2cqw">As quatro primeiras são <strong>circulares</strong>: a marca <em>é</em> a ausência do registro, e tirá-las produz o SLA de 8,11%. Nas duas destacadas o sinal <strong>inverte</strong> — são pedidos que não atrasaram, e tirá-las derrubaria o indicador para 3,1%.</p>
         </div>
         <div>
-          <div class="lbl">As três exclusões que existem</div>
+          <div class="lbl">As três exclusões, e onde estão</div>
           <table>
-            <thead><tr><th>Etapa, em <code>geolocation</code></th><th class="num">linhas</th></tr></thead>
+            <thead><tr><th>Onde</th><th class="num">antes</th><th class="num">depois</th></tr></thead>
             <tbody>
-              <tr><td>bruto</td><td class="num">1 000 163</td></tr>
-              <tr class="hi"><td>− duplicados exatos</td><td class="num">−261 831</td></tr>
-              <tr class="hi"><td>− fora dos limites do Brasil</td><td class="num">−38</td></tr>
-              <tr><td>= centroides por prefixo de CEP</td><td class="num">19 010</td></tr>
+              <tr class="hi"><td>Duplicados na geolocalização</td><td class="num">1 000 163</td><td class="num">−261 831</td></tr>
+              <tr class="hi"><td>Pontos fora do Brasil</td><td class="num">—</td><td class="num">−38</td></tr>
+              <tr><td>Grafias de cidade</td><td class="num">8 126</td><td class="num">6 066</td></tr>
             </tbody>
           </table>
-          <table style="margin-top:1cqw">
-            <thead><tr><th>Grafias de cidade</th><th class="num">valor</th></tr></thead>
-            <tbody>
-              <tr><td>na entrada</td><td class="num">8 126</td></tr>
-              <tr class="hi"><td>canônicas na saída</td><td class="num">6 066</td></tr>
-              <tr><td>suspeitas, <strong>não</strong> unidas</td><td class="num">73</td></tr>
-            </tbody>
-          </table>
-          <p style="margin-top:1cqw">São exclusões de fato, fora da tabela principal: estão no <em>derivado</em> geográfico. Os 38 pontos ficam preservados em <code>geolocation_fora_br.csv</code> — excluídos do cálculo, não apagados.</p>
-        </div>
-        <div>
-          <div class="lbl">As onze regras, nas quatro categorias</div>
-          <ul class="tight">
-            <li><strong>Limpeza (4):</strong> peso ≤ 0 → nulo, com o original preservado; grafias colapsadas; <code>SEM_FILIAL</code> para pedido sem vendedor; UF conferida contra o CEP <em>sem</em> sobrescrever.</li>
-            <li class="no"><strong>Exclusão (2):</strong> as duas da coluna ao lado.</li>
-            <li class="yes"><strong>Marcação em vez de exclusão (4):</strong> quarentena, grafia suspeita, quase-duplicado e implausibilidade — marcados, nunca corrigidos.</li>
-            <li><strong>Definição de KPI (1):</strong> <code>atraso_honesto</code>, com todos os ativos no denominador.</li>
-            <li><strong>Imputação: nenhuma.</strong> Sendo a ausência <strong>MNAR</strong>, a mediana construiria um pedido normal a partir de um que falhou.</li>
+          <ul class="tight" style="margin-top:1.2cqw">
+            <li class="yes"><strong>Nenhuma linha sai da tabela de pedidos.</strong> As três exclusões são no cálculo geográfico. Os 38 pontos ficam guardados à parte, e 73 grafias suspeitas não foram unidas: não eram nossas para decidir.</li>
+            <li><strong>Onze regras, quatro tipos:</strong> limpar (4), excluir (2), marcar em vez de excluir (4) e definir o indicador (1).</li>
+            <li class="no"><strong>Imputação: nenhuma.</strong> A ausência não é aleatória — falta <em>porque</em> correu mal, e preencher construiria um pedido normal a partir de um que falhou.</li>
+            <li class="no"><strong>Dono das onze: o mesmo.</strong> Não falta dono — há um só, e não é a operação.</li>
           </ul>
-          <p style="color:var(--stop);margin-top:1cqw">Dono das onze: <strong>o mesmo</strong>. Não falta dono — há um só, e não é a operação.</p>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">OS TRÊS DEFEITOS</span><span>Do slide 05: o nº 1 (datas ausentes) virou o denominador honesto, +2,18 p.p.; o nº 2 (duplicação) virou a exclusão de 261 831 linhas antes do centroide; o nº 3 (grafias) virou 8 126 → 6 066, com 73 casos deixados em aberto por não serem nossos para decidir.</span></div>
+    <div class="claim"><span class="k">OS TRÊS DEFEITOS</span><span>Do slide 05: as datas ausentes viraram o denominador honesto, +2,18 p.p.; a duplicação virou a exclusão de 261 831 linhas antes do cálculo; as grafias viraram 8 126 → 6 066, com 73 casos deixados em aberto.</span></div>
     <div class="pagenum">07</div>
   </section>
 
@@ -825,7 +810,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
               <tr><td class="mono">PR</td><td class="num">7 385</td><td class="num">8,35%</td></tr>
               <tr class="hi"><td class="mono">MA</td><td class="num">358</td><td class="num">25,42%</td></tr>
               <tr><td class="mono">PE</td><td class="num">396</td><td class="num">5,05%</td></tr>
-              <tr class="hi"><td class="mono">SEM_FILIAL</td><td class="num">610</td><td class="num">100,00%</td></tr>
+              <tr class="hi"><td class="mono">sem filial</td><td class="num">610</td><td class="num">100,00%</td></tr>
             </tbody>
             <tfoot><tr><td>MA contra PE (≥300 pedidos)</td><td class="num">—</td><td class="num">5,0×</td></tr></tfoot>
           </table>
@@ -863,14 +848,14 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">DENOMINADOR</span><span>SEM_FILIAL não designa uma filial: são os 610 pedidos sem vendedor registrado, preservados pela curadoria para não desaparecerem na agregação. O atraso de 100% decorre da construção, não da observação.</span></div>
+    <div class="claim"><span class="k">DENOMINADOR</span><span>«Sem filial» não é uma filial: são os 610 pedidos sem vendedor registrado, que a curadoria preservou para não desaparecerem na soma. O atraso de 100% vem da construção, não da observação.</span></div>
     <div class="pagenum">08</div>
   </section>
 
   <!-- ============ 09 · CLUSTERIZAÇÃO ============ -->
   <section class="slide dense" data-title="Clusterização">
-    <div class="eyebrow"><b>Bloco 4.1 · segmentação</b><span class="q">alcance e limites da segmentação</span></div>
-    <h2>A segmentação identifica o regime de atraso, mas não é utilizável para o prever.</h2>
+    <div class="eyebrow"><b>Bloco 4.1 · segmentação</b><span class="q">o que o agrupamento mostrou, e o que não pode fazer</span></div>
+    <h2>O agrupamento encontrou onde está o atraso — e não serve para prevê-lo.</h2>
     <div class="body">
       <div class="cols c2w">
         <div>
@@ -885,28 +870,28 @@ svg{display:block;width:100%;height:auto;overflow:visible}
             </tbody>
           </table>
           <div class="lbl" style="margin-top:1.2cqw">Método e justificação</div>
-          <p>KMeans, <strong>k=5</strong> pelo menor Davies-Bouldin numa varredura de k=2 a 9. <code>log1p</code> + padronização. Frete e atraso <strong>fora</strong> das features: são o que se quer explicar, não agrupar. ARI médio <strong>0,9916</strong> em 4 réplicas a 80% — os grupos são estáveis.</p>
-          <p style="color:var(--stop)">Silhueta de <strong>0,2979</strong>, valor baixo, que se declara: trata-se de regimes em um contínuo e não de populações disjuntas. DBSCAN e clustering hierárquico não foram testados porque a silhueta já indica ausência de fronteira a identificar.</p>
+          <p><strong>Cinco grupos</strong>, escolhidos por varredura de 2 a 9. Frete e atraso ficam <strong>fora</strong> das variáveis: são o que se quer explicar, não agrupar. Os grupos são <strong>estáveis</strong> — repetindo em quatro amostras de 80%, saem praticamente iguais.</p>
+          <p style="color:var(--stop)">Mas a separação entre eles é <strong>fraca</strong>, e dizemos isso: são regimes num contínuo, não populações distintas. Não testámos outros algoritmos porque não há fronteira a encontrar.</p>
         </div>
         <div>
           <div class="lbl">Dois achados, e a consequência de cada um</div>
           <ul class="tight">
-            <li class="no"><strong>Cluster 1</strong> tem 59,14% de atraso contra 2–5% dos outros. Mas é definido por <code>lead_dias</code>, que só existe <em>depois</em> da entrega. É a descrição de entregas lentas, não a previsão delas — usá-lo em t0 seria fuga de dados. <strong>Por isso não entra no modelo.</strong></li>
-            <li class="no"><strong>Cluster 3</strong> é 70,43% de <code>quase_duplicado</code> — <strong>9,94×</strong> a taxa geral. Não é um segmento de mercado: é um defeito de registro com forma de segmento. Sem as flags <code>qa_</code> teria passado por descoberta.</li>
+            <li class="no"><strong>O grupo 1</strong> tem 59,14% de atraso contra 2–5% dos outros. Mas é definido pelo <em>tempo que a entrega levou</em> — que só se sabe depois dela. Descreve entregas lentas, não as prevê. <strong>Por isso não entra no modelo.</strong></li>
+            <li class="no"><strong>O grupo 3</strong> é 70,43% de pedidos quase-duplicados — <strong>9,94×</strong> a taxa geral. Não é um segmento de mercado: é um defeito de registro com forma de segmento. Sem as marcas de qualidade, teria passado por descoberta.</li>
           </ul>
           <div class="lbl" style="margin-top:1.2cqw">Contribuição da segmentação</div>
-          <p>Para <strong>eliminar</strong> uma via, não para abrir uma. Estabeleceu-se que a estrutura observável nos dados é <em>post hoc</em> e que a previsão em t0 tem de ser construída sem ela.</p>
+          <p>Para <strong>eliminar</strong> um caminho, não para abrir um. A estrutura que se vê nos dados só existe depois da entrega, e a previsão tem de ser construída sem ela.</p>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">TESTE DO ARTEFATO</span><span>O teste do artefato — enriquecimento de uma flag de qualidade igual ou superior a 2× a taxa geral no interior do cluster — distingue regime operacional de concentração de defeito de registro. Dois dos cinco clusters não o passam.</span></div>
+    <div class="claim"><span class="k">TESTE DO ARTEFATO</span><span>O teste: se uma marca de qualidade aparece num grupo com o dobro ou mais da taxa geral, o grupo é suspeito de ser defeito de registro em vez de segmento real. <strong>Dois dos cinco não passam.</strong></span></div>
     <div class="pagenum">09</div>
   </section>
 
   <!-- ============ 10 · BLOCO 4.1 LINHA DE BASE ============ -->
   <section class="slide dense" data-title="4.1 · Linha de base" data-core="1">
     <div class="eyebrow"><b>Bloco 4.1 · adequação</b><span class="q">contra o que isto é comparado?</span></div>
-    <h2>Sete candidatos avaliados no mesmo teste temporal; dois abaixo do desempenho aleatório.</h2>
+    <h2>Sete candidatos no mesmo teste. Dois ficam abaixo do acaso.</h2>
     <div class="body">
       <div class="cols c2w">
         <div>
@@ -918,21 +903,21 @@ svg{display:block;width:100%;height:auto;overflow:visible}
               <tr class="hi"><td>regra de corte único: prazo &lt; 15,2 d</td><td class="num">0,3227</td><td class="num">0,053</td></tr>
               <tr class="hi"><td>árvore de profundidade 3</td><td class="num">0,4856</td><td class="num">0,073</td></tr>
               <tr><td>taxa histórica por rota UF&gt;UF</td><td class="num">0,4912</td><td class="num">0,098</td></tr>
-              <tr><td>HistGB só com <code>prazo_prometido</code></td><td class="num">0,6274</td><td class="num">0,121</td></tr>
+              <tr><td>árvores impulsionadas, só o prazo</td><td class="num">0,6274</td><td class="num">0,121</td></tr>
               <tr><td>regressão logística</td><td class="num">0,7045</td><td class="num">0,166</td></tr>
               <tr><td>random forest, 300 árvores</td><td class="num">0,6980</td><td class="num">0,156</td></tr>
-              <tr><td><strong>HistGB, 14 variáveis em t0</strong></td><td class="num"><strong>0,7244</strong></td><td class="num"><strong>0,174</strong></td></tr>
+              <tr><td><strong>árvores impulsionadas, 14 variáveis</strong></td><td class="num"><strong>0,7244</strong></td><td class="num"><strong>0,174</strong></td></tr>
             </tbody>
           </table>
-          <p style="margin-top:1cqw">O modelo escolhido excede a regressão logística em <strong>2,0 p.p.</strong> de AUC. A margem não justifica, por si, um modelo menos interpretável; a justificação está no tratamento nativo de valores ausentes e variáveis categóricas, sem imputação nem dependência adicional.</p>
+          <p style="margin-top:1cqw">O escolhido ganha <strong>2,0 p.p.</strong> à regressão logística. A margem não justifica, por si, um modelo menos legível — justifica-se por lidar com valores ausentes e categorias sem precisar de preenchimento.</p>
         </div>
         <div>
           <div class="lbl">Descartados sem teste, com justificação</div>
           <ul class="tight">
-            <li class="no"><strong>Cluster como variável explicativa:</strong> depende de <code>lead_dias</code>, indisponível em t0. Constituiria fuga de dados.</li>
-            <li class="no"><strong>Rede neural:</strong> 97 mil observações, 14 variáveis tabulares. Sem ganho documentado sobre árvores impulsionadas neste regime, e com custo de interpretação superior.</li>
-            <li class="no"><strong>CatBoost / XGBoost:</strong> desempenho equivalente ao HistGB em dados tabulares desta dimensão, com uma dependência adicional em produção.</li>
-            <li class="no"><strong>SMOTE / reamostragem:</strong> o desequilíbrio de 6,5% trata-se por deslocamento do <em>limiar</em> segundo a matriz de custo, decisão de gestão explícita, e não por distorção da distribuição de treino, que a torna implícita.</li>
+            <li class="no"><strong>O grupo do agrupamento:</strong> depende do tempo que a entrega levou, que não se sabe na compra. Seria fuga.</li>
+            <li class="no"><strong>Rede neural:</strong> 97 mil linhas e 14 colunas. Sem ganho conhecido sobre árvores neste tamanho, e mais difícil de explicar.</li>
+            <li class="no"><strong>Outras bibliotecas de árvores:</strong> desempenho igual neste tamanho, com mais uma dependência para manter.</li>
+            <li class="no"><strong>Reequilibrar a amostra:</strong> o desequilíbrio de 6,5% trata-se movendo o <em>limiar</em>, que é uma decisão de gestão visível — não distorcendo o treino, que a esconde.</li>
           </ul>
         </div>
       </div>
@@ -968,11 +953,11 @@ svg{display:block;width:100%;height:auto;overflow:visible}
             <tbody>
               <tr><td>split temporal, só t0 <em>(o nosso)</em></td><td class="num">0,7244</td><td class="num">—</td></tr>
               <tr class="hi"><td>split <strong>aleatório</strong></td><td class="num">0,7762</td><td class="num">+5,2</td></tr>
-              <tr class="hi"><td>+ <code>qa_sem_dt_entrega</code></td><td class="num">0,8066</td><td class="num">+8,2</td></tr>
-              <tr class="hi"><td>+ <code>lead_dias</code></td><td class="num">0,9928</td><td class="num">+26,8</td></tr>
+              <tr class="hi"><td>+ a marca de data ausente</td><td class="num">0,8066</td><td class="num">+8,2</td></tr>
+              <tr class="hi"><td>+ o tempo que a entrega levou</td><td class="num">0,9928</td><td class="num">+26,8</td></tr>
             </tbody>
           </table>
-          <p style="margin-top:1.1cqw">As três últimas configurações produzem resultados <strong>não apresentáveis como desempenho</strong>. Constam aqui para dimensionar o desempenho aparente obtido por fuga de dados: AUC de 0,99 com uma variável que só existe após a entrega.</p>
+          <p style="margin-top:1.1cqw">As três últimas são resultados que <strong>não temos direito de apresentar</strong>. Estão aqui para medir quanto desempenho aparente se compra com fuga de dados: <strong>0,99</strong> com uma variável que só existe depois da entrega.</p>
         </div>
       </div>
     </div>
@@ -983,12 +968,12 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <!-- ============ 12 · CUSTO DO ERRO ============ -->
   <section class="slide dense" data-title="4.1 · Custo do erro" data-core="1">
     <div class="eyebrow"><b>Bloco 4.1 · adequação</b><span class="q">quanto custa cada tipo de erro?</span></div>
-    <h2>No limiar de custo mínimo, o ganho estimado é de R$ 9 827/ano — abaixo do limiar de viabilidade declarado.</h2>
+    <h2>O melhor limiar poupa R$ 9 827 por ano — abaixo do mínimo que declarámos como viável.</h2>
     <div class="body">
       <div class="cols c2w">
         <div>
           <div class="lbl">Parâmetros declarados, ausentes dos dados</div>
-          <p>Falso negativo, atraso não sinalizado: <strong>R$ 45</strong> (contato reativo e risco de perda do cliente). Falso positivo, alarme indevido: <strong>R$ 8</strong>. Constituem decisão de gestão, fixada pela diretoria.</p>
+          <p>Atraso não avisado: <strong>R$ 45</strong> (contato reativo e risco de perder o cliente). Alarme falso: <strong>R$ 8</strong>. São decisão de gestão, e é a diretoria que os fixa.</p>
           <table>
             <thead><tr><th class="num">limiar</th><th class="num">avisados</th><th class="num">recall</th><th class="num">precisão</th><th class="num">custo R$</th></tr></thead>
             <tbody>
@@ -1004,12 +989,12 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         <div>
           <div class="lbl">Interpretação</div>
           <ul class="tight">
-            <li class="no">O limiar de custo mínimo sinaliza <strong>300 de 18 961</strong> pedidos e capta <strong>7,4%</strong> dos atrasos. O ganho é de <strong>R$ 2 423</strong> em 90 dias, ou <strong>R$ 9 827/ano</strong>.</li>
-            <li class="no">O limiar que cumpriria a meta de recall do bloco 1 (0,05, com 91,6%) tem <strong>custo superior à inação</strong>: R$ 98 203 contra R$ 55 125. A meta e a matriz de custo são incompatíveis, e a revisão cabe à meta.</li>
+            <li class="no">O melhor limiar avisa <strong>300 de 18 961</strong> pedidos e apanha <strong>7,4%</strong> dos atrasos: <strong>R$ 2 423</strong> em 90 dias, ou <strong>R$ 9 827/ano</strong>.</li>
+            <li class="no">O limiar que cumpriria a meta do bloco 1 (91,6% de recall) <strong>custa mais do que não fazer nada</strong>: R$ 98 203 contra R$ 55 125. A meta e o custo são incompatíveis, e é a meta que está errada.</li>
             <li><strong>Contra o diagnóstico do E1.2:</strong> corrigir o registro das datas valia R$ 200 320/ano. O modelo vale 4,9% disso.</li>
           </ul>
           <div class="lbl" style="margin-top:1.2cqw">Conclusão</div>
-          <p>Uma regra determinística sobre as três filiais e os três destinos de pior desempenho, com dono atribuído, capta mais atraso por unidade de custo do que este modelo. <strong>A evidência não sustenta a adoção de um modelo preditivo.</strong></p>
+          <p>Uma regra sobre as três filiais e os três destinos piores, com dono, apanha mais atraso por real gasto do que este modelo. <strong>A evidência não sustenta adotar um modelo.</strong></p>
         </div>
       </div>
     </div>
@@ -1034,15 +1019,15 @@ svg{display:block;width:100%;height:auto;overflow:visible}
             </tbody>
             <tfoot><tr><td>amplitude do alvo em toda a janela</td><td class="num">—</td><td class="num">21,1 pp</td><td class="num">—</td></tr></tfoot>
           </table>
-          <p style="margin-top:1.1cqw">O atraso mensal varia entre <strong>2,21%</strong> e <strong>23,35%</strong>: a média da janela não descreve nenhum dos seus meses, e o poder discriminante decresce à medida que o atraso aumenta.</p>
-          <p>A componente «vencido sem registro» situa-se entre 0,86% e 3,43% desde 2017-05, sem tendência: <strong>a volatilidade é operacional, não de registro</strong>.</p>
+          <p style="margin-top:1.1cqw">O atraso mensal varia entre <strong>2,21%</strong> e <strong>23,35%</strong>: a média não descreve nenhum mês, e o modelo distingue pior justamente quando há mais atraso.</p>
+          <p>A parte «vencido sem registro» fica entre 0,86% e 3,43% desde 2017, sem tendência: <strong>a volatilidade é da operação, não do registro</strong>.</p>
         </div>
         <div>
           <div class="lbl">Responsabilidade e cadência</div>
           <ul class="tight">
-            <li><strong>Dono do sistema:</strong> Gerente de Operações, que responde pelo recall na reunião mensal. O <em>KPI</em> é do Diretor de Operações (bloco 1).</li>
+            <li><strong>Dono do sistema:</strong> Gerente de Operações, que responde por ele na reunião mensal. O <em>indicador</em> é do Diretor (bloco 1).</li>
             <li><strong>Revalidação mensal</strong>, cadência máxima: o rótulo só existe 10,2 dias após a compra na mediana, e 46 no p99.</li>
-            <li><strong>Monitor de deriva:</strong> taxa de atraso mensal e distribuição de <code>prazo_prometido_dias</code>, cuja alteração produziu o sinal espúrio.</li>
+            <li><strong>Monitor de deriva:</strong> a taxa de atraso mensal e a distribuição dos prazos prometidos — foi esta que mudou e produziu o sinal falso.</li>
           </ul>
           <div class="lbl" style="margin-top:1.2cqw">Portões de decisão, com data</div>
           <ul class="tight">
@@ -1102,7 +1087,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <!-- ============ 15 · BLOCO 5 · AFETADOS E RECURSO ============ -->
   <section class="slide dense" data-title="5 · A ética · afetados" data-core="1">
     <div class="eyebrow"><b>Bloco 5 · a ética, nesta aplicação</b><span class="q">quem é afetado e não está nesta sala?</span></div>
-    <h2>Quatro grupos carregam consequência, e nenhum deles participou da especificação.</h2>
+    <h2>Quatro grupos carregam a consequência, e nenhum deles participou da decisão.</h2>
     <div class="body">
       <div class="cols c3">
         <div>
@@ -1112,7 +1097,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
             <tbody>
               <tr class="hi"><td class="who">Cliente urbano de pequeno vendedor</td><td>maior atraso (12,64%) e menor recall (0,4%)</td></tr>
               <tr class="hi"><td class="who">O vendedor pequeno</td><td>notificado pela folga curta — e registra pior: <strong>4,40%</strong> sem data contra 1,34% do grande</td></tr>
-              <tr><td class="who">Transportadora e motorista</td><td>produzem <code>dt_entrega</code> e são medidos por ela, sem escolher o denominador</td></tr>
+              <tr><td class="who">Transportadora e motorista</td><td>produzem a data de entrega e são medidos por ela, sem escolher o denominador</td></tr>
               <tr><td class="who">A expedição</td><td>fila reordenada por um score que não pode contestar</td></tr>
             </tbody>
           </table>
@@ -1146,7 +1131,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <!-- ============ 16 · BLOCO 6 ============ -->
   <section class="slide dense" data-title="6 · A decisão" data-core="1">
     <div class="eyebrow"><b>Bloco 6 · a configuração da decisão</b><span class="q">dentro do sistema, quem decide o quê?</span></div>
-    <h2>Dois passos automáticos, dois com decisão humana e um vedado à automação.</h2>
+    <h2>Dois passos automáticos, dois com decisão humana, e um que nunca será automático.</h2>
     <div class="body">
       <table>
         <thead><tr><th>Passo do fluxo</th><th>Propõe</th><th>Decide</th><th>Reverte</th><th class="num">Prazo</th></tr></thead>
@@ -1155,7 +1140,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <tr><td>Reordenar a fila de expedição</td><td class="mono">modelo</td><td class="who">expedição</td><td>supervisor</td><td class="num">mesmo dia</td></tr>
           <tr class="hi"><td>Notificar o cliente do atraso</td><td class="mono">modelo, acima de 0,30</td><td class="who">automático</td><td><strong>sem revisão</strong></td><td class="num">—</td></tr>
           <tr><td>Notificar o vendedor</td><td class="mono">modelo agregado</td><td class="who">gestão de sellers</td><td>gerente</td><td class="num">7 dias</td></tr>
-          <tr><td>Publicar o SLA da filial</td><td class="mono">script curado</td><td class="who">diretoria</td><td>—</td><td class="num">nunca automático</td></tr>
+          <tr><td>Publicar o SLA da filial</td><td class="mono">TI</td><td class="who">diretoria</td><td>—</td><td class="num">nunca automático</td></tr>
         </tbody>
       </table>
       <div class="cols c2" style="margin-top:1.4cqw">
@@ -1163,14 +1148,14 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <div class="lbl">Fronteiras mal especificadas</div>
           <ul class="tight">
             <li class="no">A notificação ao cliente é <strong>automática e irreversível</strong>. A 30,3% de precisão, <strong>7 de cada 10 notificações são indevidas</strong>.</li>
-            <li class="no">O erro do modelo <strong>não é detectado</strong>: não existe monitor de recall em produção, e a falha só se manifesta na revalidação mensal, 30 dias depois.</li>
+            <li class="no">Quando o modelo erra, <strong>ninguém percebe</strong>: não há monitor em produção, e a falha só aparece na revisão mensal, 30 dias depois.</li>
           </ul>
         </div>
         <div>
           <div class="lbl">Justificação de cada fronteira</div>
           <ul class="tight">
             <li>O score é automático por ser interno e reversível até o despacho.</li>
-            <li>A publicação do SLA <strong>nunca</strong> é automática: a escolha do denominador determina a atribuição de responsabilidade, e exige autor identificado.</li>
+            <li>A publicação do SLA <strong>nunca</strong> é automática: escolher o denominador é escolher quem responde, e isso precisa de autor.</li>
             <li class="yes">Correção imediata: submeter o aviso ao cliente a um decisor humano com informação, prazo e autoridade para recusar. Sem as três condições, a supervisão é apenas nominal.</li>
           </ul>
         </div>
@@ -1186,7 +1171,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
     <h1 style="font-size:3.9cqw;max-width:34ch">A evidência não sustenta<br>um modelo preditivo. Sustenta<br>uma regra, um registro e um dono.</h1>
     <div class="rule"></div>
     <div class="meta" style="font-size:1.16cqw">
-      <div><span>Em branco</span><code>motivo_atraso</code> não existe em<br>base nenhuma. Sem ele não se sabe<br><em>por que</em> a entrega atrasou.</div>
+      <div><span>Em branco</span>Não existe registro do <strong>motivo</strong><br>do atraso em base nenhuma. Sem ele<br>não se sabe <em>por que</em> atrasou.</div>
       <div><span>Em branco</span>O custo real de um atraso: usámos<br>R$ 45 declarado. Toda a conclusão<br>económica pende desse número.</div>
       <div><span>Próximo passo</span>Registar o motivo de atraso, publicar<br>o SLA honesto, e decidir se R$ 9,8 mil<br>por ano paga manter um modelo.</div>
     </div>
@@ -1221,7 +1206,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <!-- ============ 19 · PLUS · O FLUXO ============ -->
   <section class="slide dense" data-title="Plus · O fluxo">
     <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">do recebimento à resposta</span></div>
-    <h2>Dez desfechos explicitados, cada um com a ação correspondente.</h2>
+    <h2>Dez desfechos, cada um com a ação que dispara.</h2>
     <div class="body">
       <div class="cols c2w">
         <div>
@@ -1232,7 +1217,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
               <tr><td>não é cotação</td><td>arquiva, sem resposta</td></tr>
               <tr class="hi"><td>confiança &lt; 0,35</td><td>fila de revisão humana</td></tr>
               <tr><td>rota fora da planilha</td><td>responde «não atendemos»</td></tr>
-              <tr class="hi"><td>rota existe, tarifa vencida</td><td>«em análise» + revisão — é falha de cadastro, <strong>não ausência de rota</strong></td></tr>
+              <tr class="hi"><td>rota existe, tarifa vencida</td><td>«em análise» — é falha de cadastro, <strong>não ausência de rota</strong></td></tr>
               <tr><td>rota em quarentena</td><td>«em análise» + motivo</td></tr>
               <tr><td>dados incompletos</td><td>solicita apenas o campo ausente</td></tr>
               <tr class="hi"><td>completo, confiança &lt; 0,60</td><td>revisão: não emite preço</td></tr>
@@ -1249,18 +1234,18 @@ svg{display:block;width:100%;height:auto;overflow:visible}
             <li class="no"><strong>Tarifa vencida não equivale a «não atendemos».</strong> Comunicar isso por cadastro desatualizado seria descrever incorretamente a operação; o caso segue para revisão.</li>
           </ul>
           <div class="lbl" style="margin-top:1.3cqw">Auditoria</div>
-          <p>Cada mensagem processada grava em SQLite a extração, o desfecho, a tarifa integral em <code>tarifa_json</code> e a versão do modelo. Garante idempotência — a mesma mensagem não é respondida duas vezes — e permite reconstruir qualquer valor enviado.</p>
+          <p>Cada mensagem processada fica gravada com o que foi extraído, o desfecho, a tarifa inteira e a versão do modelo. Serve para não responder duas vezes à mesma mensagem, e para reconstruir qualquer valor enviado meses depois.</p>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">OBSERVABILIDADE</span><span>Cada desfecho corresponde a uma etiqueta na caixa de correio: <code>cotador-processado</code>, <code>cotador-revisar</code>, <code>cotador-sem-rota</code>, <code>cotador-aguardando-dados</code>. O estado do agente é inspecionável sem acesso ao código.</span></div>
+    <div class="claim"><span class="k">OBSERVABILIDADE</span><span>Cada desfecho põe uma etiqueta na própria caixa de correio — processado, para revisar, sem rota, aguardando dados. O estado do agente lê-se de dentro do Gmail, sem abrir o código.</span></div>
     <div class="pagenum">19</div>
   </section>
 
   <!-- ============ 20 · PLUS · AS DECISÕES ============ -->
   <section class="slide dense" data-title="Plus · As decisões">
-    <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">as três decisões de desenho determinantes</span></div>
-    <h2>Dois limiares de confiança, justificados pela assimetria de custo dos dois erros.</h2>
+    <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">as três decisões que mais pesaram</span></div>
+    <h2>Dois limiares de confiança, porque os dois erros não custam o mesmo.</h2>
     <div class="body">
       <div class="cols c3">
         <div>
@@ -1272,13 +1257,13 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         <div>
           <div class="lbl">2 · Memória da thread</div>
           <p>O cliente responde apenas o campo ausente — «valor da nota R$ 200» — e o histórico citado é removido antes do envio ao LLM.</p>
-          <p>O agente recupera do SQLite a última extração da mesma <code>thread_id</code> e faz a fusão: <strong>a informação mais recente prevalece</strong>, os campos vazios herdam o valor anterior, e a confiança é o <strong>máximo</strong> das duas.</p>
-          <p style="color:var(--stop)">Sem este mecanismo o agente solicitaria indefinidamente os mesmos dados e nenhuma cotação se concluiria. Foi o defeito de detecção mais custosa.</p>
+          <p>O agente recupera a última extração <strong>da mesma conversa</strong> e junta as duas: o que o cliente acabou de dizer prevalece, os campos vazios herdam o valor anterior, e a confiança é a maior das duas.</p>
+          <p style="color:var(--stop)">Sem isto o agente pediria os mesmos dados para sempre e nenhuma cotação fecharia. Foi o defeito mais difícil de encontrar.</p>
         </div>
         <div>
           <div class="lbl">3 · A tabela delimita o que o modelo não sabe</div>
-          <p>O modelo estima o <em>preço</em>. A tabela no Google Sheets define <strong>cobertura, modal, prazo e restrições</strong>.</p>
-          <p>Apenas rotas com <code>STATUS=ATIVO</code> dentro da janela de vigência são cotadas. Existindo rodoviário e aéreo no mesmo trecho, prevalece o modal solicitado; na ausência de indicação, o rodoviário.</p>
+          <p>O modelo estima o <em>preço</em>. A planilha define <strong>cobertura, modal, prazo e restrições</strong>.</p>
+          <p>Só rotas <strong>ativas e dentro da vigência</strong> são cotadas. Havendo rodoviário e aéreo no mesmo trecho, vale o que o cliente pediu; sem pedido, o rodoviário.</p>
           <p>Um modelo de preço não determina se a operação atende Manaus. A tabela é que o determina, e é a tabela que tem dono.</p>
         </div>
       </div>
@@ -1289,58 +1274,58 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 
   <!-- ============ 21 · PLUS · O MODELO DE PREÇO ============ -->
   <section class="slide dense" data-title="Plus · O modelo de preço">
-    <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">estimação por quantis, não por média</span></div>
-    <h2>Três estimadores quantílicos; o valor comunicado ao cliente é a mediana condicional.</h2>
+    <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">por que o preço não é uma média</span></div>
+    <h2>Três modelos estimam o preço. O cliente recebe o do meio.</h2>
     <div class="body">
       <div class="cols c2w">
         <div>
           <div class="lbl">O desenho</div>
           <ul class="tight">
-            <li>Uma linha = <code>order_id + seller_id</code>: um embarque com uma origem, um destino e uma ou mais unidades. Alvo: a soma de <code>freight_value</code>.</li>
-            <li>Features: distância, peso total, quantidade, valor declarado, mês, as duas UFs, rota, mesma-UF e perfil capital/interior.</li>
-            <li><strong>Três CatBoosts quantílicos</strong> estimam P25, P50 e P75; <strong>o P50 é o valor enviado.</strong> Um único modelo de média produziria estimativa pontual sem intervalo, e sem intervalo não há critério para suspender a decisão.</li>
-            <li>Um <strong>IsolationForest sem a variável preço</strong> detecta carga fora do domínio. Nesses casos o agente não emite valor e encaminha para revisão humana.</li>
+            <li>Uma linha é <strong>um embarque</strong> — pedido mais vendedor, com uma origem, um destino e uma ou mais unidades. O alvo é o frete cobrado.</li>
+            <li>Variáveis: distância, peso, quantidade, valor declarado, mês, as duas UFs, rota, mesma-UF e capital/interior.</li>
+            <li><strong>Três modelos</strong> estimam o preço baixo, o do meio e o alto; <strong>o do meio é o enviado.</strong> Um modelo de média daria um número sem intervalo — e sem intervalo não há critério para desconfiar.</li>
+            <li>Um detector de anomalia, <strong>sem olhar o preço</strong>, identifica carga fora do que o histórico cobre. Nesses casos o agente não cota: manda para revisão.</li>
           </ul>
           <div class="lbl" style="margin-top:1.2cqw">Treino</div>
-          <p>97 311 embarques · 70% treino, 15% calibração, <strong>15% teste temporal</strong>. A inferência usa os artefatos em <code>modelos/olist/atual/</code> e não depende do ZIP original.</p>
+          <p>97 311 embarques · 70% treino, 15% calibração, <strong>15% teste temporal</strong>. Em produção o modelo lê arquivos salvos em disco, sem depender da base original.</p>
         </div>
         <div>
-          <div class="lbl">Resultado e suas limitações</div>
+          <div class="lbl">O resultado, e o que ele não diz</div>
           <table>
             <thead><tr><th>métrica</th><th class="num">valor</th></tr></thead>
             <tbody>
-              <tr><td>MAE do P50</td><td class="num">R$ 5,62</td></tr>
-              <tr><td>mediana absoluta</td><td class="num">R$ 2,11</td></tr>
-              <tr><td>mediana percentual</td><td class="num">12,10%</td></tr>
-              <tr class="hi"><td>cobertura P25–P75</td><td class="num">47,42%</td></tr>
+              <tr><td>erro médio do preço enviado</td><td class="num">R$ 5,62</td></tr>
+              <tr><td>erro na metade dos casos</td><td class="num">R$ 2,11</td></tr>
+              <tr><td>erro percentual mediano</td><td class="num">12,10%</td></tr>
+              <tr class="hi"><td>casos dentro do intervalo</td><td class="num">47,42%</td></tr>
               <tr><td>tabela rota × faixa de peso</td><td class="num">R$ 7,95</td></tr>
             </tbody>
             <tfoot><tr><td>ganho sobre a tabela</td><td class="num">29%</td></tr></tfoot>
           </table>
-          <p style="margin-top:1.1cqw">A cobertura empírica é de <strong>47,42%</strong> contra 50% nominais. Reporta-se o valor observado, em vez da qualificação «bem calibrado».</p>
-          <p style="color:var(--stop)"><strong>Limitação do MAE:</strong> o frete da Olist é o valor <em>cobrado pelo vendedor</em>, não o custo da operação. O modelo mede distância ao mercado, não margem. Precificar a operação exigiria uma base de custo própria, inexistente.</p>
+          <p style="margin-top:1.1cqw">O intervalo deveria conter metade dos casos e contém <strong>47,42%</strong>. Reportamos o número, em vez de dizer «bem calibrado».</p>
+          <p style="color:var(--stop)"><strong>O que este erro não é:</strong> o frete da Olist é o valor <em>cobrado pelo vendedor</em>, não o custo da operação. O modelo mede distância ao mercado, não margem. Precificar a operação exigiria uma base de custo própria, inexistente.</p>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">REVERSIBILIDADE</span><span>A fórmula tabelar permanece no código (<code>PRECIFICADOR=tabela</code>): volumes × valor, pedágio, frete mínimo, GRIS e ad valorem. A existência de um caminho de reversão é requisito de entrada em produção.</span></div>
+    <div class="claim"><span class="k">REVERSIBILIDADE</span><span>A fórmula de tabela continua no código, atrás de uma chave de configuração: volumes × valor, pedágio, frete mínimo, GRIS e ad valorem. Ter caminho de volta é requisito para entrar em produção.</span></div>
     <div class="pagenum">21</div>
   </section>
 
   <!-- ============ 22 · PLUS · O QUE FALTA ============ -->
   <section class="slide dense" data-title="Plus · Quarentena e o que falta">
     <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">curadoria da tabela de tarifas</span></div>
-    <h2>A mesma disciplina de curadoria aplicada à tabela de tarifas, de edição manual.</h2>
+    <h2>A mesma disciplina da base curada, aplicada à planilha que o comercial edita à mão.</h2>
     <div class="body">
       <div class="cols c2w">
         <div>
           <div class="lbl">Curadoria da tabela de tarifas</div>
           <ul class="tight">
-            <li>Uma rota só é cotada com <code>STATUS=ATIVO</code> e dentro de <code>VIGENCIA_INICIO..VIGENCIA_FIM</code>. Tarifa fora de vigência não é tarifa válida.</li>
-            <li>Linha com valor implausível segue para <strong>quarentena</strong> e o cliente recebe «em análise» com o motivo, em vez de um valor incorreto ou de uma recusa de atendimento.</li>
-            <li class="yes">É a regra aplicada à base curada: <strong>marcar e reter, nunca corrigir sem registro</strong>. A diferença é que aqui o autor da linha é identificável e recebe o retorno.</li>
+            <li>Uma rota só é cotada se estiver <strong>ativa e dentro da vigência</strong>. Tarifa vencida não é tarifa.</li>
+            <li>Linha com valor implausível vai para <strong>quarentena</strong>, e o cliente recebe «em análise» com o motivo — não um valor errado nem uma recusa.</li>
+            <li class="yes">É a regra da base curada: <strong>marcar e segurar, nunca corrigir em silêncio</strong>. A diferença é que aqui o autor da linha é uma pessoa, e ela recebe o retorno.</li>
           </ul>
           <div class="lbl" style="margin-top:1.2cqw">A fila de revisão humana</div>
-          <p>Sete motivos agrupados, cada um enunciado em linguagem operacional: <em>tarifa em quarentena</em>, <em>tarifa vencida</em>, <em>peso acima do limite</em>, <em>fora do domínio histórico</em>, <em>modelo indisponível</em>, <em>confiança insuficiente para emitir preço</em>, <em>pedido não identificado</em>.</p>
+          <p>Sete motivos, cada um numa frase que uma pessoa entende: tarifa em quarentena, tarifa vencida, peso acima do limite, carga fora do histórico, modelo indisponível, confiança insuficiente, pedido não identificado.</p>
           <p>Um painel Flask expõe a fila. Sem esse painel, o encaminhamento para revisão humana seria apenas uma etiqueta sem leitor.</p>
         </div>
         <div>
@@ -1348,11 +1333,11 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <ul class="tight">
             <li class="no"><strong>Não há prazo de reversão definido.</strong> Emitido um valor incorreto, não está estabelecido em quanto tempo o comercial deve retificá-lo.</li>
             <li class="no"><strong>Não há alerta quando o agente erra.</strong> A fila mostra o que ele <em>não</em> respondeu, não o que respondeu mal.</li>
-            <li class="no"><strong>Não há controle de acesso ao SQLite.</strong> O acesso à máquina dá acesso ao conteúdo de todas as mensagens de clientes, que constitui dado pessoal.</li>
-            <li>Não há resposta a <code>noreply@</code> nem à própria conta — a única salvaguarda contra ciclos de resposta automática.</li>
+            <li class="no"><strong>Não há controle de acesso ao banco.</strong> Quem tem a máquina tem o conteúdo de todas as mensagens de clientes — que é dado pessoal.</li>
+            <li>Não há resposta a remetentes automáticos nem à própria conta — a única proteção contra um loop de robôs.</li>
           </ul>
           <div class="lbl" style="margin-top:1.2cqw">Limitação comum aos dois sistemas</div>
-          <p>O cotador e o preditor de atraso partilham a mesma limitação de fundo: <strong>medem o que a Olist registrou, não a operação em causa</strong>. O trabalho subsequente é o mesmo para ambos.</p>
+          <p>Os dois sistemas têm a mesma limitação de fundo: <strong>medem o que a Olist registrou, não a nossa operação</strong>. O próximo passo é o mesmo para ambos.</p>
         </div>
       </div>
     </div>
