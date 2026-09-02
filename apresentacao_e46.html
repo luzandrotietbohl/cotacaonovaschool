@@ -714,35 +714,38 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 06 · BLOCO 3.3 · RASTREABILIDADE ============ -->
-  <section class="slide dense" data-title="3.3 · Rastreabilidade" data-core="1">
+  <section class="slide" data-title="3.3 · Rastreabilidade" data-core="1">
     <div class="eyebrow"><b>Bloco 3.3 · Rastreabilidade</b><span class="q">de onde veio cada dado, e por onde passou?</span></div>
-    <h2>Cada arquivo tem hash: oito na entrada, seis na saída, e os parâmetros versionados.</h2>
+    <h2>Sabemos de onde veio cada número, e conseguimos provar.</h2>
     <div class="body">
       <div class="cols c2">
         <div>
-          <div class="lbl">De onde veio, e no que virou · Olist (Kaggle) → <code>dados_curados/v1</code></div>
-          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:1.14cqw;line-height:1.65;color:var(--ink-2)">
-            <div style="color:var(--muted);letter-spacing:.1em">ENTRADA · 8 ARQUIVOS · 1 550 851 LINHAS · <strong style="color:var(--accent)">kaggle.com/datasets/olistbr/brazilian-ecommerce</strong></div>
-            orders <strong>8df58ef3</strong> · order_items <strong>0bc4d068</strong> · customers <strong>983a4222</strong> · sellers <strong>1f643d2b</strong> · products <strong>3e656962</strong> · payments <strong>4f713964</strong> · geolocation <strong>b514f6fc</strong> · reviews <strong>012b61c7</strong>
-            <div style="color:var(--muted);letter-spacing:.1em;margin-top:1cqw">SAÍDA · 6 ARQUIVOS VERSIONADOS</div>
-            entregas_curado 99 441×56 <strong>1b4a4f4c</strong> · quarentena 1 391 <strong>5a08204c</strong> · geolocation_cep 19 010 <strong>1a4a7e10</strong> · cidades_mapa 8 617 <strong>85cfc8bd</strong> · cidades_suspeitas 73 <strong>1adbc223</strong> · fora_br 38 <strong>9b31390b</strong>
-          </div>
-          <p style="margin-top:1.3cqw">Entre as duas metades: quatro junções, uma agregação por <code>order_id</code> e o centroide de CEP pela <strong>mediana</strong> — decisão nossa, que protege dos <strong>261 831 duplicados</strong> do <code>geolocation</code> e apaga a variação dentro do prefixo (35,5 m na mediana, 504 prefixos acima de 1 km).</p>
-          <p>Os <strong>parâmetros</strong> ficam no <code>MANIFEST.json</code>: mudar um é uma <code>v2</code>.</p>
+          <div class="lbl">O caminho, de ponta a ponta</div>
+          <table>
+            <thead><tr><th>Etapa</th><th class="num">arquivos</th><th class="num">volume</th></tr></thead>
+            <tbody>
+              <tr><td>Entrada — Olist, público no Kaggle</td><td class="num">8</td><td class="num">1 550 851 linhas</td></tr>
+              <tr class="hi"><td>Saída — a nossa base curada <code>v1</code></td><td class="num">6</td><td class="num">99 441 pedidos</td></tr>
+            </tbody>
+          </table>
+          <p style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.85em;color:var(--accent);margin-top:.7cqw">kaggle.com/datasets/olistbr/brazilian-ecommerce</p>
+          <p style="margin-top:1.1cqw"><strong>Cada um dos catorze arquivos tem uma assinatura digital gravada.</strong> Se um byte mudar, a assinatura muda — e fica evidente que o número apresentado veio de outra base. É isso que torna a decisão contestável.</p>
+          <p>No meio: quatro junções, uma agregação por pedido e o centroide de CEP pela <strong>mediana</strong>. A mediana é decisão nossa: protege dos <strong>261 831 duplicados</strong> e, em troca, apaga a variação dentro do prefixo.</p>
+          <p>Os <strong>parâmetros</strong> ficam registrados junto com a base. Mudar um é uma <code>v2</code>, não um recálculo silencioso.</p>
         </div>
         <div>
           <div class="lbl">Dado pessoal e LGPD</div>
           <ul class="tight">
-            <li>O dataset Olist é <strong>público e pseudonimizado</strong>: nenhum nome, e-mail ou CPF. Base legal para o treino: <strong>art. 7.º, IX</strong> — legítimo interesse, sobre dado já tornado público pelo controlador de origem.</li>
-            <li class="no">Na nossa operação o dado pessoal é <strong>o CEP e a cidade do cliente</strong>: identificam pessoa natural. Base legal <strong>art. 7.º, V</strong> — execução de contrato, que é a própria entrega.</li>
-            <li class="no">O <strong>score de atraso é dado pessoal derivado</strong>. O <strong>art. 20</strong> dá ao titular direito a pedir revisão — e a exigência de que quem revê fosse pessoa natural <em>foi vetada</em>. Que haja humano no circuito é decisão nossa, não da lei.</li>
-            <li>Retenção declarada: <strong>24 meses</strong>, para auditar o SLA publicado. Depois, o art. 16 manda eliminar.</li>
-            <li class="no">Acesso: <strong>desde 2026-09-02</strong>, data da <code>v1</code>, a base está na máquina de quem a gerou — TI, 1 pessoa. Antes disso, ninguém: os CSV brutos são públicos. <strong>Não há controle de acesso</strong>, e é preciso dizê-lo.</li>
+            <li>O dataset Olist é <strong>público e pseudonimizado</strong>: sem nome, e-mail ou CPF. Base legal do treino: <strong>art. 7.º, IX</strong>.</li>
+            <li class="no">Na nossa operação, o dado pessoal é <strong>o CEP e a cidade do cliente</strong> — identificam pessoa natural. Base legal <strong>art. 7.º, V</strong>: execução do contrato, que é a própria entrega.</li>
+            <li class="no">O <strong>score de atraso é dado pessoal derivado</strong>. O art. 20 dá direito a pedir revisão, mas <em>não</em> obriga que quem revê seja uma pessoa. Ter humano no circuito é decisão nossa.</li>
+            <li>Retenção declarada: <strong>24 meses</strong>, para auditar o SLA publicado.</li>
+            <li class="no">Acesso hoje: <strong>uma pessoa da TI</strong>, desde 2026-09-02. Não há controle de acesso, e é preciso dizê-lo.</li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">AUDITABILIDADE</span><span>Rastrear é poder dizer de onde veio um número e por onde ele passou. O hash faz isso; a prosa não. Mas o nosso rastro só começa na <em>publicação</em>: do que houve entre o evento e o que a Olist publicou não há registro, e é o trecho que não podemos auditar.</span></div>
+    <div class="claim"><span class="k">O LIMITE</span><span>Rastrear é poder dizer de onde veio um número e por onde passou. Mas o nosso rastro só começa na <em>publicação</em>: do que houve entre a entrega acontecer e a Olist publicar o dado não há registro, e é o trecho que não podemos auditar.</span></div>
     <div class="pagenum">06</div>
   </section>
 
