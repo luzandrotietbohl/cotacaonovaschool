@@ -547,7 +547,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
     <div class="rule"></div>
     <div class="meta">
       <div><span>O sistema</span>Avisar, no instante da compra,<br>que uma entrega vai furar<br>o prazo prometido.</div>
-      <div><span>Os dados</span>97 358 pedidos Olist curados,<br>2016-09 a 2018-10, teste temporal<br>nos últimos 90 dias.</div>
+      <div><span>Os dados</span>Olist Brazilian E-Commerce,<br>público no Kaggle. 97 358 pedidos<br>curados, 2016-09 a 2018-10.</div>
       <div><span>Resultado principal</span>AUC 0,72 no teste temporal, sem<br>correspondência no treino: a associação<br>não foi aprendida. Ganho: R$ 9 827/ano.</div>
     </div>
     <div class="pagenum">01</div>
@@ -720,15 +720,15 @@ svg{display:block;width:100%;height:auto;overflow:visible}
     <div class="body">
       <div class="cols c2">
         <div>
-          <div class="lbl">Linhagem · <code>dados_curados/v1</code> · <code>scripts/curar_dados.py</code></div>
+          <div class="lbl">Linhagem · Olist Brazilian E-Commerce (Kaggle) → <code>dados_curados/v1</code></div>
           <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:1.14cqw;line-height:1.65;color:var(--ink-2)">
-            <div style="color:var(--muted);letter-spacing:.1em">ENTRADA · 8 FICHEIROS · 1 550 851 LINHAS</div>
+            <div style="color:var(--muted);letter-spacing:.1em">ENTRADA · 8 ARQUIVOS · 1 550 851 LINHAS · <strong style="color:var(--accent)">kaggle.com/datasets/olistbr/brazilian-ecommerce</strong></div>
             orders <strong>8df58ef3</strong> · order_items <strong>0bc4d068</strong> · customers <strong>983a4222</strong> · sellers <strong>1f643d2b</strong> · products <strong>3e656962</strong> · payments <strong>4f713964</strong> · geolocation <strong>b514f6fc</strong> · reviews <strong>012b61c7</strong>
-            <div style="color:var(--muted);letter-spacing:.1em;margin-top:1cqw">SAÍDA · 6 FICHEIROS VERSIONADOS</div>
+            <div style="color:var(--muted);letter-spacing:.1em;margin-top:1cqw">SAÍDA · 6 ARQUIVOS VERSIONADOS</div>
             entregas_curado 99 441×56 <strong>1b4a4f4c</strong> · quarentena 1 391 <strong>5a08204c</strong> · geolocation_cep 19 010 <strong>1a4a7e10</strong> · cidades_mapa 8 617 <strong>85cfc8bd</strong> · cidades_suspeitas 73 <strong>1adbc223</strong> · fora_br 38 <strong>9b31390b</strong>
           </div>
           <p style="margin-top:1.3cqw">Entre as duas metades: quatro junções, uma agregação por <code>order_id</code> e o centroide de CEP pela <strong>mediana</strong> — decisão nossa, que protege dos <strong>261 831 duplicados</strong> do <code>geolocation</code> e apaga a variação dentro do prefixo (35,5 m na mediana, 504 prefixos acima de 1 km).</p>
-          <p>Os <strong>parâmetros</strong> ficam no <code>MANIFEST.json</code>. Mudar um é uma <code>v2</code>, não um recálculo silencioso.</p>
+          <p>Os <strong>parâmetros</strong> ficam no <code>MANIFEST.json</code>: mudar um é uma <code>v2</code>.</p>
         </div>
         <div>
           <div class="lbl">Dado pessoal e LGPD</div>
@@ -742,7 +742,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">AUDITABILIDADE</span><span>Proveniência é o registro da origem de um dado e do percurso que ele fez. A descrição em prosa não a substitui: é o hash que estabelece qual base produziu qual número. Janela fixa: 2016-09-04 a 2018-10-17.</span></div>
+    <div class="claim"><span class="k">AUDITABILIDADE</span><span>O hash estabelece qual base produziu qual número — a prosa não. Mas a nossa linhagem só começa na <em>publicação</em>: do que houve entre o evento e o que a Olist publicou não há registro, e é o trecho que não podemos auditar.</span></div>
     <div class="pagenum">06</div>
   </section>
 
