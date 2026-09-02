@@ -1,0 +1,708 @@
+<meta charset="utf-8">
+<title>Cinco Regimes de Embarque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+/* ============================================================
+   Clusterizacao dos embarques curados — analises/clusterizacao_v1
+   Tokens de apresentacao.html. Par divergente indigo/ocre validado
+   pelo validate_palette.js nos dois modos (dE 26-28 em normal,
+   protan, deutan e tritan).
+   ============================================================ */
+
+:root{
+  --paper:#f4f2ed;
+  --surface:#fbfaf7;
+  --surface-2:#efece4;
+  --ink:#191712;
+  --ink-2:#4a463d;
+  --muted:#807a6d;
+  --rule:#d9d3c6;
+  --rule-soft:#e8e4da;
+  --accent:#b16512;
+
+  /* polos do divergente — validados */
+  --antes:#426bce;
+  --depois:#b16512;
+  /* barra neutra e barra em destaque: enfase por VALOR, nao por matiz,
+     porque valor sobrevive a qualquer tipo de daltonismo */
+  --barra:#96907f;
+  --barra-forte:#191712;
+
+  --ok:#008f7d;
+  --warn:#b16512;
+  --stop:#c14d66;
+
+  --ok-wash:#008f7d14;
+  --warn-wash:#b1651214;
+  --stop-wash:#c14d6614;
+  --info-wash:#426bce14;
+
+  --shadow:0 1px 2px #19171208, 0 8px 28px #1917120f;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131210;
+    --surface:#1c1a16;
+    --surface-2:#24211b;
+    --ink:#f2efe6;
+    --ink-2:#c4bfb2;
+    --muted:#8f887a;
+    --rule:#3a362c;
+    --rule-soft:#2a2721;
+    --accent:#d08a2e;
+
+    --antes:#5c82da;
+    --depois:#be7125;
+    --barra:#6f6857;
+    --barra-forte:#f2efe6;
+
+    --ok:#0f9b89;
+    --warn:#be7125;
+    --stop:#cf5971;
+
+    --ok-wash:#0f9b891f;
+    --warn-wash:#be71251f;
+    --stop-wash:#cf59711f;
+    --info-wash:#5c82da1f;
+
+    --shadow:0 1px 2px #00000040, 0 8px 28px #00000047;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131210;
+  --surface:#1c1a16;
+  --surface-2:#24211b;
+  --ink:#f2efe6;
+  --ink-2:#c4bfb2;
+  --muted:#8f887a;
+  --rule:#3a362c;
+  --rule-soft:#2a2721;
+  --accent:#d08a2e;
+
+  --antes:#5c82da;
+  --depois:#be7125;
+  --barra:#6f6857;
+  --barra-forte:#f2efe6;
+
+  --ok:#0f9b89;
+  --warn:#be7125;
+  --stop:#cf5971;
+
+  --ok-wash:#0f9b891f;
+  --warn-wash:#be71251f;
+  --stop-wash:#cf59711f;
+  --info-wash:#5c82da1f;
+
+  --shadow:0 1px 2px #00000040, 0 8px 28px #00000047;
+}
+
+*{box-sizing:border-box}
+
+body{
+  background:var(--paper);
+  color:var(--ink-2);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  font-size:17px;
+  line-height:1.62;
+  margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:54rem;margin:0 auto;padding:0 1.6rem 6rem}
+
+code{
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.86em;color:var(--ink);background:var(--surface-2);
+  padding:.1em .34em;border-radius:2px;
+}
+strong{color:var(--ink);font-weight:600}
+
+/* ------------------------------------------------------------ cabecalho -- */
+
+header{border-bottom:1px solid var(--ink);padding:4.5rem 0 1.6rem;margin-bottom:2.4rem}
+.kicker{
+  font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:1.1rem;
+}
+h1{
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;font-weight:800;
+  font-size:clamp(2.2rem,5.6vw,3.4rem);line-height:1.02;letter-spacing:-.035em;
+  color:var(--ink);margin:0 0 .9rem;text-wrap:balance;
+}
+.dek{font-size:1.16rem;line-height:1.5;max-width:42ch;margin:0;color:var(--ink-2)}
+.meta{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));
+  gap:1.1rem 1.6rem;margin-top:2.2rem;
+  font-family:"IBM Plex Mono",monospace;font-size:.78rem;line-height:1.5;color:var(--ink-2);
+}
+.meta b{
+  display:block;color:var(--muted);font-weight:500;font-size:.68rem;
+  letter-spacing:.13em;text-transform:uppercase;margin-bottom:.3rem;
+}
+
+/* ---------------------------------------------------------------- texto -- */
+
+h2{
+  font-family:Archivo,sans-serif;font-weight:700;font-size:1.05rem;
+  letter-spacing:.02em;text-transform:uppercase;color:var(--ink);
+  margin:3.6rem 0 1.4rem;padding-bottom:.5rem;border-bottom:1px solid var(--rule);
+  display:flex;align-items:baseline;gap:.7rem;
+}
+h2 .gr{
+  font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:.78rem;
+  letter-spacing:.14em;color:var(--accent);
+}
+h3{
+  font-family:Archivo,sans-serif;font-weight:600;font-size:1.16rem;
+  letter-spacing:-.014em;color:var(--ink);margin:2.4rem 0 .8rem;text-wrap:balance;
+}
+p{margin:0 0 1.1rem}
+.lede{font-size:1.06rem}
+
+/* --------------------------------------------------------------- figura -- */
+
+figure{margin:2rem 0 2.4rem}
+.figtitle{
+  font-family:Archivo,sans-serif;font-weight:600;font-size:1.06rem;
+  color:var(--ink);letter-spacing:-.01em;margin-bottom:.2rem;
+}
+.figsub{font-size:.95rem;color:var(--muted);margin-bottom:1.2rem;max-width:56ch}
+figcaption{
+  font-size:.93rem;line-height:1.5;color:var(--muted);
+  margin-top:1rem;max-width:60ch;
+}
+figcaption b{color:var(--ink-2);font-weight:600}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.ax{font-family:"IBM Plex Mono",monospace;font-size:9.5px;fill:var(--muted)}
+.axl{font-family:"IBM Plex Mono",monospace;font-size:10px;fill:var(--ink-2)}
+.axb{font-family:"IBM Plex Mono",monospace;font-size:10px;fill:var(--ink);font-weight:600}
+.val{font-family:"IBM Plex Mono",monospace;font-size:10.5px;fill:var(--ink);font-weight:600}
+.pt{font-family:Archivo,sans-serif;font-size:10px;fill:var(--muted);font-weight:600;letter-spacing:.08em}
+.grid{stroke:var(--rule-soft);stroke-width:1}
+.base{stroke:var(--ink);stroke-width:1}
+
+.leg{
+  display:flex;flex-wrap:wrap;gap:.4rem 1.3rem;margin-top:1rem;
+  font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--ink-2);
+}
+.leg span{display:flex;align-items:center;gap:.42rem}
+.leg i{width:.72rem;height:.72rem;flex:0 0 auto;border-radius:1px}
+
+/* --------------------------------------------------------------- caixas -- */
+
+.caixa{
+  border-left:2px solid var(--accent);background:var(--warn-wash);
+  padding:1.1rem 1.3rem;margin:0 0 1.9rem;font-size:.98rem;
+}
+.caixa.mal{border-left-color:var(--stop);background:var(--stop-wash)}
+.caixa p:last-child{margin-bottom:0}
+.caixa .ct{
+  font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.5rem;
+}
+.caixa.mal .ct{color:var(--stop)}
+
+.tiles{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));
+  gap:1.4rem;margin:0 0 2rem;
+}
+.tile .tn{
+  font-family:Archivo,sans-serif;font-weight:800;font-size:2.5rem;line-height:1;
+  letter-spacing:-.035em;color:var(--ink);font-variant-numeric:tabular-nums;
+}
+.tile .tn.mal{color:var(--stop)}
+.tile .tl{font-size:.92rem;line-height:1.4;color:var(--muted);margin-top:.4rem}
+.tile .tl b{color:var(--ink-2);font-weight:600}
+
+/* --------------------------------------------------------------- tabela -- */
+
+.tw{overflow-x:auto;margin:0 0 1.9rem}
+table{width:100%;border-collapse:collapse;font-size:.92rem;line-height:1.38}
+thead th{
+  font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;
+  padding:0 .85rem .55rem 0;border-bottom:1px solid var(--ink);
+  vertical-align:bottom;white-space:nowrap;
+}
+tbody td{padding:.58rem .85rem .58rem 0;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tbody tr:last-child td{border-bottom:1px solid var(--rule)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;padding-right:0;white-space:nowrap}
+td.k{color:var(--ink);font-weight:600}
+tr.mal td{background:var(--stop-wash)}
+tr.esc td{background:var(--info-wash)}
+.chip{
+  font-family:"IBM Plex Mono",monospace;font-size:.62rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;padding:.24em .5em;
+  border:1px solid currentColor;border-radius:2px;white-space:nowrap;display:inline-block;
+}
+.c-mal{color:var(--stop);background:var(--stop-wash)}
+.c-ok{color:var(--ok);background:var(--ok-wash)}
+
+ul{margin:0 0 1.9rem;padding:0;list-style:none;display:flex;flex-direction:column;gap:.8rem}
+ul li{padding-left:1.5rem;position:relative;font-size:.98rem;line-height:1.55}
+ul li::before{
+  content:"";position:absolute;left:.18rem;top:.68em;
+  width:.36rem;height:.36rem;background:var(--muted);border-radius:50%;
+}
+ul li b{color:var(--ink);font-weight:600}
+
+footer{
+  margin-top:4rem;padding-top:1.4rem;border-top:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace;font-size:.76rem;line-height:1.65;color:var(--muted);
+}
+footer b{color:var(--ink-2);font-weight:500}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="kicker">Análise · analises/clusterizacao_v1 · consome dados_curados/v1</div>
+  <h1>Cinco regimes de embarque</h1>
+  <p class="dek">Segmentação de 95 969 embarques da base curada — e o teste que
+  distingue um regime logístico real de um defeito de cadastro com forma de segmento.</p>
+  <div class="meta">
+    <div><b>Método</b>KMeans, k=5<br>5 features, log1p + escala</div>
+    <div><b>Reprodutível</b>ARI 0,992<br>em 4 réplicas de 80%</div>
+    <div><b>Cobertura</b>95 969 de 99 441<br>pedidos (96,5%)</div>
+    <div><b>Veredicto</b>4 regimes reais<br>1 artefato reprovado</div>
+    <div><b>Data</b>2 de setembro<br>de 2026</div>
+  </div>
+</header>
+
+<p class="lede">Clusterizar dados sujos produz clusters de sujeira. É o risco central
+desta análise, e a razão de ela rodar sobre a base curada e não sobre o Olist bruto:
+as 20 colunas <code>qa_*</code> permitem perguntar, de cada grupo encontrado,
+<strong>se ele descreve uma realidade operacional ou apenas uma concentração de
+defeito de registo</strong>. Um dos cinco clusters reprova essa pergunta — e é
+justamente o que teria sido celebrado como descoberta.</p>
+
+<p class="lede">Duas escolhas de método, antes dos resultados. As distâncias saem dos
+centroides de CEP corrigidos, sem os 261 831 duplicados exatos: em 80,5% dos prefixos
+o centroide bruto estava deslocado, e distância errada move o cluster de lugar. E o
+<strong>frete e o atraso ficam fora das features</strong> — são as variáveis a
+explicar, não a agrupar. Entram apenas no perfil dos grupos, o que torna qualquer
+relação entre eles um achado, não uma tautologia.</p>
+
+<h2><span class="gr">1</span> O achado</h2>
+
+<div class="tiles">
+  <div class="tile">
+    <div class="tn mal">59%</div>
+    <div class="tl">de atraso no cluster 1, contra <b>2% a 5%</b> nos outros quatro</div>
+  </div>
+  <div class="tile">
+    <div class="tn mal">+2,7</div>
+    <div class="tl">dias após o prazo na <b>mediana</b> do cluster 1 — não é cauda, é o pedido típico</div>
+  </div>
+  <div class="tile">
+    <div class="tn">R$ 0,024</div>
+    <div class="tl">de frete por km no cluster 1: o <b>mais barato dos cinco</b>, 11× menos que a praça local</div>
+  </div>
+  <div class="tile">
+    <div class="tn">8,45%</div>
+    <div class="tl">dos embarques estão nesse regime — <b>8 106 pedidos</b></div>
+  </div>
+</div>
+
+<div class="caixa mal">
+  <div class="ct">A frase</div>
+  <p>A operação cobra o menor preço por quilómetro exatamente no regime onde o pedido
+  mediano chega atrasado. Não é uma cauda que estoura: <strong>é a política de preço
+  apontada para o lado errado</strong>.</p>
+</div>
+
+<h3>Lento não é o mesmo que atrasado</h3>
+
+<p>A distinção que separa um problema de operação de um problema de promessa está em
+comparar a entrega com o prazo, e não com a média. Quatro dos cinco clusters entregam
+com <strong>nove a treze dias de folga</strong> sobre o prazo prometido. Um entrega
+depois.</p>
+
+<figure>
+  <div class="figtitle">Dias entre a entrega e o prazo prometido, mediana por cluster</div>
+  <div class="figsub">Negativo = chegou antes do prazo. Os clusters estão ordenados por
+  distância mediana, do mais local ao mais distante.</div>
+  <svg viewBox="0 0 580 214" role="img" aria-label="Gráfico divergente da mediana de dias entre entrega e prazo, por cluster, ordenado por distância. Cluster 4 (praça local): 8,99 dias antes do prazo. Cluster 2 (carga pesada): 12,43 dias antes. Cluster 3 (artefato): 12,99 dias antes. Cluster 0 (corpo do negócio): 13,23 dias antes. Cluster 1 (cauda longa): 2,67 dias depois do prazo.">
+    <line class="grid" x1="132" y1="18" x2="132" y2="170"/>
+    <line class="grid" x1="232" y1="18" x2="232" y2="170"/>
+    <line class="grid" x1="332" y1="18" x2="332" y2="170"/>
+    <line class="grid" x1="532" y1="18" x2="532" y2="170"/>
+
+    <text class="axl" x="124" y="34" text-anchor="end">4 · praça local</text>
+    <rect x="252" y="24" width="180" height="13" fill="var(--antes)"/>
+    <text class="val" x="246" y="34" text-anchor="end">−8,99</text>
+
+    <text class="axl" x="124" y="64" text-anchor="end">2 · carga pesada</text>
+    <rect x="183" y="54" width="249" height="13" fill="var(--antes)"/>
+    <text class="val" x="177" y="64" text-anchor="end">−12,43</text>
+
+    <text class="axl" x="124" y="94" text-anchor="end">3 · artefato</text>
+    <rect x="172" y="84" width="260" height="13" fill="var(--antes)" opacity=".38"/>
+    <rect x="172" y="84" width="260" height="13" fill="none" stroke="var(--antes)" stroke-width="1" stroke-dasharray="3 2"/>
+    <text class="val" x="166" y="94" text-anchor="end">−12,99</text>
+
+    <text class="axl" x="124" y="124" text-anchor="end">0 · corpo do negócio</text>
+    <rect x="167" y="114" width="265" height="13" fill="var(--antes)"/>
+    <text class="val" x="161" y="124" text-anchor="end">−13,23</text>
+
+    <text class="axb" x="124" y="154" text-anchor="end">1 · cauda longa</text>
+    <rect x="432" y="144" width="53" height="13" fill="var(--depois)"/>
+    <text class="val" x="491" y="154">+2,67</text>
+
+    <line x1="432" y1="14" x2="432" y2="174" stroke="var(--ink)" stroke-width="1.5"/>
+    <text class="pt" x="432" y="188" text-anchor="middle">PRAZO PROMETIDO</text>
+
+    <line class="base" x1="132" y1="170" x2="532" y2="170"/>
+    <text class="ax" x="132" y="203" text-anchor="middle">−15 d</text>
+    <text class="ax" x="232" y="203" text-anchor="middle">−10 d</text>
+    <text class="ax" x="332" y="203" text-anchor="middle">−5 d</text>
+    <text class="ax" x="532" y="203" text-anchor="middle">+5 d</text>
+  </svg>
+  <div class="leg">
+    <span><i style="background:var(--antes)"></i>chegou antes do prazo</span>
+    <span><i style="background:var(--depois)"></i>chegou depois do prazo</span>
+    <span><i style="background:var(--antes);opacity:.38"></i>cluster reprovado no teste do artefato</span>
+  </div>
+  <figcaption>A leitura tem dois lados. O cluster 1 é o único cujo <b>pedido mediano</b>
+  chega atrasado — a falha é do regime, não de exceções. Mas os outros quatro chegam com
+  folga de quase duas semanas, o que diz que <b>o prazo prometido está muito frouxo</b>:
+  os 4,7% de atraso do cluster 2 acontecem apesar de doze dias de margem, e isso é uma
+  cauda muito pior do que a mediana confortável sugere.</figcaption>
+</figure>
+
+<h3>Onde a operação falha, o preço é o mais baixo</h3>
+
+<figure>
+  <div class="figtitle">Atraso e frete por quilómetro, na mesma ordem de clusters</div>
+  <div class="figsub">Dois painéis, duas escalas próprias — nunca dois eixos no mesmo
+  gráfico. A ordem das linhas é idêntica, então a inversão entre os painéis é o que se
+  deve ler.</div>
+  <svg viewBox="0 0 580 216" role="img" aria-label="Dois painéis. Painel de atraso: cluster 4 4,83%, cluster 2 4,68%, cluster 3 4,97%, cluster 0 2,09%, cluster 1 59,14%. Painel de frete por quilómetro: cluster 4 R$0,273, cluster 2 R$0,063, cluster 3 R$0,086, cluster 0 R$0,031, cluster 1 R$0,024.">
+    <text class="pt" x="96" y="16">% DE ATRASO</text>
+    <text class="pt" x="356" y="16">FRETE POR KM (R$)</text>
+
+    <line class="grid" x1="196" y1="26" x2="196" y2="166"/>
+    <line class="grid" x1="296" y1="26" x2="296" y2="166"/>
+    <line class="grid" x1="456" y1="26" x2="456" y2="166"/>
+    <line class="grid" x1="556" y1="26" x2="556" y2="166"/>
+
+    <text class="axl" x="88" y="42" text-anchor="end">4 · local</text>
+    <rect x="96" y="32" width="16" height="13" fill="var(--barra)"/>
+    <text class="val" x="118" y="42">4,83%</text>
+    <rect x="356" y="32" width="195" height="13" fill="var(--barra-forte)"/>
+    <text class="val" x="356" y="42" dx="6" style="fill:var(--paper)">R$ 0,273</text>
+
+    <text class="axl" x="88" y="70" text-anchor="end">2 · pesada</text>
+    <rect x="96" y="60" width="16" height="13" fill="var(--barra)"/>
+    <text class="val" x="118" y="70">4,68%</text>
+    <rect x="356" y="60" width="45" height="13" fill="var(--barra)"/>
+    <text class="val" x="407" y="70">0,063</text>
+
+    <text class="axl" x="88" y="98" text-anchor="end">3 · artefato</text>
+    <rect x="96" y="88" width="17" height="13" fill="var(--barra)" opacity=".5"/>
+    <rect x="96" y="88" width="17" height="13" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 2"/>
+    <text class="val" x="119" y="98">4,97%</text>
+    <rect x="356" y="88" width="61" height="13" fill="var(--barra)" opacity=".5"/>
+    <rect x="356" y="88" width="61" height="13" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 2"/>
+    <text class="val" x="423" y="98">0,086</text>
+
+    <text class="axl" x="88" y="126" text-anchor="end">0 · corpo</text>
+    <rect x="96" y="116" width="7" height="13" fill="var(--barra)"/>
+    <text class="val" x="109" y="126">2,09%</text>
+    <rect x="356" y="116" width="22" height="13" fill="var(--barra)"/>
+    <text class="val" x="384" y="126">0,031</text>
+
+    <text class="axb" x="88" y="154" text-anchor="end">1 · cauda</text>
+    <rect x="96" y="144" width="197" height="13" fill="var(--barra-forte)"/>
+    <text class="val" x="96" y="154" dx="6" style="fill:var(--paper)">59,14%</text>
+    <rect x="356" y="144" width="17" height="13" fill="var(--barra)"/>
+    <text class="val" x="379" y="154">0,024</text>
+
+    <line class="base" x1="96" y1="166" x2="296" y2="166"/>
+    <text class="ax" x="96" y="180" text-anchor="middle">0</text>
+    <text class="ax" x="196" y="180" text-anchor="middle">30%</text>
+    <text class="ax" x="296" y="180" text-anchor="middle">60%</text>
+
+    <line class="base" x1="356" y1="166" x2="556" y2="166"/>
+    <text class="ax" x="356" y="180" text-anchor="middle">0</text>
+    <text class="ax" x="456" y="180" text-anchor="middle">0,14</text>
+    <text class="ax" x="556" y="180" text-anchor="middle">0,28</text>
+
+    <text class="ax" x="96" y="206">A barra escura marca o extremo de cada painel. Note que ela troca de linha entre os dois.</text>
+  </svg>
+  <figcaption>A barra escura é o extremo de cada painel, e ela <b>troca de linha</b>: no
+  atraso está no cluster 1, no frete por km está no cluster 4. Quem paga mais por
+  quilómetro é a praça local, que quase nunca atrasa; quem paga menos é a cauda longa,
+  que atrasa em 59% dos casos. A ênfase aqui é por valor e não por matiz, de propósito —
+  contraste de luminosidade sobrevive a qualquer tipo de daltonismo.</figcaption>
+</figure>
+
+<h2><span class="gr">2</span> O teste do artefato</h2>
+
+<p>Esta é a pergunta que só a base curada permite fazer. Para cada cluster, comparo a
+taxa de cada uma das 20 flags <code>qa_*</code> com a taxa da população segmentada.
+<strong>Enriquecimento de 2× ou mais sinaliza que o grupo pode ter sido desenhado por
+um defeito de cadastro</strong>, não por uma realidade operacional. Dois clusters
+acusaram; um reprova.</p>
+
+<figure>
+  <div class="figtitle">Cluster 3: sete em cada dez pedidos carregam a mesma flag</div>
+  <div class="figsub">Taxa da flag <code>qa_quase_duplicado</code> dentro do cluster 3
+  contra a taxa na população segmentada.</div>
+  <svg viewBox="0 0 580 128" role="img" aria-label="Comparação: a flag quase_duplicado atinge 70,43% do cluster 3 contra 7,08% da população segmentada, um enriquecimento de 9,94 vezes.">
+    <text class="axl" x="150" y="34" text-anchor="end">cluster 3</text>
+    <rect x="158" y="24" width="352" height="16" fill="var(--barra-forte)"/>
+    <text class="val" x="158" y="35" dx="8" style="fill:var(--paper)">70,43%  ·  6 031 pedidos</text>
+
+    <text class="axl" x="150" y="64" text-anchor="end">população</text>
+    <rect x="158" y="54" width="35" height="16" fill="var(--barra)"/>
+    <text class="val" x="201" y="65">7,08%</text>
+
+    <line class="base" x1="158" y1="80" x2="558" y2="80"/>
+    <text class="ax" x="158" y="94" text-anchor="middle">0</text>
+    <text class="ax" x="358" y="94" text-anchor="middle">40%</text>
+    <text class="ax" x="558" y="94" text-anchor="middle">80%</text>
+    <text class="axb" x="158" y="118">Enriquecimento de 9,94× — o cluster é a flag, não um segmento</text>
+  </svg>
+  <figcaption>O revelador é a mediana de itens por pedido: <b>2 no cluster 3, 1 em todos
+  os outros quatro</b>. O grupo não reúne embarques com uma logística parecida; reúne os
+  pedidos cuja contagem de itens é ambígua — a ambiguidade que a curadoria recusou
+  resolver, porque decidir se são duas unidades ou um lançamento em duplicado é decisão
+  de negócio, não de script.</figcaption>
+</figure>
+
+<div class="caixa mal">
+  <div class="ct">Por que isto importa</div>
+  <p>O cluster 3 tem o <strong>maior frete mediano dos cinco</strong>: R$ 34,52, contra
+  R$ 16,35 do corpo do negócio. Sem as flags de qualidade, ele seria apresentado como um
+  segmento premium recém-descoberto — pedidos de valor médio, distância média e frete
+  muito acima da média — e alguém desenharia uma tabela de preço para ele.</p>
+  <p>O frete é alto porque <strong>há mais de um item</strong>. O «segmento» é uma
+  consequência de como as linhas foram lançadas.</p>
+</div>
+
+<div class="tw">
+  <table>
+    <thead>
+      <tr><th>Cluster</th><th>Flag enriquecida</th><th class="n">No cluster</th><th class="n">Na população</th><th class="n">Enriq.</th><th>Veredicto</th></tr>
+    </thead>
+    <tbody>
+      <tr class="mal">
+        <td class="k n">3</td><td><code>quase_duplicado</code></td>
+        <td class="n">70,43%</td><td class="n">7,08%</td><td class="n">9,94×</td>
+        <td><span class="chip c-mal">reprova</span></td>
+      </tr>
+      <tr>
+        <td class="k n">4</td><td><code>cauda_incompleta</code></td>
+        <td class="n">3,13%</td><td class="n">1,50%</td><td class="n">2,09×</td>
+        <td><span class="chip c-ok">aceitável</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p>O cluster 4 acusa levemente porque é o mais recente na janela — entrega local é
+rápida, então concentra pedidos dos últimos 60 dias. É consequência do calendário, não
+do agrupamento, e 2,09× fica abaixo do corte de 3× que uso para reprovar. Os demais
+três clusters não têm nenhuma flag acima de 2×.</p>
+
+<p><strong>Um controlo negativo reforça o resultado:</strong> a composição por origem do
+registo é praticamente idêntica nos cinco clusters — a faixa de vendedores com 101 a
+1 000 pedidos representa entre 44,4% e 47,3% de cada um. Se os grupos fossem artefato de
+<em>quem</em> registra, essa distribuição estaria torta. Está plana.</p>
+
+<h2><span class="gr">3</span> Os cinco regimes</h2>
+
+<div class="tw">
+  <table>
+    <thead>
+      <tr>
+        <th>Cluster</th><th class="n">Pedidos</th><th class="n">%</th>
+        <th class="n">Dist. km</th><th class="n">Peso kg</th><th class="n">Valor R$</th>
+        <th class="n">Itens</th><th class="n">Lead d</th><th class="n">vs prazo</th>
+        <th class="n">Frete R$</th><th class="n">Frete/km</th><th class="n">Atraso</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="k">4 · praça local</td><td class="n">16 814</td><td class="n">17,5</td>
+        <td class="n">36</td><td class="n">0,40</td><td class="n">52,90</td><td class="n">1</td>
+        <td class="n">5,0</td><td class="n">−8,99</td><td class="n">9,26</td>
+        <td class="n">0,273</td><td class="n">4,83%</td>
+      </tr>
+      <tr>
+        <td class="k">2 · carga pesada</td><td class="n">16 959</td><td class="n">17,7</td>
+        <td class="n">434</td><td class="n">6,25</td><td class="n">176,99</td><td class="n">1</td>
+        <td class="n">11,0</td><td class="n">−12,43</td><td class="n">25,76</td>
+        <td class="n">0,063</td><td class="n">4,68%</td>
+      </tr>
+      <tr class="esc">
+        <td class="k">3 · artefato <span class="chip c-mal">reprova</span></td><td class="n">8 563</td><td class="n">8,9</td>
+        <td class="n">442</td><td class="n">0,70</td><td class="n">135,00</td><td class="n">2</td>
+        <td class="n">10,0</td><td class="n">−12,99</td><td class="n">34,52</td>
+        <td class="n">0,086</td><td class="n">4,97%</td>
+      </tr>
+      <tr>
+        <td class="k">0 · corpo do negócio</td><td class="n">45 527</td><td class="n">47,4</td>
+        <td class="n">522</td><td class="n">0,48</td><td class="n">65,00</td><td class="n">1</td>
+        <td class="n">10,9</td><td class="n">−13,23</td><td class="n">16,35</td>
+        <td class="n">0,031</td><td class="n">2,09%</td>
+      </tr>
+      <tr class="mal">
+        <td class="k">1 · cauda longa</td><td class="n">8 106</td><td class="n">8,5</td>
+        <td class="n">877</td><td class="n">0,70</td><td class="n">99,00</td><td class="n">1</td>
+        <td class="n">30,2</td><td class="n">+2,67</td><td class="n">19,83</td>
+        <td class="n">0,024</td><td class="n">59,14%</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Todos os valores são medianas. As colunas de frete e de atraso <strong>não entraram
+nas features</strong> — aparecem aqui como perfil, e é isso que autoriza tratar a
+relação entre distância e preço como um resultado.</p>
+
+<h3>O que cada um é</h3>
+
+<ul>
+  <li><b>0 · corpo do negócio — 47,4%.</b> Quase metade dos embarques: pacote leve
+  (0,48 kg), valor baixo (R$ 65), distância longa (522 km), onze dias de trânsito e
+  <b>o melhor desempenho da base</b> — 2,09% de atraso, treze dias de folga. É a
+  operação padrão e ela funciona.</li>
+  <li><b>4 · praça local — 17,5%.</b> Trinta e seis quilómetros, cinco dias, pacote
+  minúsculo e valor mínimo. Paga R$ 0,273 por km, <b>onze vezes mais que a cauda
+  longa</b>. Faz sentido — há custo fixo de coleta e entrega que não escala com a
+  distância — mas a magnitude do desvio merece revisão de tabela.</li>
+  <li><b>2 · carga pesada — 17,7%.</b> O único regime definido pelo peso: 6,25 kg
+  contra 0,40 a 0,70 kg dos demais, com valor de mercadoria três vezes maior. Frete
+  mediano de R$ 25,76 e a <b>menor razão frete/valor da base</b> (0,154), o que indica
+  que aqui a tabela está bem ajustada.</li>
+  <li><b>1 · cauda longa — 8,5%.</b> Oitocentos e setenta e sete quilómetros, trinta
+  dias de trânsito, <b>59% de atraso e mediana já depois do prazo</b>. Cobra R$ 0,024
+  por km. É o regime que precisa de decisão — de preço, de prazo prometido ou de
+  malha.</li>
+  <li><b>3 · artefato — 8,9%.</b> Não é um regime. <b>Reprova o teste</b>: 70% dos
+  pedidos com <code>qa_quase_duplicado</code> e mediana de 2 itens. Deve ser excluído de
+  qualquer decisão até que a contagem de itens tenha dono.</li>
+</ul>
+
+<h2><span class="gr">4</span> A qualidade do agrupamento</h2>
+
+<p>Três critérios, porque nenhum decide sozinho — e a escolha de <code>k</code> só é
+defensável se eles convergirem, em vez de eu escolher a métrica que dá a resposta
+desejada.</p>
+
+<div class="tw">
+  <table>
+    <thead>
+      <tr><th class="n">k</th><th class="n">Silhueta</th><th class="n">Davies-Bouldin</th><th class="n">Calinski-Harabasz</th><th class="n">Menor cluster</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="n">2</td><td class="n">0,2403</td><td class="n">1,7607</td><td class="n">24 121</td><td class="n">40,09%</td></tr>
+      <tr><td class="n">3</td><td class="n">0,2583</td><td class="n">1,4220</td><td class="n">26 045</td><td class="n">9,89%</td></tr>
+      <tr><td class="n">4</td><td class="n">0,2908</td><td class="n">1,1551</td><td class="n">28 839</td><td class="n">9,12%</td></tr>
+      <tr class="esc"><td class="k n">5</td><td class="n">0,2979 ↑</td><td class="n">1,0850 ↓</td><td class="n">29 265</td><td class="n">8,37%</td></tr>
+      <tr><td class="n">6</td><td class="n">0,2587</td><td class="n">1,1002</td><td class="n">29 486 ↑</td><td class="n">6,61%</td></tr>
+      <tr><td class="n">7</td><td class="n">0,2632</td><td class="n">1,1764</td><td class="n">27 349</td><td class="n">2,31%</td></tr>
+      <tr><td class="n">8</td><td class="n">0,2521</td><td class="n">1,1936</td><td class="n">25 884</td><td class="n">2,31%</td></tr>
+      <tr><td class="n">9</td><td class="n">0,2315</td><td class="n">1,2209</td><td class="n">24 596</td><td class="n">2,30%</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p><strong>Convergência:</strong> a silhueta tem máximo em k=5, o Davies-Bouldin tem
+mínimo em k=5, e o Calinski-Harabasz tem máximo em k=6 — mas 29 486 contra 29 265 é uma
+diferença de 0,75%, dentro do ruído. Acima de k=6 o menor cluster cai para 2,3% da base,
+que é fragmentação, não estrutura.</p>
+
+<p><strong>Reprodutibilidade:</strong> reajustando em quatro subamostras de 80%, o índice
+de Rand ajustado ficou em 0,9859, 0,9891, 0,9935 e 0,9980 — média de <strong>0,992</strong>.
+A partição não depende de quais pedidos entraram na amostra.</p>
+
+<div class="caixa">
+  <div class="ct">A ressalva que muda a interpretação</div>
+  <p>A silhueta absoluta é <strong>0,30</strong>, um valor baixo. Isso não invalida o
+  agrupamento — o ARI mostra que ele é estável — mas diz o que ele é: <strong>não existe
+  vazio entre os grupos</strong>. São regimes num continuo de distância, peso e valor,
+  não cinco populações disjuntas de clientes.</p>
+  <p>A consequência prática é concreta. A segmentação serve para <em>política de preço e
+  de prazo por faixa</em>. Não serve para afirmar que a operação tem cinco tipos de
+  cliente, nem para atribuir um pedido novo a um cluster com confiança — perto das
+  fronteiras, a atribuição é arbitrária.</p>
+</div>
+
+<h2><span class="gr">5</span> A população, e quem ficou fora</h2>
+
+<p>KMeans exige as cinco features completas, então excluir é inevitável. O que não é
+inevitável é excluir sem contar: cada etapa do funil tem número e motivo.</p>
+
+<div class="tw">
+  <table>
+    <thead><tr><th>Etapa</th><th class="n">Pedidos</th><th class="n">Saíram</th><th>Motivo</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Base curada</td><td class="n">99 441</td><td class="n">—</td><td>Ponto de partida</td></tr>
+      <tr><td class="k">Remover cancelados</td><td class="n">98 816</td><td class="n">625</td><td>Cancelado não é embarque</td></tr>
+      <tr><td class="k">Exigir distância</td><td class="n">97 715</td><td class="n">1 101</td><td>Sem centroide de CEP numa das pontas</td></tr>
+      <tr><td class="k">Exigir peso</td><td class="n">97 693</td><td class="n">22</td><td>Produto sem peso registado</td></tr>
+      <tr class="mal"><td class="k">Exigir lead time</td><td class="n">95 969</td><td class="n">1 724</td><td>Sem data de entrega — o buraco do cartão E1.2</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p><strong>A última linha é a herança do defeito.</strong> Não é possível agrupar por
+prazo quem não tem prazo medido, então os 1 724 pedidos sem data de entrega ficam fora —
+e são exatamente os que o cartão E1.2 identificou como o defeito mais caro da base.
+A segmentação, portanto, <strong>descreve os embarques que a operação conseguiu
+registar</strong>, não todos os embarques. Cobertura de 96,5%, com o viés nomeado.</p>
+
+<h2><span class="gr">6</span> Limitações</h2>
+
+<ul>
+  <li><b>Sem cubagem nem densidade.</b> A base curada guarda peso mas não as dimensões
+  do produto, então não há como separar <em>volumoso</em> de <em>pesado</em> — duas
+  realidades logísticas distintas que aqui caem no mesmo cluster 2. É a lacuna mais
+  relevante, e resolvê-la exigiria uma versão <code>v2</code> da curadoria com as três
+  dimensões.</li>
+  <li><b>KMeans presume grupos esféricos</b> de variância parecida. Com silhueta de 0,30
+  a premissa é frouxa; um método baseado em densidade daria fronteiras diferentes,
+  provavelmente com um grupo grande e várias bolsas pequenas.</li>
+  <li><b>O CEP do vendedor vem da fonte bruta</b>, porque não entra na tabela curada
+  <code>v1</code>. Só o CEP passa por lá sem transformação — as coordenadas que ele
+  resolve são as corrigidas — mas é uma dependência fora da versão curada, e o manifesto
+  a registra.</li>
+  <li><b>Os cinco regimes são medianas.</b> Nenhuma dispersão intracluster é reportada
+  aqui; o ficheiro <code>clusters_atribuicao.csv</code> traz as 95 969 linhas com as
+  features e as projeções PCA para quem quiser olhar a distribuição.</li>
+  <li><b>O corte de 3× para reprovar</b> no teste do artefato é julgamento, como os
+  limiares da curadoria. Com corte de 2× o cluster 4 também reprovaria.</li>
+</ul>
+
+<h2><span class="gr">7</span> O que fazer com isto</h2>
+
+<ul>
+  <li><b>Excluir o cluster 3 de qualquer decisão</b> até que alguém decida o que
+  significa uma linha de item repetida. Não é um segmento.</li>
+  <li><b>Revisar o prazo prometido antes de revisar a operação.</b> Quatro clusters
+  entregam com nove a treze dias de folga: o prazo não está apertado, está frouxo, e
+  ainda assim há 4,7% de atraso — o que aponta para variância alta, não para lentidão
+  média.</li>
+  <li><b>Precificar o cluster 1 pelo que ele custa.</b> 8 106 embarques com 59% de
+  atraso pagando o menor frete por quilómetro da base. Ou o preço sobe, ou o prazo
+  prometido passa a refletir os trinta dias reais.</li>
+  <li><b>Reconstruir a análise depois de fechar o registo</b> dos 1 724 pedidos sem data
+  de entrega. Se eles se concentrarem num regime, o perfil muda — e o candidato óbvio é
+  o cluster 1.</li>
+</ul>
+
+<footer>
+  <b>Reprodução</b> — <code>python scripts/clusterizar_curados.py --versao v1</code><br>
+  <b>Saídas</b> — <code>analises/clusterizacao_v1/</code>, sete CSV + <code>MANIFEST.json</code> + log<br>
+  <b>Lineagem</b> — o manifesto registra o <code>sha256</code> de <code>entregas_curado.csv</code> e <code>geolocation_cep_curado.csv</code> consumidos<br>
+  <b>Diagnóstico e curadoria a montante</b> — <code>docs/E1-2_cartao_qualidade.md</code> · <code>docs/curadoria_decisoes.html</code><br>
+  <b>Paleta</b> — par divergente índigo/ocre validado nos dois modos: ΔE 26–28 em visão normal, protanopia, deuteranopia e tritanopia
+</footer>
+
+</div>

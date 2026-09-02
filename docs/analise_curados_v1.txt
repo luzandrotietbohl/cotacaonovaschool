@@ -1,0 +1,360 @@
+
+==============================================================================
+ANALISE DOS DADOS CURADOS - v1  (curadoria de 2026-09-02T18:21:50+00:00)
+==============================================================================
+  fonte     dados_curados/v1/entregas_curado.csv
+  janela    2016-09-04 a 2018-10-17
+  pedidos   99,441 linhas x 56 colunas
+  limpos    85,398 pedidos sem nenhuma flag (85.9%)
+
+==============================================================================
+1) O QUE SOBROU PARA ANALISAR - os recortes e o que cada um custa
+==============================================================================
+
+  todos os pedidos                          99,441   100.00%
+  ativos (exclui cancelado)                 98,816    99.37%
+  ativos fora da quarentena e da cauda      95,986    96.53%
+  com data de entrega (mensuravel)          96,470    97.01%
+  sem nenhuma flag de qualidade             85,398    85.88%
+
+  O recorte 'analitico' (ativos, sem quarentena, sem cauda) e o que usamos abaixo
+  para medias e comparacoes. A cauda sai porque o registo ainda estava a chegar;
+  a quarentena sai porque a linha viola a fisica do processo, nao a estatistica.
+
+------------------------------------------------------------------------------
+Status dos pedidos
+------------------------------------------------------------------------------
+  delivered          96,478   97.02%
+  shipped             1,107    1.11%
+  canceled              625    0.63%
+  unavailable           609    0.61%
+  invoiced              314    0.32%
+  processing            301    0.30%
+  created                 5    0.01%
+  approved                2    0.00%
+
+==============================================================================
+2) SLA - os dois denominadores e para onde a diferenca aponta
+==============================================================================
+
+  reportado  (so quem tem data de entrega)     8.11%  sobre 96,470 pedidos
+  honesto    (todos os ativos)                10.29%  sobre 98,816 pedidos
+  diferenca  +2.18 p.p. - 2,346 pedidos com prazo vencido e sem registo
+
+  A leitura: 1 em cada 10 pedidos ativos chegou atrasado ou nunca foi dado por
+  chegado. O KPI reportado nao mente por calculo, mente por ausencia: quem nao
+  tem data sai do denominador exatamente por ter corrido mal.
+
+------------------------------------------------------------------------------
+Onde estao os pedidos vencidos sem registo (top 10 filiais)
+------------------------------------------------------------------------------
+
+  filial        vencidos    ativos      taxa
+  SP               1,221    69,636     1.75%
+  SEM_FILIAL         611       611   100.00%
+  MG                 147     7,794     1.89%
+  PR                 135     7,564     1.78%
+  RJ                 105     4,290     2.45%
+  SC                  47     3,598     1.31%
+  RS                  21     1,970     1.07%
+  BA                  17       566     3.00%
+  DF                  13       816     1.59%
+  GO                   9       460     1.96%
+
+------------------------------------------------------------------------------
+Atraso por mes de compra - o KPI honesto ao longo da janela
+------------------------------------------------------------------------------
+
+  mes        pedidos  reportado   honesto  na cauda
+  2016-10        300      1.13%    12.67%
+  2017-01        797      3.07%     8.78%
+  2017-02      1,763      3.21%     9.25%
+  2017-03      2,649      5.58%     9.25%
+  2017-04      2,386      7.86%    11.06%
+  2017-05      3,671      3.61%     6.92%
+  2017-06      3,229      3.86%     6.66%
+  2017-07      3,998      3.43%     6.48%
+  2017-08      4,304      3.32%     5.81%
+  2017-09      4,265      5.20%     7.76%
+  2017-10      4,605      5.29%     7.90%
+  2017-11      7,507     14.31%    16.81%
+  2017-12      5,662      8.38%    10.79%
+  2018-01      7,235      6.56%     8.71%
+  2018-02      6,655     15.99%    17.25%
+  2018-03      7,185     21.36%    23.35%
+  2018-04      6,924      5.31%     7.03%
+  2018-05      6,849      8.24%     9.58%
+  2018-06      6,149      1.36%     2.21%
+  2018-07      6,251      4.48%     5.94%
+  2018-08      6,428     10.39%    11.47%
+
+==============================================================================
+3) LEAD TIME - distribuicao e folga contra o prazo prometido
+==============================================================================
+
+  n=93,656  media=12.7d  desvio=9.6d
+  p5=3.1d  p25=6.9d  p50=10.4d  p75=15.9d  p90=23.3d  p95=29.7d  p99=46.2d
+
+  A mediana (10.4d) fica bem abaixo da media (12.7d): a cauda direita e que
+  faz o KPI. Metade dos pedidos nao e o problema.
+
+------------------------------------------------------------------------------
+Folga contra o prazo (dias_vs_prazo: negativo = chegou antes)
+------------------------------------------------------------------------------
+
+  n=93,656  mediana=-12.0d  media=-11.2d
+  p5=-25.7d  p25=-16.2d  p50=-12.0d  p75=-6.4d  p90=-1.1d  p95=+4.0d  p99=+19.6d
+
+  O prazo prometido e folgado por construcao: a mediana chega 12 dias antes.
+  Bater o prazo nao e o mesmo que ser rapido - o prazo tem gordura embutida.
+
+------------------------------------------------------------------------------
+Decomposicao do lead time em etapas (dias)
+------------------------------------------------------------------------------
+
+  etapa                     mediana    media      p90      p99  share mediana
+  compra -> aprovacao         0.01d    0.41d    1.40d    3.57d            0%
+  aprovacao -> coleta         1.87d    2.88d    6.05d   17.25d           21%
+  coleta -> entrega           7.15d    9.45d   19.03d   41.10d           79%
+
+  O transporte domina (79% da mediana), mas a etapa mais volatil e a
+  expedicao: p99 de 17.2d contra mediana de 1.87d.
+
+==============================================================================
+4) FILIAIS (UF do vendedor) - volume, atraso e a filial que nao existe
+==============================================================================
+
+  filial       pedidos   share   atraso  lead med  frete med frete/merc
+  SP            67,556   70.4%   10.52%     10.1d   R$ 16.18      0.20x
+  MG             7,591    7.9%    7.50%     10.9d   R$ 18.80      0.21x
+  PR             7,385    7.7%    8.35%     11.3d   R$ 18.65      0.18x
+  RJ             4,184    4.4%   10.85%     10.1d   R$ 17.51      0.15x
+  SC             3,491    3.6%    7.48%     11.9d   R$ 19.95      0.19x
+  RS             1,907    2.0%    5.45%      9.8d   R$ 20.23      0.17x
+  DF               798    0.8%    7.52%     10.6d   R$ 18.27      0.24x
+  SEM_FILIAL       610    0.6%  100.00%         -          -          -
+  BA               559    0.6%    8.59%     11.8d   R$ 27.65      0.10x
+  GO               448    0.5%    5.80%     11.1d   R$ 21.67      0.22x
+  PE               396    0.4%    5.05%     11.2d   R$ 24.65      0.16x
+  MA               358    0.4%   25.42%     16.3d   R$ 27.51      0.41x
+  ES               312    0.3%    9.29%     11.3d   R$ 34.91      0.35x
+  MT               134    0.1%    5.22%     13.0d   R$ 34.98      0.27x
+  CE                87    0.1%   12.64%     14.2d   R$ 32.08      0.21x
+
+  Concentracao: SP, MG, PR respondem por 86.0% dos pedidos.
+  Entre filiais reais com >=300 pedidos: MA (25.42%) contra PE (5.05%)
+  - fator 5.0x entre a pior e a melhor.
+  SEM_FILIAL: 610 pedidos sem vendedor, atraso 100% por definicao (sem
+  vendedor nao ha coleta nem entrega registada). Num GROUP BY ingenuo
+  desapareciam do relatorio; aqui aparecem como o que sao - um buraco de registo.
+
+------------------------------------------------------------------------------
+Maturidade do vendedor (origem_registo) contra desempenho
+------------------------------------------------------------------------------
+
+  faixa             pedidos   atraso  lead med  frete med
+  101-1000           44,233    9.51%     10.8d   R$ 16.81
+  11-100             31,536    9.88%     10.2d   R$ 18.00
+  >1000              13,401    9.74%     10.4d   R$ 16.01
+  1-10 pedidos        6,206   12.79%      9.6d   R$ 18.37
+  SEM_VENDEDOR          610  100.00%         -          -
+
+  Vendedores de 1-10 pedidos atrasam 12.79% contra 9.74% dos de >1000: a
+  cauda de vendedores pequenos e pior, mas responde por so 6.5% do volume.
+
+==============================================================================
+5) DESTINO - a geografia do atraso
+==============================================================================
+
+  Top 12 destinos por volume
+  UF      pedidos   atraso  lead med  frete med frete/merc
+  SP       39,956    8.04%      7.3d   R$ 13.62      0.17x
+  RJ       12,472   16.58%     12.2d   R$ 17.95      0.20x
+  MG       11,242    7.54%     10.5d   R$ 18.09      0.20x
+  RS        5,315    8.99%     13.3d   R$ 18.23      0.20x
+  PR        4,869    7.09%     10.7d   R$ 17.80      0.21x
+  SC        3,530   11.84%     13.2d   R$ 18.23      0.20x
+  BA        3,304   16.92%     17.0d   R$ 22.06      0.23x
+  DF        2,064    9.69%     11.8d   R$ 17.98      0.21x
+  ES        1,980   13.69%     13.8d   R$ 18.26      0.21x
+  GO        1,952   10.60%     14.0d   R$ 18.48      0.21x
+  PE        1,621   13.94%     15.8d   R$ 27.59      0.28x
+  CE        1,307   18.82%     18.2d   R$ 27.59      0.28x
+
+  Piores destinos por atraso (>=200 pedidos)
+  UF      pedidos   atraso  lead med frete/merc
+  AL          408   26.47%     22.3d      0.33x
+  MA          728   22.66%     19.3d      0.36x
+  PI          483   18.84%     16.4d      0.31x
+  CE        1,307   18.82%     18.2d      0.28x
+  SE          346   18.79%     18.0d      0.32x
+  BA        3,304   16.92%     17.0d      0.23x
+  RJ       12,472   16.58%     12.2d      0.20x
+  PA          960   14.58%     21.1d      0.28x
+
+  O padrao e regional, nao aleatorio: Norte e Nordeste concentram lead alto,
+  atraso alto e frete que pesa mais sobre o valor da mercadoria.
+
+------------------------------------------------------------------------------
+Rota: dentro da UF contra fora da UF
+------------------------------------------------------------------------------
+
+  UF diferente     62,102 pedidos   atraso 12.08%   lead 12.9d   frete R$ 19.04
+  mesma UF         33,884 pedidos   atraso  7.47%   lead  6.8d   frete R$ 12.69
+
+==============================================================================
+6) DINHEIRO - frete, mercadoria e canal de pagamento
+==============================================================================
+
+  mercadoria  total R$ 13,149,143.70   mediana R$ 86.99
+  frete       total R$ 2,180,489.05   mediana R$ 17.17
+  no agregado, o frete e 16.6% do valor da mercadoria
+
+------------------------------------------------------------------------------
+Frete por faixa de peso (mediana)
+------------------------------------------------------------------------------
+
+  faixa        pedidos  frete med   merc med frete/merc    lead   atraso
+  <=300g        26,800   R$ 15.10   R$ 40.00      0.38x    9.8d    9.32%
+  301-750g      23,464   R$ 16.11   R$ 79.90      0.20x   10.2d    9.51%
+  751g-2kg      23,234   R$ 17.67   R$ 93.86      0.19x   10.8d    9.97%
+  2-5kg          9,922   R$ 21.23  R$ 138.50      0.15x   10.8d   10.64%
+  5-15kg         9,897   R$ 28.58  R$ 149.00      0.19x   11.7d   10.50%
+  >15kg          2,043   R$ 62.05  R$ 289.00      0.21x   12.9d   13.75%
+
+------------------------------------------------------------------------------
+Canal de pagamento
+------------------------------------------------------------------------------
+
+  canal           pedidos  ticket med   atraso  lead med
+  credit_card      73,894   R$ 109.30   10.23%     10.1d
+  boleto           19,169    R$ 94.31   11.34%     11.6d
+  voucher           1,511    R$ 70.52    9.86%     10.2d
+  debit_card        1,411    R$ 89.30   10.35%      9.0d
+
+  Latencia de aprovacao por canal (horas, mediana) - onde o boleto cobra o seu preco
+    boleto            28.8 h
+    debit_card         0.8 h
+    voucher            0.3 h
+    credit_card        0.3 h
+
+==============================================================================
+7) AS FLAGS IMPORTAM? - o efeito de cada defeito no KPI
+==============================================================================
+
+  Para cada flag: o atraso honesto dentro dela contra o atraso de quem nao a tem.
+  Se as duas colunas coincidem, a flag e ruido para este KPI; se divergem, e sinal.
+
+  a) Tautologicas - a flag entra na propria definicao de atraso_honesto
+  flag                       pedidos  atraso c/  atraso s/      delta
+  sem_dt_entrega               2,346    100.00%      8.11%   +91.89pp
+  sem_dt_coleta                1,233    100.00%      9.16%   +90.84pp
+  sem_item                       611    100.00%      9.74%   +90.26pp
+  lead_implausivel                64    100.00%     10.24%   +89.76pp
+  sem_peso                       627     97.45%      9.74%   +87.71pp
+
+     Estas nao sao achado nenhum: sem data de entrega e com prazo vencido, o
+     pedido conta como atraso por regra. Estao aqui para mostrar o tamanho do
+     buraco de registo, nao para explicar o KPI.
+
+  b) Informativas - a flag e independente da definicao do KPI
+  flag                       pedidos  atraso c/  atraso s/      delta
+  entrega_antes_coleta            23      0.00%     10.30%   -10.30pp
+  lag_despacho_negativo        1,359      3.09%     10.39%    -7.30pp
+  frete_zero                     338      4.73%     10.31%    -5.58pp
+  cep_sem_geo                    277     15.16%     10.28%    +4.88pp
+  uf_filial_incoerente           580      6.03%     10.32%    -4.28pp
+  cauda_incompleta             1,458      6.72%     10.35%    -3.63pp
+  frete_desproporcional           77     12.99%     10.29%    +2.70pp
+  pagamento_divergente           247      7.69%     10.30%    -2.61pp
+  quase_duplicado              6,930      8.38%     10.44%    -2.05pp
+  cidade_regrafada               267     11.24%     10.29%    +0.94pp
+
+  Na tabela informativa o sinal e quase todo NEGATIVO: pedidos com defeito de
+  registo (lag de despacho negativo, frete zero, pagamento divergente,
+  quase-duplicado) atrasam MENOS do que a media. Sao pedidos que chegaram e
+  cujo defeito e de lancamento, nao de operacao.
+  As excecoes, essas sim uteis: cep_sem_geo (+4.88pp) e frete_desproporcional
+  (+2.70pp) apontam para destinos que o cadastro nao cobre e o frete ja denunciava.
+
+------------------------------------------------------------------------------
+Quarentena - as linhas que violam a fisica do processo
+------------------------------------------------------------------------------
+
+  1,391 linhas em quarentena (1.40% dos pedidos)
+  lag_despacho_negativo         1,359   97.70%
+  entrega_antes_coleta             23    1.65%
+  peso_invalido                     6    0.43%
+  pagamento_invalido|canal_indefinido      3    0.22%
+
+  Nenhuma foi apagada: a quarentena e um extrato para alguem corrigir na origem.
+
+==============================================================================
+8) GEOLOCATION CURADO - o que a deduplicacao mudou
+==============================================================================
+
+  prefixos de CEP com centroide: 19,010
+  duplicados exatos removidos:   261,831 de 1,000,163 (26.2%)
+  correcao do centroide (m):     mediana 35.5 | p90 263.3 | p99 2823.9 | max 4,002,693
+  prefixos onde a dedup moveu o centroide >1 km: 504 (2.65%)
+
+  A mediana de 36 m e irrelevante para roteirizacao; a cauda nao e. Os prefixos
+  com correcao quilometrica eram os que puxavam distancias erradas para o modelo.
+
+  Piores 8 prefixos por correcao
+  CEP    cidade                      UF  pontos   dups     correcao
+  29654  Santo Antônio do Canaã      ES       2      2   4,002,693m
+  68275  Porto Trombetas             PA       3      6   3,948,588m
+  68379  Castelo dos Sonhos          PA       1      1   3,700,797m
+  46560  Ibiajara                    BA       1      1   3,529,506m
+  57319  Vila Sao Francisco          AL       1      2   3,187,052m
+  28165  Vila Nova de Campos         RJ       3      1   2,159,436m
+  58441  São José da Mata            PB       3      1   1,549,402m
+  28155  Santa Maria                 RJ       3      2   1,413,270m
+
+------------------------------------------------------------------------------
+Cobertura: pedidos cujo CEP nao tem geolocation
+------------------------------------------------------------------------------
+
+  279 pedidos (0.28%) - sem centroide nao ha distancia,
+  e sem distancia o modelo de frete perde a sua variavel mais forte.
+
+==============================================================================
+9) CONSISTENCIA DE CIDADE - o que o mapa canonico resolveu
+==============================================================================
+
+  grafias de entrada: 8,126 -> canonicas: 6,066
+  regrafias estruturais (alias, sufixo de UF, espacos): 31 grafias, 39 linhas
+  pedidos com cidade regrafada: 267
+
+  Por regra aplicada
+    sufixo-uf          26 grafias
+    nenhuma             5 grafias
+
+  73 pares suspeitos (erro de digitacao) ficaram fora: unir 'Sao Pauo' a 'Sao Paulo'
+  por distancia de edicao e adivinhar. Vao para revisao humana, nao para o pipeline.
+
+==============================================================================
+10) O QUE ISTO SUSTENTA - e o que ainda nao sustenta
+==============================================================================
+
+  Sustenta:
+    - KPI de atraso com denominador defensavel (10.29% e nao 8.11%).
+    - Comparacao entre filiais e entre destinos, porque a cidade tem grafia unica
+      e a UF do vendedor foi conferida contra o CEP.
+    - Distancia origem-destino, porque o centroide de CEP deixou de ser puxado por
+      261,831 linhas duplicadas.
+    - Decomposicao do lead time por etapa, com a expedicao isolada como etapa volatil.
+
+  Nao sustenta ainda:
+    - 6,968 pedidos com quase-duplicado em order_items: duas unidades ou lancamento
+      repetido? Sem essa resposta, receita por pedido tem margem de erro conhecida
+      e nao corrigida.
+    - 581 pedidos onde a UF declarada do vendedor discorda do CEP. A filial nao foi
+      sobrescrita - logo qualquer analise por filial carrega essa ambiguidade.
+    - 279 pedidos sem centroide de CEP: ficam sem distancia.
+    - 73 grafias de cidade suspeitas a espera de revisao humana.
+
+  Proximo passo com maior retorno: resolver a semantica de order_items
+  (quase-duplicados) - e o unico defeito que ainda contamina valor, peso e
+  contagem de itens ao mesmo tempo.

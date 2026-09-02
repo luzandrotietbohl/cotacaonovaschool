@@ -1,0 +1,123 @@
+==============================================================================
+CLUSTERIZACAO DOS EMBARQUES CURADOS — fonte: dados_curados/v1/
+==============================================================================
+  entregas_curado.csv .......... 99,441 pedidos
+  geolocation_cep_curado.csv ... 19,010 prefixos com centroide corrigido
+
+------------------------------------------------------------------------------
+1) POPULACAO — quem entra na segmentacao, e por que os outros nao
+------------------------------------------------------------------------------
+  A regra: cluster de KMeans exige as 5 features completas. Excluir e inevitavel,
+  mas cada exclusao e contada — nenhum pedido desaparece sem numero.
+    pedidos na base curada              99,441  
+    apos remover cancelados             98,816  cancelado nao e embarque
+    apos exigir dist_km                 97,715  sem centroide de CEP nas duas pontas (1,101 fora)
+    apos exigir peso_kg                 97,693  sem peso do produto (22 fora)
+    apos exigir valor_mercadoria        97,693  sem item registado (0 fora)
+    apos exigir lead_dias               95,969  sem data de entrega — o buraco do cartao E1.2 (1,724 fora)
+    apos exigir valores positivos       95,969  peso, valor e lead acima de zero
+
+  Populacao segmentada: 95,969 de 99,441 (96.5%)
+  ATENCAO: a exclusao por lead_dias remove justamente os pedidos sem data de
+  entrega. A segmentacao herda o vies do cartao E1.2 — nao e possivel agrupar
+  por prazo quem nao tem prazo medido. Isso e tratado no teste do artefato.
+
+------------------------------------------------------------------------------
+2) VARREDURA DE k — tres metricas, porque nenhuma decide sozinha
+------------------------------------------------------------------------------
+     k    silhueta  Davies-Bouldin  Calinski-Harabasz     menor %
+     2      0.2403          1.7607            24,121      40.09%
+     3      0.2583          1.4220            26,045       9.89%
+     4      0.2908          1.1551            28,839       9.12%
+     5      0.2979          1.0850            29,265       8.37%
+     6      0.2587          1.1002            29,486       6.61%
+     7      0.2632          1.1764            27,349       2.31%
+     8      0.2521          1.1936            25,884       2.31%
+     9      0.2315          1.2209            24,596       2.30%
+
+  k escolhido: 5  (menor Davies-Bouldin da varredura)
+  Os tres critérios convergem: menor Davies-Bouldin em k=5, maior silhueta
+  em k=5, maior Calinski-Harabasz em k=6. Convergencia e o que autoriza
+  fixar k sem escolher a metrica que da a resposta desejada.
+  Mas a silhueta absoluta e baixa (0.30): os grupos nao tem vazio entre eles.
+  Sao regimes num continuo, nao populacoes disjuntas — a segmentacao serve para
+  politica de preco e de prazo, nao para afirmar que existem cinco tipos de cliente.
+
+------------------------------------------------------------------------------
+3) ESTABILIDADE — o agrupamento sobrevive a reamostragem?
+------------------------------------------------------------------------------
+    replica 1 em 80% da base: ARI 0.9859
+    replica 2 em 80% da base: ARI 0.9891
+    replica 3 em 80% da base: ARI 0.9935
+    replica 4 em 80% da base: ARI 0.9980
+    ARI medio: 0.9916  (1,0 = particao identica; acima de 0,75 e reprodutivel)
+
+------------------------------------------------------------------------------
+4) TESTE DO ARTEFATO — cada cluster e regime logistico ou defeito de registo?
+------------------------------------------------------------------------------
+  Para cada cluster, a taxa de cada flag qa_* contra a taxa da populacao
+  segmentada. Enriquecimento acima de 2x sinaliza que o grupo pode estar
+  desenhado por um defeito de cadastro, nao por uma realidade operacional.
+
+    cluster 3 · quase_duplicado           70.43% vs  7.08% geral =  9.94x  (6,031 pedidos)
+    cluster 4 · cauda_incompleta           3.13% vs  1.50% geral =  2.09x  (527 pedidos)
+
+  VEREDICTO: 1 cluster(es) reprovam o teste — cluster 3.
+    O cluster 3 nao e um regime logistico: 70% dele carrega a flag
+    'quase_duplicado', contra 7.1% da populacao. O grupo foi desenhado por um
+    defeito de cadastro, nao por uma realidade operacional.
+  Os demais enriquecimentos ficam abaixo de 3x e sao aceitaveis.
+
+------------------------------------------------------------------------------
+5) PERFIL DOS CLUSTERS — frete e atraso entram aqui, nunca nas features
+------------------------------------------------------------------------------
+            pedidos  pct_base  dist_km_mediana  peso_kg_mediana  valor_mediano  itens_mediana  lead_mediano  vs_prazo_mediano  frete_mediano  frete_sobre_valor  frete_por_km  atraso_pct  flags_media
+   cluster                                                                                                                                                                                            
+   4          16814     17.52            35.87             0.40          52.90            1.0          4.98             -8.99           9.26              0.186         0.273        4.83         0.08
+   2          16959     17.67           434.16             6.25         176.99            1.0         11.02            -12.43          25.76              0.154         0.063        4.68         0.05
+   3           8563      8.92           441.74             0.70         135.00            2.0          9.97            -12.99          34.52              0.272         0.086        4.97         0.75
+   0          45527     47.44           521.69             0.48          65.00            1.0         10.91            -13.23          16.35              0.265         0.031        2.09         0.05
+   1           8106      8.45           877.31             0.70          99.00            1.0         30.15              2.67          19.83              0.233         0.024       59.14         0.04
+
+  Lento ou atrasado? vs_prazo_mediano e (entrega - prazo) em dias:
+  negativo = chegou antes do prazo. Um cluster com muito atraso mas mediana
+  negativa nao e lento: tem prazo mal calibrado numa cauda que estoura.
+
+  Mediana de itens por pedido, por cluster — o revelador do artefato:
+   cluster 4 = 1, cluster 2 = 1, cluster 3 = 2, cluster 0 = 1, cluster 1 = 1
+
+  Composicao por origem do registo (% de cada cluster):
+   origem_registo  1-10 pedidos  101-1000  11-100  >1000
+   cluster                                              
+   4                        6.5      45.0    32.2   16.3
+   2                        8.1      44.4    38.7    8.9
+   3                        7.8      46.2    32.0   13.9
+   0                        6.1      46.9    32.1   14.9
+   1                        5.1      47.3    32.1   15.6
+
+  Filiais dominantes por cluster:
+    cluster 4: SP 89%, RJ 4%, MG 3%
+    cluster 2: SP 65%, MG 11%, PR 9%
+    cluster 3: SP 73%, PR 8%, MG 7%
+    cluster 0: SP 66%, PR 9%, MG 9%
+    cluster 1: SP 71%, PR 8%, MG 7%
+
+  PCA para inspecao: 2 componentes explicam 58.4% da variancia
+                       PC1    PC2
+   dist_km           0.412  0.565
+   peso_kg           0.530 -0.374
+   valor_mercadoria  0.593 -0.377
+   n_itens           0.153 -0.290
+   lead_dias         0.417  0.561
+
+------------------------------------------------------------------------------
+6) GRAVACAO — analises/clusterizacao_v1/
+------------------------------------------------------------------------------
+  clusters_atribuicao.csv           95,969 linhas x 14 colunas
+  clusters_perfil.csv                    5 linhas x 14 colunas
+  clusters_centros.csv                   5 linhas x  6 colunas
+  clusters_composicao_origem.csv         5 linhas x  5 colunas
+  varredura_k.csv                        8 linhas x  5 colunas
+  teste_artefato.csv                     2 linhas x  6 colunas
+  pca_cargas.csv                         5 linhas x  3 colunas
+  MANIFEST.json                    gravado

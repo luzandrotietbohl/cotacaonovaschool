@@ -1,0 +1,734 @@
+{
+  "versao": "v1",
+  "gerado_em_curadoria": "2026-09-02T18:21:50+00:00",
+  "pedidos": 99441,
+  "recortes": {
+    "todos os pedidos": 99441,
+    "ativos (exclui cancelado)": 98816,
+    "ativos fora da quarentena e da cauda": 95986,
+    "com data de entrega (mensuravel)": 96470,
+    "sem nenhuma flag de qualidade": 85398
+  },
+  "status": {
+    "delivered": 96478,
+    "shipped": 1107,
+    "canceled": 625,
+    "unavailable": 609,
+    "invoiced": 314,
+    "processing": 301,
+    "created": 5,
+    "approved": 2
+  },
+  "sla": {
+    "reportado": 0.08112366538820359,
+    "honesto": 0.10293879533678757,
+    "vencidos_sem_registo": 2346,
+    "delta_pp": 2.181512994858398
+  },
+  "vencidos_por_filial": {
+    "SP": 1221,
+    "SEM_FILIAL": 611,
+    "MG": 147,
+    "PR": 135,
+    "RJ": 105,
+    "SC": 47,
+    "RS": 21,
+    "BA": 17,
+    "DF": 13,
+    "GO": 9
+  },
+  "sla_por_mes": {
+    "2016-10": {
+      "pedidos": 300,
+      "reportado": 0.011320754716981131,
+      "honesto": 0.12666666666666668
+    },
+    "2017-01": {
+      "pedidos": 797,
+      "reportado": 0.030666666666666665,
+      "honesto": 0.08782936010037641
+    },
+    "2017-02": {
+      "pedidos": 1763,
+      "reportado": 0.03206291591046582,
+      "honesto": 0.09245604083947816
+    },
+    "2017-03": {
+      "pedidos": 2649,
+      "reportado": 0.05577376276512176,
+      "honesto": 0.09248773121932805
+    },
+    "2017-04": {
+      "pedidos": 2386,
+      "reportado": 0.07859313938341293,
+      "honesto": 0.11064543168482817
+    },
+    "2017-05": {
+      "pedidos": 3671,
+      "reportado": 0.03610719322990127,
+      "honesto": 0.0691909561427404
+    },
+    "2017-06": {
+      "pedidos": 3229,
+      "reportado": 0.03859649122807018,
+      "honesto": 0.06658408175905853
+    },
+    "2017-07": {
+      "pedidos": 3998,
+      "reportado": 0.034349173553719005,
+      "honesto": 0.0647823911955978
+    },
+    "2017-08": {
+      "pedidos": 4304,
+      "reportado": 0.03315048891008824,
+      "honesto": 0.05808550185873606
+    },
+    "2017-09": {
+      "pedidos": 4265,
+      "reportado": 0.052048192771084335,
+      "honesto": 0.0776084407971864
+    },
+    "2017-10": {
+      "pedidos": 4605,
+      "reportado": 0.05292541313086199,
+      "honesto": 0.07904451682953312
+    },
+    "2017-11": {
+      "pedidos": 7507,
+      "reportado": 0.1431119648737651,
+      "honesto": 0.16810976422006127
+    },
+    "2017-12": {
+      "pedidos": 5662,
+      "reportado": 0.08380192272809722,
+      "honesto": 0.10791239844577888
+    },
+    "2018-01": {
+      "pedidos": 7235,
+      "reportado": 0.06563870420144292,
+      "honesto": 0.08707671043538355
+    },
+    "2018-02": {
+      "pedidos": 6655,
+      "reportado": 0.15987795575896263,
+      "honesto": 0.17250187828700225
+    },
+    "2018-03": {
+      "pedidos": 7185,
+      "reportado": 0.21362273311437954,
+      "honesto": 0.23354210160055672
+    },
+    "2018-04": {
+      "pedidos": 6924,
+      "reportado": 0.05310385407472786,
+      "honesto": 0.07033506643558636
+    },
+    "2018-05": {
+      "pedidos": 6849,
+      "reportado": 0.08238257519632539,
+      "honesto": 0.09578040589867134
+    },
+    "2018-06": {
+      "pedidos": 6149,
+      "reportado": 0.013615485564304463,
+      "honesto": 0.022117417466254674
+    },
+    "2018-07": {
+      "pedidos": 6251,
+      "reportado": 0.04483430799220273,
+      "honesto": 0.0593505039193729
+    },
+    "2018-08": {
+      "pedidos": 6428,
+      "reportado": 0.10392064241851677,
+      "honesto": 0.11465463596764157
+    }
+  },
+  "lead_dias": {
+    "n": 93656,
+    "media": 12.727383488511148,
+    "desvio": 9.599399752845684,
+    "p5": 3.078,
+    "p25": 6.894,
+    "p50": 10.393,
+    "p75": 15.915,
+    "p90": 23.268,
+    "p95": 29.668750000000003,
+    "p99": 46.21814999999998
+  },
+  "dias_vs_prazo": {
+    "mediana": -11.976500000000001,
+    "media": -11.175514179550696,
+    "p5": -25.65025,
+    "p25": -16.245,
+    "p50": -11.976500000000001,
+    "p75": -6.44175,
+    "p90": -1.131,
+    "p95": 3.953,
+    "p99": 19.58214999999998
+  },
+  "etapas": {
+    "compra -> aprovacao": {
+      "mediana": 0.014085648148148147,
+      "media": 0.4081690313394767,
+      "p90": 1.396016203703705,
+      "p99": 3.572176388888889
+    },
+    "aprovacao -> coleta": {
+      "mediana": 1.8690335648148149,
+      "media": 2.8794505326224207,
+      "p90": 6.051274305555555,
+      "p99": 17.247460763888895
+    },
+    "coleta -> entrega": {
+      "mediana": 7.149606481481482,
+      "media": 9.45012825304951,
+      "p90": 19.033398148148148,
+      "p99": 41.09642453703704
+    }
+  },
+  "filiais": {
+    "SP": {
+      "pedidos": 67556,
+      "share": 0.7038109724334799,
+      "atraso_honesto": 0.10521641304991415,
+      "lead_mediana": 10.132
+    },
+    "MG": {
+      "pedidos": 7591,
+      "share": 0.0790844498155981,
+      "atraso_honesto": 0.07495718614148333,
+      "lead_mediana": 10.935
+    },
+    "PR": {
+      "pedidos": 7385,
+      "share": 0.07693830350259413,
+      "atraso_honesto": 0.08354773188896411,
+      "lead_mediana": 11.342
+    },
+    "RJ": {
+      "pedidos": 4184,
+      "share": 0.04358969016314879,
+      "atraso_honesto": 0.10850860420650095,
+      "lead_mediana": 10.057
+    },
+    "SC": {
+      "pedidos": 3491,
+      "share": 0.036369887275227636,
+      "atraso_honesto": 0.07476367802921799,
+      "lead_mediana": 11.9245
+    },
+    "RS": {
+      "pedidos": 1907,
+      "share": 0.019867480674264998,
+      "atraso_honesto": 0.054535920293654956,
+      "lead_mediana": 9.838000000000001
+    },
+    "DF": {
+      "pedidos": 798,
+      "share": 0.008313712416394057,
+      "atraso_honesto": 0.07518796992481203,
+      "lead_mediana": 10.647
+    },
+    "SEM_FILIAL": {
+      "pedidos": 610,
+      "share": 0.006355093451128289,
+      "atraso_honesto": 1.0,
+      "lead_mediana": null
+    },
+    "BA": {
+      "pedidos": 559,
+      "share": 0.005823765965870023,
+      "atraso_honesto": 0.08586762075134168,
+      "lead_mediana": 11.776
+    },
+    "GO": {
+      "pedidos": 448,
+      "share": 0.004667347321484383,
+      "atraso_honesto": 0.05803571428571429,
+      "lead_mediana": 11.131
+    },
+    "PE": {
+      "pedidos": 396,
+      "share": 0.00412560165024066,
+      "atraso_honesto": 0.050505050505050504,
+      "lead_mediana": 11.181000000000001
+    },
+    "MA": {
+      "pedidos": 358,
+      "share": 0.003729710582793324,
+      "atraso_honesto": 0.2541899441340782,
+      "lead_mediana": 16.326
+    },
+    "ES": {
+      "pedidos": 312,
+      "share": 0.003250474027462338,
+      "atraso_honesto": 0.09294871794871795,
+      "lead_mediana": 11.254
+    },
+    "MT": {
+      "pedidos": 134,
+      "share": 0.0013960369220511325,
+      "atraso_honesto": 0.05223880597014925,
+      "lead_mediana": 13.027
+    },
+    "CE": {
+      "pedidos": 87,
+      "share": 0.0009063821807346905,
+      "atraso_honesto": 0.12643678160919541,
+      "lead_mediana": 14.19
+    },
+    "RN": {
+      "pedidos": 49,
+      "share": 0.0005104911132873544,
+      "atraso_honesto": 0.10204081632653061,
+      "lead_mediana": 9.006
+    },
+    "MS": {
+      "pedidos": 46,
+      "share": 0.00047923655533098575,
+      "atraso_honesto": 0.08695652173913043,
+      "lead_mediana": 10.242
+    },
+    "PB": {
+      "pedidos": 32,
+      "share": 0.0003333819515345988,
+      "atraso_honesto": 0.09375,
+      "lead_mediana": 11.077
+    },
+    "RO": {
+      "pedidos": 13,
+      "share": 0.00013543641781093077,
+      "atraso_honesto": 0.0,
+      "lead_mediana": 17.902
+    },
+    "PI": {
+      "pedidos": 11,
+      "share": 0.00011460004584001834,
+      "atraso_honesto": 0.09090909090909091,
+      "lead_mediana": 13.4325
+    },
+    "PA": {
+      "pedidos": 8,
+      "share": 8.33454878836497e-05,
+      "atraso_honesto": 0.125,
+      "lead_mediana": 12.665500000000002
+    },
+    "SE": {
+      "pedidos": 7,
+      "share": 7.292730189819348e-05,
+      "atraso_honesto": 0.0,
+      "lead_mediana": 13.804
+    },
+    "AM": {
+      "pedidos": 3,
+      "share": 3.125455795636864e-05,
+      "atraso_honesto": 0.6666666666666666,
+      "lead_mediana": 29.523
+    },
+    "AC": {
+      "pedidos": 1,
+      "share": 1.0418185985456212e-05,
+      "atraso_honesto": 1.0,
+      "lead_mediana": null
+    }
+  },
+  "maturidade": {
+    "101-1000": {
+      "pedidos": 44233,
+      "atraso": 0.0951325933126851
+    },
+    "11-100": {
+      "pedidos": 31536,
+      "atraso": 0.09877600202942668
+    },
+    ">1000": {
+      "pedidos": 13401,
+      "atraso": 0.09738079247817327
+    },
+    "1-10 pedidos": {
+      "pedidos": 6206,
+      "atraso": 0.1279407025459233
+    },
+    "SEM_VENDEDOR": {
+      "pedidos": 610,
+      "atraso": 1.0
+    }
+  },
+  "destinos": {
+    "SP": {
+      "pedidos": 39956,
+      "atraso": 0.08036339973971368,
+      "lead_mediana": 7.295,
+      "frete_sobre_mercadoria": 0.17046307884856068
+    },
+    "RJ": {
+      "pedidos": 12472,
+      "atraso": 0.16581141757536882,
+      "lead_mediana": 12.1645,
+      "frete_sobre_mercadoria": 0.1994666074008223
+    },
+    "MG": {
+      "pedidos": 11242,
+      "atraso": 0.07543141789717132,
+      "lead_mediana": 10.492,
+      "frete_sobre_mercadoria": 0.20122358175750832
+    },
+    "RS": {
+      "pedidos": 5315,
+      "atraso": 0.08993414863593603,
+      "lead_mediana": 13.278,
+      "frete_sobre_mercadoria": 0.2048314606741573
+    },
+    "PR": {
+      "pedidos": 4869,
+      "atraso": 0.07085643869377696,
+      "lead_mediana": 10.733,
+      "frete_sobre_mercadoria": 0.20943640428285681
+    },
+    "SC": {
+      "pedidos": 3530,
+      "atraso": 0.11841359773371105,
+      "lead_mediana": 13.1585,
+      "frete_sobre_mercadoria": 0.20278086763070077
+    },
+    "BA": {
+      "pedidos": 3304,
+      "atraso": 0.16918886198547214,
+      "lead_mediana": 16.9905,
+      "frete_sobre_mercadoria": 0.23356273160402327
+    },
+    "DF": {
+      "pedidos": 2064,
+      "atraso": 0.09689922480620156,
+      "lead_mediana": 11.775,
+      "frete_sobre_mercadoria": 0.20714285714285716
+    },
+    "ES": {
+      "pedidos": 1980,
+      "atraso": 0.13686868686868686,
+      "lead_mediana": 13.804,
+      "frete_sobre_mercadoria": 0.20516853932584272
+    },
+    "GO": {
+      "pedidos": 1952,
+      "atraso": 0.10604508196721311,
+      "lead_mediana": 14.022,
+      "frete_sobre_mercadoria": 0.2053561506834093
+    },
+    "PE": {
+      "pedidos": 1621,
+      "atraso": 0.13942011104256632,
+      "lead_mediana": 15.764,
+      "frete_sobre_mercadoria": 0.2786868686868687
+    },
+    "CE": {
+      "pedidos": 1307,
+      "atraso": 0.18821729150726854,
+      "lead_mediana": 18.241,
+      "frete_sobre_mercadoria": 0.27645290581162324
+    },
+    "PA": {
+      "pedidos": 960,
+      "atraso": 0.14583333333333334,
+      "lead_mediana": 21.102,
+      "frete_sobre_mercadoria": 0.2757142857142857
+    },
+    "MT": {
+      "pedidos": 886,
+      "atraso": 0.08916478555304741,
+      "lead_mediana": 16.171,
+      "frete_sobre_mercadoria": 0.23243243243243242
+    },
+    "MA": {
+      "pedidos": 728,
+      "atraso": 0.22664835164835165,
+      "lead_mediana": 19.2545,
+      "frete_sobre_mercadoria": 0.3551165146909827
+    },
+    "MS": {
+      "pedidos": 705,
+      "atraso": 0.13191489361702127,
+      "lead_mediana": 13.991,
+      "frete_sobre_mercadoria": 0.19059125964010282
+    },
+    "PB": {
+      "pedidos": 523,
+      "atraso": 0.13957934990439771,
+      "lead_mediana": 18.2795,
+      "frete_sobre_mercadoria": 0.3270454545454546
+    },
+    "PI": {
+      "pedidos": 483,
+      "atraso": 0.18840579710144928,
+      "lead_mediana": 16.38,
+      "frete_sobre_mercadoria": 0.3118645606390705
+    },
+    "RN": {
+      "pedidos": 475,
+      "atraso": 0.12842105263157894,
+      "lead_mediana": 16.177,
+      "frete_sobre_mercadoria": 0.33849953988472903
+    },
+    "AL": {
+      "pedidos": 408,
+      "atraso": 0.2647058823529412,
+      "lead_mediana": 22.333,
+      "frete_sobre_mercadoria": 0.32554814108674923
+    },
+    "SE": {
+      "pedidos": 346,
+      "atraso": 0.18786127167630057,
+      "lead_mediana": 18.048000000000002,
+      "frete_sobre_mercadoria": 0.31981599079954
+    },
+    "TO": {
+      "pedidos": 275,
+      "atraso": 0.14545454545454545,
+      "lead_mediana": 15.9215,
+      "frete_sobre_mercadoria": 0.3225471207898342
+    },
+    "RO": {
+      "pedidos": 249,
+      "atraso": 0.05622489959839357,
+      "lead_mediana": 17.643,
+      "frete_sobre_mercadoria": 0.3502136557868898
+    },
+    "AM": {
+      "pedidos": 147,
+      "atraso": 0.061224489795918366,
+      "lead_mediana": 25.862000000000002,
+      "frete_sobre_mercadoria": 0.3043381535038932
+    },
+    "AC": {
+      "pedidos": 77,
+      "atraso": 0.05194805194805195,
+      "lead_mediana": 18.4995,
+      "frete_sobre_mercadoria": 0.3553230209281164
+    },
+    "AP": {
+      "pedidos": 68,
+      "atraso": 0.058823529411764705,
+      "lead_mediana": 24.347,
+      "frete_sobre_mercadoria": 0.2926112895823772
+    },
+    "RR": {
+      "pedidos": 44,
+      "atraso": 0.20454545454545456,
+      "lead_mediana": 25.131,
+      "frete_sobre_mercadoria": 0.36926067814054553
+    }
+  },
+  "rota_interna": {
+    "outra_uf": {
+      "pedidos": 62102,
+      "atraso": 0.12076905735725098,
+      "lead_mediana": 12.931
+    },
+    "mesma_uf": {
+      "pedidos": 33884,
+      "atraso": 0.07472553417542203,
+      "lead_mediana": 6.755
+    }
+  },
+  "financeiro": {
+    "mercadoria_total": 13149143.7,
+    "frete_total": 2180489.05,
+    "frete_share": 0.16582745612552702
+  },
+  "frete_por_peso": {
+    "<=300g": {
+      "pedidos": 26800,
+      "frete_mediana": 15.1,
+      "atraso": 0.09320895522388059
+    },
+    "301-750g": {
+      "pedidos": 23464,
+      "frete_mediana": 16.11,
+      "atraso": 0.09512444595976816
+    },
+    "751g-2kg": {
+      "pedidos": 23234,
+      "frete_mediana": 17.67,
+      "atraso": 0.09968150124817078
+    },
+    "2-5kg": {
+      "pedidos": 9922,
+      "frete_mediana": 21.23,
+      "atraso": 0.10643015521064302
+    },
+    "5-15kg": {
+      "pedidos": 9897,
+      "frete_mediana": 28.58,
+      "atraso": 0.10498130746690916
+    },
+    ">15kg": {
+      "pedidos": 2043,
+      "frete_mediana": 62.05,
+      "atraso": 0.13754282917278512
+    }
+  },
+  "pagamento": {
+    "credit_card": {
+      "pedidos": 73894,
+      "ticket_mediana": 109.295,
+      "atraso": 0.10234931117546756
+    },
+    "boleto": {
+      "pedidos": 19169,
+      "ticket_mediana": 94.31,
+      "atraso": 0.11336011268193437
+    },
+    "voucher": {
+      "pedidos": 1511,
+      "ticket_mediana": 70.52,
+      "atraso": 0.0986101919258769
+    },
+    "debit_card": {
+      "pedidos": 1411,
+      "ticket_mediana": 89.3,
+      "atraso": 0.1034727143869596
+    }
+  },
+  "efeito_flags": [
+    {
+      "flag": "sem_dt_entrega",
+      "pedidos": 2346,
+      "atraso_com": 1.0,
+      "atraso_sem": 0.08112366538820359,
+      "delta_pp": 91.88763346117965,
+      "tautologica": true
+    },
+    {
+      "flag": "sem_dt_coleta",
+      "pedidos": 1233,
+      "atraso_com": 1.0,
+      "atraso_sem": 0.09160407038111146,
+      "delta_pp": 90.83959296188885,
+      "tautologica": true
+    },
+    {
+      "flag": "sem_item",
+      "pedidos": 611,
+      "atraso_com": 1.0,
+      "atraso_sem": 0.0973575683519169,
+      "delta_pp": 90.2642431648083,
+      "tautologica": true
+    },
+    {
+      "flag": "lead_implausivel",
+      "pedidos": 64,
+      "atraso_com": 1.0,
+      "atraso_sem": 0.10235742060920285,
+      "delta_pp": 89.76425793907971,
+      "tautologica": true
+    },
+    {
+      "flag": "sem_peso",
+      "pedidos": 627,
+      "atraso_com": 0.9744816586921851,
+      "atraso_sem": 0.09737343286926234,
+      "delta_pp": 87.71082258229227,
+      "tautologica": true
+    },
+    {
+      "flag": "entrega_antes_coleta",
+      "pedidos": 23,
+      "atraso_com": 0.0,
+      "atraso_sem": 0.10296276051947001,
+      "delta_pp": -10.296276051947,
+      "tautologica": false
+    },
+    {
+      "flag": "lag_despacho_negativo",
+      "pedidos": 1359,
+      "atraso_com": 0.03090507726269316,
+      "atraso_sem": 0.10394327754804683,
+      "delta_pp": -7.303820028535367,
+      "tautologica": false
+    },
+    {
+      "flag": "frete_zero",
+      "pedidos": 338,
+      "atraso_com": 0.047337278106508875,
+      "atraso_sem": 0.10312963301448039,
+      "delta_pp": -5.579235490797151,
+      "tautologica": false
+    },
+    {
+      "flag": "cep_sem_geo",
+      "pedidos": 277,
+      "atraso_com": 0.15162454873646208,
+      "atraso_sem": 0.10280193628918499,
+      "delta_pp": 4.882261244727709,
+      "tautologica": false
+    },
+    {
+      "flag": "uf_filial_incoerente",
+      "pedidos": 580,
+      "atraso_com": 0.0603448275862069,
+      "atraso_sem": 0.10319027647705525,
+      "delta_pp": -4.284544889084835,
+      "tautologica": false
+    },
+    {
+      "flag": "cauda_incompleta",
+      "pedidos": 1458,
+      "atraso_com": 0.06721536351165981,
+      "atraso_sem": 0.10347377719345098,
+      "delta_pp": -3.625841368179117,
+      "tautologica": false
+    },
+    {
+      "flag": "frete_desproporcional",
+      "pedidos": 77,
+      "atraso_com": 0.12987012987012986,
+      "atraso_sem": 0.10291779337445184,
+      "delta_pp": 2.695233649567802,
+      "tautologica": false
+    },
+    {
+      "flag": "pagamento_divergente",
+      "pedidos": 247,
+      "atraso_com": 0.07692307692307693,
+      "atraso_sem": 0.10300398705475353,
+      "delta_pp": -2.60809101316766,
+      "tautologica": false
+    },
+    {
+      "flag": "quase_duplicado",
+      "pedidos": 6930,
+      "atraso_com": 0.08383838383838384,
+      "atraso_sem": 0.1043793396164813,
+      "delta_pp": -2.054095577809746,
+      "tautologica": false
+    },
+    {
+      "flag": "cidade_regrafada",
+      "pedidos": 267,
+      "atraso_com": 0.11235955056179775,
+      "atraso_sem": 0.10291327157048778,
+      "delta_pp": 0.9446278991309967,
+      "tautologica": false
+    }
+  ],
+  "quarentena": {
+    "lag_despacho_negativo": 1359,
+    "entrega_antes_coleta": 23,
+    "peso_invalido": 6,
+    "pagamento_invalido|canal_indefinido": 3
+  },
+  "geolocation": {
+    "prefixos": 19010,
+    "correcao_mediana_m": 35.5,
+    "correcao_p99_m": 2823.865999999998,
+    "prefixos_acima_1km": 504
+  },
+  "cep_sem_geo": 279,
+  "cidades": {
+    "grafias_entrada": 8126,
+    "canonicas": 6066,
+    "regrafias_estruturais": 31,
+    "pares_suspeitos": 73
+  }
+}

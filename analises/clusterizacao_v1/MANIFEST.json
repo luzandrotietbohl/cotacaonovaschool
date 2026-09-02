@@ -1,0 +1,117 @@
+{
+  "analise": "clusterizacao dos embarques curados",
+  "gerado_em": "2026-09-02T18:38:13+00:00",
+  "gerado_por": "scripts/clusterizar_curados.py",
+  "consome": {
+    "versao_curada": "v1",
+    "entregas_curado.csv": {
+      "sha256": "1b4a4f4ca8949b4a0716ef0c91ca4499a1f288420b1900451af9ef04bcc3beb9",
+      "linhas": 99441
+    },
+    "geolocation_cep_curado.csv": {
+      "sha256": "1a4a7e1079c382f063a31360cd09fb7aee89871e3386f9811f712893bfd70c43",
+      "linhas": 19010
+    }
+  },
+  "metodo": {
+    "algoritmo": "KMeans",
+    "features": [
+      "dist_km",
+      "peso_kg",
+      "valor_mercadoria",
+      "n_itens",
+      "lead_dias"
+    ],
+    "transformacao": {
+      "log1p": [
+        "dist_km",
+        "peso_kg",
+        "valor_mercadoria",
+        "n_itens"
+      ],
+      "escala": "StandardScaler"
+    },
+    "fora_das_features": [
+      "valor_frete",
+      "atraso_honesto",
+      "dias_vs_prazo"
+    ],
+    "motivo_exclusao": "sao as variaveis a explicar, nao a agrupar",
+    "k": 5,
+    "criterio_k": "menor Davies-Bouldin da varredura",
+    "k_varredura": [
+      2,
+      9
+    ],
+    "n_init": 25,
+    "seed": 42,
+    "replicas_estabilidade": 4,
+    "fracao_replica": 0.8
+  },
+  "populacao": {
+    "pedidos_base_curada": 99441,
+    "pedidos_segmentados": 95969,
+    "cobertura_pct": 96.51,
+    "funil": [
+      {
+        "etapa": "pedidos na base curada",
+        "pedidos": 99441,
+        "observacao": ""
+      },
+      {
+        "etapa": "apos remover cancelados",
+        "pedidos": 98816,
+        "observacao": "cancelado nao e embarque"
+      },
+      {
+        "etapa": "apos exigir dist_km",
+        "pedidos": 97715,
+        "observacao": "sem centroide de CEP nas duas pontas (1,101 fora)"
+      },
+      {
+        "etapa": "apos exigir peso_kg",
+        "pedidos": 97693,
+        "observacao": "sem peso do produto (22 fora)"
+      },
+      {
+        "etapa": "apos exigir valor_mercadoria",
+        "pedidos": 97693,
+        "observacao": "sem item registado (0 fora)"
+      },
+      {
+        "etapa": "apos exigir lead_dias",
+        "pedidos": 95969,
+        "observacao": "sem data de entrega — o buraco do cartao E1.2 (1,724 fora)"
+      },
+      {
+        "etapa": "apos exigir valores positivos",
+        "pedidos": 95969,
+        "observacao": "peso, valor e lead acima de zero"
+      }
+    ]
+  },
+  "qualidade": {
+    "silhueta": 0.2979,
+    "davies_bouldin": 1.085,
+    "calinski_harabasz": 29265.1,
+    "ari_replicas": [
+      0.9859,
+      0.9891,
+      0.9935,
+      0.998
+    ],
+    "ari_medio": 0.9916,
+    "pca_variancia_2c_pct": 58.36
+  },
+  "teste_artefato": {
+    "regra": "flag com taxa >= 2x a da populacao segmentada e >= 2% no cluster",
+    "achados": 2,
+    "conclusao": "ver teste_artefato.csv"
+  },
+  "limitacoes": [
+    "A exigencia de lead_dias exclui os pedidos sem data de entrega, herdando o vies diagnosticado no cartao E1.2.",
+    "Sem dimensoes de produto na base curada, nao ha cubagem nem densidade — duas features que separariam volumoso de pesado.",
+    "KMeans presume grupos esfericos de variancia parecida; a silhueta baixa indica regimes num continuo, nao populacoes disjuntas.",
+    "O CEP do vendedor vem da fonte bruta, porque nao entra na tabela curada v1."
+  ]
+}
