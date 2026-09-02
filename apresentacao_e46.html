@@ -573,9 +573,17 @@ svg{display:block;width:100%;height:auto;overflow:visible}
             <li><strong>Recall ≥ 60%</strong> dos atrasos com <strong>precisão ≥ 25%</strong>. Hoje: 56,2% de recall a 13,1% de precisão — falha na segunda metade.</li>
             <li>Publicar o SLA honesto: <strong>8,11% → 10,29%</strong>. O número piora de propósito.</li>
           </ul>
-          <div class="lbl" style="margin-top:1.3cqw">Quem define o KPI, e onde está escrito</div>
-          <p><code>atraso_honesto</code> — regra 9 do <code>MANIFEST.json</code> da base curada: <em>prazo vencido sem registo conta como atraso até prova em contrário</em>.</p>
-          <p class="" style="color:var(--stop)">Dono hoje: quem mantém <code>scripts/curar_dados.py</code>. Isto é um defeito: o KPI é de gestão, e não foi a gestão que o definiu.</p>
+          <div class="lbl" style="margin-top:1.3cqw">O dono do KPI, nomeado</div>
+          <p><code>atraso_honesto</code> — regra 9 do <code>MANIFEST.json</code>: <em>prazo vencido sem registo conta como atraso até prova em contrário</em>.</p>
+          <table>
+            <thead><tr><th>Papel</th><th>Quem</th><th>Responde onde</th></tr></thead>
+            <tbody>
+              <tr class="hi"><td>Define a regra e assina</td><td class="who">Diretor de Operações</td><td>reunião mensal de resultados</td></tr>
+              <tr><td>Audita o denominador</td><td class="who">Controladoria</td><td>fecho do mês</td></tr>
+              <tr><td>Calcula e publica</td><td class="who">TI</td><td>executa, não decide</td></tr>
+              <tr><td>É medido pelo número</td><td class="who">Gerentes de filial</td><td>— e por isso não o definem</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -995,7 +1003,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         <div>
           <div class="lbl">Quem responde, e com que cadência</div>
           <ul class="tight">
-            <li><strong>Dono:</strong> gerente de operações — quem responde perante a diretoria, não quem roda o script. Hoje é a TI, e é isso que precisa mudar.</li>
+            <li><strong>Dono do sistema:</strong> Gerente de Operações — responde pelo recall na reunião mensal. O <em>KPI</em> é do Diretor de Operações (bloco 1); o <em>sistema</em> é dele.</li>
             <li><strong>Revalidação mensal.</strong> Não pode ser mais rápida: o rótulo só existe 10,2 dias depois da compra, na mediana, e 46 dias no p99.</li>
             <li><strong>Monitor de deriva:</strong> taxa de atraso mensal e distribuição de <code>prazo_prometido_dias</code> — foi esta que mudou e produziu o sinal falso.</li>
           </ul>
