@@ -11,7 +11,7 @@ Duas coisas distinguem esta segmentacao de uma feita sobre o Olist bruto:
 
   2. As 20 colunas qa_* permitem o TESTE DO ARTEFATO: para cada cluster,
      verificar se ele e um regime logistico real ou apenas uma concentracao
-     de defeito de registo. Um cluster feito de pedidos sem data de entrega
+     de defeito de registro. Um cluster feito de pedidos sem data de entrega
      nao e um segmento de mercado — e um buraco no cadastro com forma de
      segmento. Sem as flags, ele passaria por descoberta.
 
@@ -211,7 +211,7 @@ log("    ARI medio: {:.4f}  (1,0 = particao identica; acima de 0,75 e reprodutiv
 # ------------------------------------------------------- TESTE DO ARTEFATO
 log("")
 log("-" * 78)
-log("4) TESTE DO ARTEFATO — cada cluster e regime logistico ou defeito de registo?")
+log("4) TESTE DO ARTEFATO — cada cluster e regime logistico ou defeito de registro?")
 log("-" * 78)
 log("  Para cada cluster, a taxa de cada flag qa_* contra a taxa da populacao")
 log("  segmentada. Enriquecimento acima de 2x sinaliza que o grupo pode estar")
@@ -296,7 +296,7 @@ log("  Mediana de itens por pedido, por cluster — o revelador do artefato:")
 log("   " + ", ".join("cluster {} = {:.0f}".format(c, perfil.loc[c, "itens_mediana"])
                       for c in ordem))
 log("")
-log("  Composicao por origem do registo (% de cada cluster):")
+log("  Composicao por origem do registro (% de cada cluster):")
 comp = (pd.crosstab(base.cluster, base.origem_registo, normalize="index") * 100).round(1)
 log("   " + comp.loc[ordem].to_string().replace("\n", "\n   "))
 
@@ -387,7 +387,7 @@ manifest = {
     "teste_artefato": {
         "regra": "flag com taxa >= 2x a da populacao segmentada e >= 2% no cluster",
         "achados": int(len(art)),
-        "conclusao": ("nenhum cluster desenhado por defeito de registo" if not len(art)
+        "conclusao": ("nenhum cluster desenhado por defeito de registro" if not len(art)
                       else "ver teste_artefato.csv"),
     },
     "limitacoes": [

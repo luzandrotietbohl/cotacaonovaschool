@@ -41,7 +41,7 @@ LEAD_MAX_DIAS = 100          # acima disto nao e entrega, e processo perdido
 PESO_MAX_G = 30_000          # 30 kg num pacote de e-commerce
 FRETE_SOBRE_MERCADORIA = 3   # frete acima de 3x a mercadoria
 DIF_PAGAMENTO_REAIS = 1.00   # tolerancia entre pagamento e (mercadoria + frete)
-CAUDA_DIAS = 60              # ultimos N dias da janela: coorte de registo incompleto
+CAUDA_DIAS = 60              # ultimos N dias da janela: coorte de registro incompleto
 
 # Aliases de cidade. Tabela curta e explicita de proposito: cada entrada e uma decisao
 # de negocio auditavel, aplicada so quando a UF confirma. Nada de adivinhacao por
@@ -492,7 +492,7 @@ e["vencido_sem_registo"] = (e.ativo & ~e.atraso_mensuravel
                             & e.order_estimated_delivery_date.notna()
                             & (e.order_estimated_delivery_date < fim))
 # atraso_honesto: o denominador passa a ser TODOS os pedidos ativos.
-# Sem registo e prazo vencido conta como falha ate prova em contrario.
+# Sem registro e prazo vencido conta como falha ate prova em contrario.
 e["atraso_honesto"] = np.where(
     ~e.ativo, None,
     np.where(e.atraso_mensuravel, e.dias_vs_prazo > 0, e.vencido_sem_registo))
@@ -526,7 +526,7 @@ log("    reportado (so quem tem data): {:.2f}%  sobre {:,} pedidos".format(
     rep.mean(skipna=True) * 100, int(rep.notna().sum())))
 log("    honesto  (todos os ativos):   {:.2f}%  sobre {:,} pedidos".format(
     ativ.atraso_honesto.astype("boolean").mean() * 100, len(ativ)))
-log("    diferenca: {:,} pedidos vencidos sem registo entram na conta".format(
+log("    diferenca: {:,} pedidos vencidos sem registro entram na conta".format(
     int(ativ.vencido_sem_registo.sum())))
 
 # ---------------------------------------------------------------- ordem final
@@ -619,7 +619,7 @@ manifest = {
         "Quase-duplicados de order_items marcados, nunca removidos: a decisao e de negocio.",
         "Pedidos sem vendedor recebem filial 'SEM_FILIAL' para nao sumirem no GROUP BY.",
         "atraso_honesto usa TODOS os pedidos ativos como denominador; prazo vencido "
-        "sem registo conta como atraso ate prova em contrario.",
+        "sem registro conta como atraso ate prova em contrario.",
         "UF declarada e conferida contra a UF do prefixo de CEP; divergencia vai para "
         "filial_uf_cep / cliente_uf_cep com flag, sem sobrescrever a filial.",
         "Implausibilidade (exatidao) e sempre marcada e nunca corrigida.",

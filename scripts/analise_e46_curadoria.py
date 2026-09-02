@@ -56,21 +56,21 @@ R["gerado_em_curadoria"] = man["gerado_em"]
 secao("BLOCO 3.3 - PROVENIENCIA: origem com hash, transformacao e saida com hash")
 
 diz("Fontes de entrada (sha256 truncado em 12):")
-diz("  " + "ficheiro".ljust(42) + "linhas".rjust(10) + "  sha256")
+diz("  " + "arquivo".ljust(42) + "linhas".rjust(10) + "  sha256")
 fontes = []
 for nome, meta in man["fontes"].items():
     diz("  " + nome.ljust(42) + format(meta["linhas"], ",").rjust(10) + "  " + meta["sha256"][:12])
-    fontes.append({"ficheiro": nome, "linhas": meta["linhas"], "sha256": meta["sha256"]})
+    fontes.append({"arquivo": nome, "linhas": meta["linhas"], "sha256": meta["sha256"]})
 R["fontes"] = fontes
 
 diz()
 diz("Saidas versionadas:")
-diz("  " + "ficheiro".ljust(42) + "linhas".rjust(10) + "colunas".rjust(9) + "  sha256")
+diz("  " + "arquivo".ljust(42) + "linhas".rjust(10) + "colunas".rjust(9) + "  sha256")
 saidas = []
 for nome, meta in man["saidas"].items():
     diz("  " + nome.ljust(42) + format(meta["linhas"], ",").rjust(10)
         + str(meta["colunas"]).rjust(9) + "  " + meta["sha256"][:12])
-    saidas.append({"ficheiro": nome, "linhas": meta["linhas"], "colunas": meta["colunas"],
+    saidas.append({"arquivo": nome, "linhas": meta["linhas"], "colunas": meta["colunas"],
                    "sha256": meta["sha256"]})
 R["saidas"] = saidas
 
@@ -115,7 +115,7 @@ diz("  reportado (so quem tem data de entrega) " + format(rep * 100, ".2f").rjus
 diz("  honesto   (todos os ativos)             " + format(hon * 100, ".2f").rjust(7) + "%  sobre "
     + format(len(ativos), ",") + " pedidos")
 diz("  diferenca                               " + format((hon - rep) * 100, "+.2f").rjust(7) + " p.p.  = "
-    + format(len(ativos) - len(mensuravel), ",") + " pedidos vencidos sem registo")
+    + format(len(ativos) - len(mensuravel), ",") + " pedidos vencidos sem registro")
 R["denominador_sla"] = {
     "reportado_pct": round(rep * 100, 4), "n_reportado": int(len(mensuravel)),
     "honesto_pct": round(hon * 100, 4), "n_honesto": int(len(ativos)),
@@ -181,7 +181,7 @@ for r in efeito:
         + format(r["atraso_com_pct"], ".1f").rjust(10) + "%"
         + format(r["atraso_sem_pct"], ".1f").rjust(10) + "%"
         + format(r["delta_pp"], "+.1f").rjust(12)
-        + ("  tautologica: a flag E a ausencia do registo"
+        + ("  tautologica: a flag E a ausencia do registro"
            if r["tautologica"] else
            "  a flag apanha pedido bom: excluir baixaria o KPI" if r["protege"] else ""))
 R["efeito_flags"] = efeito

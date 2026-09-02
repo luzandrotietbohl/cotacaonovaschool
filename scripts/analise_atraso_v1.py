@@ -13,7 +13,7 @@ PRINCIPIOS
   2. Nenhuma coluna qa_* e feature. Varias sao tautologicas com o alvo
      (qa_sem_dt_entrega implica atraso_honesto) e usa-las seria fuga.
   3. Split TEMPORAL. O split aleatorio aparece so como contraprova.
-  4. A cauda incompleta sai do teste: o alvo ainda estava a chegar.
+  4. A cauda incompleta sai do teste: o alvo ainda chegava.
   5. O custo de cada tipo de erro e um PARAMETRO DECLARADO, nao um dado.
 
 Executar: python scripts/analise_atraso_v1.py [--versao v1]
@@ -107,7 +107,7 @@ for nome, n in recortes:
 R["recortes"] = [{"recorte": n, "pedidos": int(v)} for n, v in recortes]
 
 diz()
-diz("  A cauda sai porque o ALVO ainda estava a chegar, nao porque incomoda:")
+diz("  A cauda sai porque o ALVO ainda chegava, nao porque incomoda:")
 diz("  " + format(int(df['b_cauda'].sum()), ",") + " pedidos nos ultimos "
     + str(man["parametros"]["cauda_dias"]) + " dias da janela.")
 
@@ -507,7 +507,7 @@ for m, r in por_mes.iterrows():
 estavel = por_mes.loc[por_mes.index >= "2017-05"]
 diz()
 diz("  Decomposto, o alvo tem duas componentes com comportamentos diferentes:")
-diz("  'vencido sem registo' de 2017-05 em diante fica entre "
+diz("  'vencido sem registro' de 2017-05 em diante fica entre "
     + format(float(estavel["vencido"].min() * 100), ".2f") + "% e "
     + format(float(estavel["vencido"].max() * 100), ".2f") + "%,")
 diz("  sem tendencia. Antes disso sobe ate "
@@ -516,7 +516,7 @@ diz("  sem tendencia. Antes disso sobe ate "
 diz("  o espelho da cauda no outro extremo, e os primeiros meses tambem nao servem")
 diz("  para treinar. A volatilidade do alvo vem de 'atrasado', isto e, da operacao:")
 diz("  o pico de 2018-03 (" + format(float(por_mes.loc['2018-03', 'atrasado'] * 100), ".2f")
-    + "%) e atraso real, nao falta de registo.")
+    + "%) e atraso real, nao falta de registro.")
 R["decomposicao_alvo"] = {
     "vencido_sem_registo_min_pct_pos_2017_05": round(float(estavel["vencido"].min() * 100), 3),
     "vencido_sem_registo_max_pct_pos_2017_05": round(float(estavel["vencido"].max() * 100), 3),

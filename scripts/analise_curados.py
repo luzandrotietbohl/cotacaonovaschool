@@ -126,7 +126,7 @@ R["recortes"] = {nome: int(n) for nome, n in recortes}
 
 diz()
 diz("  O recorte 'analitico' (ativos, sem quarentena, sem cauda) e o que usamos abaixo")
-diz("  para medias e comparacoes. A cauda sai porque o registo ainda estava a chegar;")
+diz("  para medias e comparacoes. A cauda sai porque o registro ainda chegava;")
 diz("  a quarentena sai porque a linha viola a fisica do processo, nao a estatistica.")
 
 status = e.order_status.value_counts()
@@ -146,7 +146,7 @@ diz("  reportado  (so quem tem data de entrega)  {:>8}  sobre {:,} pedidos".form
     pct(sla_rep), len(mensur)))
 diz("  honesto    (todos os ativos)              {:>8}  sobre {:,} pedidos".format(
     pct(sla_hon), len(ativos)))
-diz("  diferenca  {:+.2f} p.p. - {:,} pedidos com prazo vencido e sem registo".format(
+diz("  diferenca  {:+.2f} p.p. - {:,} pedidos com prazo vencido e sem registro".format(
     (sla_hon - sla_rep) * 100, vencidos))
 diz()
 diz("  A leitura: 1 em cada 10 pedidos ativos chegou atrasado ou nunca foi dado por")
@@ -156,7 +156,7 @@ R["sla"] = {"reportado": float(sla_rep), "honesto": float(sla_hon),
             "vencidos_sem_registo": vencidos,
             "delta_pp": float((sla_hon - sla_rep) * 100)}
 
-sub("Onde estao os pedidos vencidos sem registo (top 10 filiais)")
+sub("Onde estao os pedidos vencidos sem registro (top 10 filiais)")
 vsr = (ativos[ativos.vencido_sem_registo.fillna(False)]
        .groupby("filial").order_id.count().sort_values(ascending=False).head(10))
 base_f = ativos.groupby("filial").order_id.count()
@@ -177,7 +177,7 @@ diz()
 diz("  " + "mes".ljust(9) + "pedidos".rjust(9) + "reportado".rjust(11)
     + "honesto".rjust(10) + "  na cauda")
 for m, l in serie.iterrows():
-    marca = "  <- registo incompleto" if l.cauda > 0.5 else ""
+    marca = "  <- registro incompleto" if l.cauda > 0.5 else ""
     diz("  {:<9}{:>9,.0f}{:>10.2f}%{:>9.2f}%{}".format(
         m, l.pedidos, l.reportado * 100, l.honesto * 100, marca))
 R["sla_por_mes"] = {m: {"pedidos": int(l.pedidos), "reportado": float(l.reportado),
@@ -263,7 +263,7 @@ diz("  Concentracao: {} respondem por {:.1f}% dos pedidos.".format(
     ", ".join(map(str, top3.index)), top3.share.sum() * 100))
 # SEM_FILIAL fica fora da comparacao: sem vendedor nao ha data de entrega, logo o
 # atraso e 100% por definicao. Compara-la com uma filial real seria comparar um
-# buraco de registo com um processo.
+# buraco de registro com um processo.
 reais = g[(g.pedidos >= 300) & (g.index != "SEM_FILIAL")].sort_values(
     "atraso", ascending=False)
 diz("  Entre filiais reais com >=300 pedidos: {} ({:.2f}%) contra {} ({:.2f}%)".format(
@@ -276,7 +276,7 @@ if "SEM_FILIAL" in g.index:
     diz("  SEM_FILIAL: {:,.0f} pedidos sem vendedor, atraso 100% por definicao (sem".format(
         sf.pedidos))
     diz("  vendedor nao ha coleta nem entrega registada). Num GROUP BY ingenuo")
-    diz("  desapareciam do relatorio; aqui aparecem como o que sao - um buraco de registo.")
+    diz("  desapareciam do relatorio; aqui aparecem como o que sao - um buraco de registro.")
 R["filiais"] = {str(f): {"pedidos": int(l.pedidos), "share": float(l.share),
                          "atraso_honesto": float(l.atraso),
                          "lead_mediana": float(l.lead) if pd.notna(l.lead) else None}
@@ -442,7 +442,7 @@ for t in efeito:
 diz()
 diz("     Estas nao sao achado nenhum: sem data de entrega e com prazo vencido, o")
 diz("     pedido conta como atraso por regra. Estao aqui para mostrar o tamanho do")
-diz("     buraco de registo, nao para explicar o KPI.")
+diz("     buraco de registro, nao para explicar o KPI.")
 
 diz()
 diz("  b) Informativas - a flag e independente da definicao do KPI")
@@ -457,7 +457,7 @@ R["efeito_flags"] = [{"flag": n, "pedidos": int(k), "atraso_com": float(a),
 
 diz()
 diz("  Na tabela informativa o sinal e quase todo NEGATIVO: pedidos com defeito de")
-diz("  registo (lag de despacho negativo, frete zero, pagamento divergente,")
+diz("  registro (lag de despacho negativo, frete zero, pagamento divergente,")
 diz("  quase-duplicado) atrasam MENOS do que a media. Sao pedidos que chegaram e")
 diz("  cujo defeito e de lancamento, nao de operacao.")
 diz("  As excecoes, essas sim uteis: cep_sem_geo ({:+.2f}pp) e frete_desproporcional".format(

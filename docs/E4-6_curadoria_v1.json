@@ -3,79 +3,79 @@
   "gerado_em_curadoria": "2026-09-02T18:21:50+00:00",
   "fontes": [
     {
-      "ficheiro": "olist_orders_dataset.csv",
+      "arquivo": "olist_orders_dataset.csv",
       "linhas": 99441,
       "sha256": "8df58ef3d2d7e9944010f7beecd9b75367f5588ec6e3c91cec19ae3345ef9ecf"
     },
     {
-      "ficheiro": "olist_order_items_dataset.csv",
+      "arquivo": "olist_order_items_dataset.csv",
       "linhas": 112650,
       "sha256": "0bc4d068c4fe38cbb01bd90e8746e3c613fe7b4baef75fab7b0e329701c3e279"
     },
     {
-      "ficheiro": "olist_customers_dataset.csv",
+      "arquivo": "olist_customers_dataset.csv",
       "linhas": 99441,
       "sha256": "983a422239e1712ded753b3bf9ecf47dc73f144d306029dcfa99e70a226883d2"
     },
     {
-      "ficheiro": "olist_sellers_dataset.csv",
+      "arquivo": "olist_sellers_dataset.csv",
       "linhas": 3095,
       "sha256": "1f643d2b950373b85735e7794b20986f528d7a000432e7c6f9bcbb44d0846a0e"
     },
     {
-      "ficheiro": "olist_products_dataset.csv",
+      "arquivo": "olist_products_dataset.csv",
       "linhas": 32951,
       "sha256": "3e6569628a17fbc75fd206ee357b59e20364b9afa90f5b6cd5b4d624c58aa9cc"
     },
     {
-      "ficheiro": "olist_order_payments_dataset.csv",
+      "arquivo": "olist_order_payments_dataset.csv",
       "linhas": 103886,
       "sha256": "4f713964f2815dbbaa40b9488268c55aac3627bfce5aa96cf58d1f3616de3cc0"
     },
     {
-      "ficheiro": "olist_geolocation_dataset.csv",
+      "arquivo": "olist_geolocation_dataset.csv",
       "linhas": 1000163,
       "sha256": "b514f6fc991b9566aeba02aa5d67e2c3630f034b60a0e05aa0d082a3b66d88d6"
     },
     {
-      "ficheiro": "olist_order_reviews_dataset.csv",
+      "arquivo": "olist_order_reviews_dataset.csv",
       "linhas": 99224,
       "sha256": "012b61c7593e34f51fa614efdf802b9c7056ce6aae5307ddb93236e7cfc797d7"
     }
   ],
   "saidas": [
     {
-      "ficheiro": "entregas_curado.csv",
+      "arquivo": "entregas_curado.csv",
       "linhas": 99441,
       "colunas": 56,
       "sha256": "1b4a4f4ca8949b4a0716ef0c91ca4499a1f288420b1900451af9ef04bcc3beb9"
     },
     {
-      "ficheiro": "geolocation_cep_curado.csv",
+      "arquivo": "geolocation_cep_curado.csv",
       "linhas": 19010,
       "colunas": 11,
       "sha256": "1a4a7e1079c382f063a31360cd09fb7aee89871e3386f9811f712893bfd70c43"
     },
     {
-      "ficheiro": "geolocation_fora_br.csv",
+      "arquivo": "geolocation_fora_br.csv",
       "linhas": 38,
       "colunas": 6,
       "sha256": "9b31390b79c1f6a3fffdbd285bc511a0198834ece54c418f40f4b02e0635b8bd"
     },
     {
-      "ficheiro": "cidades_mapa.csv",
+      "arquivo": "cidades_mapa.csv",
       "linhas": 8617,
       "colunas": 7,
       "sha256": "85cfc8bdb4017ebd8bbd65075134e8d87f21c9d5ebf6181242ab81aff71a252a"
     },
     {
-      "ficheiro": "cidades_suspeitas.csv",
+      "arquivo": "cidades_suspeitas.csv",
       "linhas": 73,
       "colunas": 7,
       "sha256": "1adbc223d95abbd552841718b8868ca8674f60e26cf4d64210ac47ad173bbf39"
     },
     {
-      "ficheiro": "quarentena.csv",
+      "arquivo": "quarentena.csv",
       "linhas": 1391,
       "colunas": 57,
       "sha256": "5a08204c337624da6c29ce45a9469b78b96654032fd42deb392120869b7ecae3"
