@@ -749,42 +749,62 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <!-- ============ 07 · BLOCO 3.4 ============ -->
   <section class="slide dense" data-title="3.4 · Curadoria" data-core="1">
     <div class="eyebrow"><b>Bloco 3.4 · Curadoria</b><span class="q">o número antes e depois de cada regra</span></div>
-    <h2>Curadoria sem remoção de linhas: 99 441 pedidos entram e saem. A escolha do denominador desloca o indicador em 2,18 p.p.</h2>
+    <h2>Nenhum pedido é removido. Três exclusões existem, e estão todas no derivado.</h2>
     <div class="body">
-      <div class="cols c2w">
+      <div class="cols c3">
         <div>
-          <div class="lbl">Taxa de atraso sob denominador completo, com e sem cada regra · n = 98 816</div>
+          <div class="lbl">Atraso com e sem cada regra · n = 98 816</div>
           <table>
-            <thead><tr><th>Regra (flag)</th><th class="num">pedidos</th><th class="num">com</th><th class="num">sem</th><th class="num">Δ p.p.</th></tr></thead>
+            <thead><tr><th>Regra (flag)</th><th class="num">n</th><th class="num">com</th><th class="num">sem</th></tr></thead>
             <tbody>
-              <tr><td class="mono">sem_dt_entrega</td><td class="num">2 346</td><td class="num">100,0%</td><td class="num">8,1%</td><td class="num">+91,9</td></tr>
-              <tr><td class="mono">sem_dt_coleta</td><td class="num">1 233</td><td class="num">100,0%</td><td class="num">9,2%</td><td class="num">+90,8</td></tr>
-              <tr><td class="mono">sem_item</td><td class="num">611</td><td class="num">100,0%</td><td class="num">9,7%</td><td class="num">+90,3</td></tr>
-              <tr><td class="mono">sem_peso</td><td class="num">627</td><td class="num">97,5%</td><td class="num">9,7%</td><td class="num">+87,7</td></tr>
-              <tr class="hi"><td class="mono">lag_despacho_negativo</td><td class="num">1 359</td><td class="num">3,1%</td><td class="num">10,4%</td><td class="num">−7,3</td></tr>
-              <tr class="hi"><td class="mono">frete_zero</td><td class="num">338</td><td class="num">4,7%</td><td class="num">10,3%</td><td class="num">−5,6</td></tr>
+              <tr><td class="mono">sem_dt_entrega</td><td class="num">2 346</td><td class="num">100,0%</td><td class="num">8,1%</td></tr>
+              <tr><td class="mono">sem_dt_coleta</td><td class="num">1 233</td><td class="num">100,0%</td><td class="num">9,2%</td></tr>
+              <tr><td class="mono">sem_item</td><td class="num">611</td><td class="num">100,0%</td><td class="num">9,7%</td></tr>
+              <tr><td class="mono">sem_peso</td><td class="num">627</td><td class="num">97,5%</td><td class="num">9,7%</td></tr>
+              <tr class="hi"><td class="mono">lag_despacho_neg.</td><td class="num">1 359</td><td class="num">3,1%</td><td class="num">10,4%</td></tr>
+              <tr class="hi"><td class="mono">frete_zero</td><td class="num">338</td><td class="num">4,7%</td><td class="num">10,3%</td></tr>
             </tbody>
-            <tfoot><tr><td>SLA reportado → honesto</td><td class="num">2 346</td><td class="num">8,11%</td><td class="num">10,29%</td><td class="num">+2,18</td></tr></tfoot>
+            <tfoot><tr><td>SLA reportado → honesto</td><td class="num">2 346</td><td class="num">8,11%</td><td class="num">10,29%</td></tr></tfoot>
           </table>
-          <p style="margin-top:1.1cqw">As quatro primeiras são <strong>tautológicas</strong>: a flag coincide com a ausência de registro, e excluí-las produz o SLA de 8,11%.</p>
+          <p style="margin-top:1cqw">As quatro primeiras são <strong>tautológicas</strong>: excluí-las produz o SLA de 8,11%. Nas duas destacadas o sinal <strong>inverte</strong> — excluí-las reduziria o KPI a 3,1%.</p>
         </div>
         <div>
-          <div class="lbl">As onze regras e o que cada uma decide</div>
+          <div class="lbl">As três exclusões que existem</div>
+          <table>
+            <thead><tr><th>Etapa, em <code>geolocation</code></th><th class="num">linhas</th></tr></thead>
+            <tbody>
+              <tr><td>bruto</td><td class="num">1 000 163</td></tr>
+              <tr class="hi"><td>− duplicados exatos</td><td class="num">−261 831</td></tr>
+              <tr class="hi"><td>− fora dos limites do Brasil</td><td class="num">−38</td></tr>
+              <tr><td>= centroides por prefixo de CEP</td><td class="num">19 010</td></tr>
+            </tbody>
+          </table>
+          <table style="margin-top:1cqw">
+            <thead><tr><th>Grafias de cidade</th><th class="num">valor</th></tr></thead>
+            <tbody>
+              <tr><td>na entrada</td><td class="num">8 126</td></tr>
+              <tr class="hi"><td>canônicas na saída</td><td class="num">6 066</td></tr>
+              <tr><td>suspeitas, <strong>não</strong> unidas</td><td class="num">73</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:1cqw">São exclusões de fato, fora da tabela principal: estão no <em>derivado</em> geográfico. Os 38 pontos ficam preservados em <code>geolocation_fora_br.csv</code> — excluídos do cálculo, não apagados.</p>
+        </div>
+        <div>
+          <div class="lbl">As onze regras, nas quatro categorias</div>
           <ul class="tight">
-            <li class="yes"><strong>Nenhuma linha é removida.</strong> A quarentena (1 391, 1,4%) é um <em>extrato</em>, não um corte.</li>
-            <li class="no">O retido difere do mantido: frete mediano de R$ 18,45 contra R$ 17,16.</li>
-            <li class="no">Sinal invertido em <code>lag_despacho_negativo</code> e <code>frete_zero</code>: a flag <strong>seleciona pedidos sem atraso</strong>; excluí-los <em>reduziria</em> o KPI de 10,4% para 3,1%.</li>
-            <li><strong>Implausibilidade é marcada, nunca corrigida.</strong> Peso ≤ 0 vira nulo, com o original em <code>peso_g_original</code>.</li>
-            <li class="no"><strong>Imputação: nenhuma na base.</strong> A mediana entra apenas no pipeline da logística e do random forest. Sendo a ausência <strong>MNAR</strong>, imputá-la construiria um pedido normal a partir de um que falhou.</li>
-            <li class="no">Dono das onze regras: <strong>quem mantém <code>curar_dados.py</code></strong>, não a operação. A corrigir antes do piloto.</li>
+            <li><strong>Limpeza (4):</strong> peso ≤ 0 → nulo, com o original preservado; grafias colapsadas; <code>SEM_FILIAL</code> para pedido sem vendedor; UF conferida contra o CEP <em>sem</em> sobrescrever.</li>
+            <li class="no"><strong>Exclusão (2):</strong> as duas da coluna ao lado.</li>
+            <li class="yes"><strong>Marcação em vez de exclusão (4):</strong> quarentena, grafia suspeita, quase-duplicado e implausibilidade — marcados, nunca corrigidos.</li>
+            <li><strong>Definição de KPI (1):</strong> <code>atraso_honesto</code>, com todos os ativos no denominador.</li>
+            <li><strong>Imputação: nenhuma.</strong> Sendo a ausência <strong>MNAR</strong>, a mediana construiria um pedido normal a partir de um que falhou.</li>
           </ul>
+          <p style="color:var(--stop);margin-top:1cqw">Dono das onze: <strong>o mesmo</strong>. Não falta dono — há um só, e não é a operação.</p>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">LIMITAÇÃO</span><span>Esta é a curadoria do bloco 3. O modelo do bloco 4 opera ainda sobre o funil anterior, que <em>excluía</em> 2 961 registros e R$ 65 655 de frete, e no nível do embarque, ausente na <code>v1</code>. A repontagem constitui trabalho não realizado.</span></div>
+    <div class="claim"><span class="k">OS TRÊS DEFEITOS</span><span>Do slide 05: o nº 1 (datas ausentes) virou o denominador honesto, +2,18 p.p.; o nº 2 (duplicação) virou a exclusão de 261 831 linhas antes do centroide; o nº 3 (grafias) virou 8 126 → 6 066, com 73 casos deixados em aberto por não serem nossos para decidir.</span></div>
     <div class="pagenum">07</div>
   </section>
-
 
   <!-- ============ 08 · CURADOS: ONDE ESTÁ O ATRASO ============ -->
   <section class="slide dense" data-title="Curados · onde está o atraso">
