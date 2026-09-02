@@ -687,7 +687,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
               <tr><td>Validade</td><td class="num">3/5</td><td>23 entregas <em>antes</em> da coleta; 1 350 despachos antes da aprovação</td></tr>
               <tr><td>Exatidão</td><td class="num">2/5</td><td>lead até 210 dias (mediana 10,2); 73 fretes &gt; 3× a mercadoria</td></tr>
               <tr><td>Atualidade</td><td class="num">2/5</td><td>compra→aprovação máx 188 dias; 3,5% sem entrega nos últimos 60 dias</td></tr>
-              <tr class="hi"><td>Proveniência</td><td class="num">2/5</td><td>a qualidade varia <strong>monotonicamente</strong> com o porte do vendedor</td></tr>
+              <tr class="hi"><td>Origem do registro</td><td class="num">2/5</td><td>a qualidade varia <strong>monotonicamente</strong> com o porte do vendedor</td></tr>
             </tbody>
           </table>
         </div>
@@ -713,14 +713,14 @@ svg{display:block;width:100%;height:auto;overflow:visible}
     <div class="pagenum">05</div>
   </section>
 
-  <!-- ============ 06 · BLOCO 3.3 ============ -->
-  <section class="slide dense" data-title="3.3 · Proveniência" data-core="1">
-    <div class="eyebrow"><b>Bloco 3.3 · Proveniência</b><span class="q">por onde passou até chegar aqui?</span></div>
-    <h2>Proveniência registrada por hash: oito arquivos de entrada, seis de saída, parâmetros versionados.</h2>
+  <!-- ============ 06 · BLOCO 3.3 · RASTREABILIDADE ============ -->
+  <section class="slide dense" data-title="3.3 · Rastreabilidade" data-core="1">
+    <div class="eyebrow"><b>Bloco 3.3 · Rastreabilidade</b><span class="q">de onde veio cada dado, e por onde passou?</span></div>
+    <h2>Cada arquivo tem hash: oito na entrada, seis na saída, e os parâmetros versionados.</h2>
     <div class="body">
       <div class="cols c2">
         <div>
-          <div class="lbl">Linhagem · Olist Brazilian E-Commerce (Kaggle) → <code>dados_curados/v1</code></div>
+          <div class="lbl">De onde veio, e no que virou · Olist (Kaggle) → <code>dados_curados/v1</code></div>
           <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:1.14cqw;line-height:1.65;color:var(--ink-2)">
             <div style="color:var(--muted);letter-spacing:.1em">ENTRADA · 8 ARQUIVOS · 1 550 851 LINHAS · <strong style="color:var(--accent)">kaggle.com/datasets/olistbr/brazilian-ecommerce</strong></div>
             orders <strong>8df58ef3</strong> · order_items <strong>0bc4d068</strong> · customers <strong>983a4222</strong> · sellers <strong>1f643d2b</strong> · products <strong>3e656962</strong> · payments <strong>4f713964</strong> · geolocation <strong>b514f6fc</strong> · reviews <strong>012b61c7</strong>
@@ -742,7 +742,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">AUDITABILIDADE</span><span>O hash estabelece qual base produziu qual número — a prosa não. Mas a nossa linhagem só começa na <em>publicação</em>: do que houve entre o evento e o que a Olist publicou não há registro, e é o trecho que não podemos auditar.</span></div>
+    <div class="claim"><span class="k">AUDITABILIDADE</span><span>Rastrear é poder dizer de onde veio um número e por onde ele passou. O hash faz isso; a prosa não. Mas o nosso rastro só começa na <em>publicação</em>: do que houve entre o evento e o que a Olist publicou não há registro, e é o trecho que não podemos auditar.</span></div>
     <div class="pagenum">06</div>
   </section>
 
