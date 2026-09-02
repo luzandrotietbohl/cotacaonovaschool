@@ -1,0 +1,52 @@
+{
+  "model_version": "2026-09-02_145132",
+  "trained_at": "2026-09-02T14:51:32.220546+00:00",
+  "unit_of_analysis": "order_id+seller_id",
+  "target": "sum(freight_value)",
+  "total_rows": 97311,
+  "training_rows": 68117,
+  "calibration_rows": 14597,
+  "test_rows": 14597,
+  "features": [
+    "distance_km",
+    "weight_total_kg",
+    "quantity_items",
+    "declared_value",
+    "month",
+    "origin_state",
+    "dest_state",
+    "route",
+    "same_state",
+    "geo_profile"
+  ],
+  "log1p_numeric_features": [
+    "distance_km",
+    "weight_total_kg",
+    "quantity_items",
+    "declared_value"
+  ],
+  "calibration_log_adjustments": {
+    "p25": 0.0010066244150466197,
+    "p50": 0.06255128697933987,
+    "p75": 0.13500395669966325
+  },
+  "catboost_parameters": {
+    "iterations": 450,
+    "depth": 8,
+    "learning_rate": 0.07,
+    "random_seed": 42,
+    "verbose": false,
+    "allow_writing_files": false,
+    "thread_count": -1
+  },
+  "isolation_contamination": 0.01,
+  "metrics": {
+    "mae_p50": 5.617481978334573,
+    "median_absolute_error_p50": 2.1148131671463517,
+    "median_absolute_percentage_error_p50": 12.10445358799802,
+    "coverage_p25_p75": 0.4742070288415428,
+    "below_p25": 0.15400424744810579,
+    "above_p75": 0.37178872371035143
+  },
+  "limitations": "Benchmark de encomendas Olist; cargas especiais, pallets e modais não rodoviários exigem revisão."
+}

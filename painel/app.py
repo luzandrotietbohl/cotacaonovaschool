@@ -48,7 +48,7 @@ def _para_float_ptbr(texto: str) -> float:
     return float(limpo)
 
 
-def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
+def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado, precificador_historico=None) -> Flask:
     app = Flask(__name__)
     # So para assinar o cookie de flash(); o painel e local e sem login.
     app.config["SECRET_KEY"] = secrets.token_hex(32)
@@ -185,7 +185,11 @@ def criar_app(cfg, banco, tarifas, servico, fabrica_caixa, estado) -> Flask:
                     else:
                         erro = "Rota não atendida."
                 else:
-                    resultado = precificacao.calcular(pedido, tarifa)
+                    resultado = (
+                        precificador_historico.cotar(pedido, tarifa)
+                        if getattr(cfg, "precificador", "tabela") == "historico" and precificador_historico is not None
+                        else precificacao.calcular(pedido, tarifa)
+                    )
             except Exception as exc:
                 erro = f"Não foi possível cotar: {exc}"
         return render_template(

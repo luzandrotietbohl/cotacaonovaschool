@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block conteudo %}
 <h2>Cotação manual</h2>
-<p class="subtitulo">Usa a mesma tabela de tarifas do agente. Não consome a Claude API.</p>
+<p class="subtitulo">Usa o mesmo precificador do agente. Não consome a Claude API.</p>
 
 <form method="post" class="linha">
   <input type="hidden" name="_token" value="{{ csrf_token }}">
@@ -37,6 +37,13 @@
   <h3>Rota {{ resultado.tarifa.id_rota }} [{{ resultado.tarifa.modal }}]
     · {{ resultado.tarifa.chave_origem }} → {{ resultado.tarifa.chave_destino }}</h3>
   <table>
+    {% if resultado.fonte == 'historico_olist' %}
+    <tr><td>Benchmark P25</td><td>{{ resultado.p25 | reais }}</td></tr>
+    <tr><td>Preço padrão P50</td><td>{{ resultado.p50 | reais }}</td></tr>
+    <tr><td>Benchmark P75</td><td>{{ resultado.p75 | reais }}</td></tr>
+    <tr><td>Distância estimada</td><td>{{ '%.1f'|format(resultado.distancia_km) }} km</td></tr>
+    <tr><td>Versão do modelo</td><td>{{ resultado.model_version }}</td></tr>
+    {% else %}
     <tr><td>Frete por volume ({{ resultado.qtd_volumes }} vol.)</td><td>{{ resultado.frete_volumes | reais }}</td></tr>
     {% if resultado.usou_frete_minimo %}
     <tr><td>Frete mínimo aplicado</td><td>{{ resultado.frete_aplicado | reais }}</td></tr>
@@ -44,6 +51,7 @@
     <tr><td>GRIS + Advalorem</td><td>{{ resultado.gris_advalorem | reais }}</td></tr>
     {% if resultado.taxa_entrega_dificil %}
     <tr><td>Taxa entrega difícil</td><td>{{ resultado.taxa_entrega_dificil | reais }}</td></tr>
+    {% endif %}
     {% endif %}
     <tr><th>Total</th><th>{{ resultado.total | reais }}</th></tr>
     {% if resultado.prazo_dias %}

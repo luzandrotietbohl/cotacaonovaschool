@@ -25,6 +25,11 @@ def _bool(chave: str, padrao: bool) -> bool:
     return valor in ("1", "true", "sim", "s", "yes")
 
 
+def _caminho(chave: str, padrao: Path) -> Path:
+    valor = Path(os.path.expandvars(os.getenv(chave, str(padrao)).strip()))
+    return valor if valor.is_absolute() else RAIZ / valor
+
+
 @dataclass(frozen=True)
 class Config:
     # Vazia e permitido: so os comandos que usam o LLM cobram a chave
@@ -54,6 +59,9 @@ class Config:
 
     service_account_json: Path = RAIZ / "service_account.json"
     banco: Path = RAIZ / "cotador" / "dados" / "cotador.sqlite3"
+    precificador: str = "tabela"
+    modelo_artefatos: Path = RAIZ / "modelos" / "olist" / "atual"
+    modelo_bloquear_outlier: bool = True
 
     @property
     def remetente(self) -> str:
@@ -86,6 +94,9 @@ class Config:
             intervalo_segundos=int(os.getenv("INTERVALO_SEGUNDOS", "120")),
             exigir_peso=_bool("EXIGIR_PESO", True),
             auditoria_bloqueia=_bool("AUDITORIA_BLOQUEIA", True),
+            precificador=os.getenv("PRECIFICADOR", "historico").strip().lower(),
+            modelo_artefatos=_caminho("MODELO_ARTEFATOS", RAIZ / "modelos" / "olist" / "atual"),
+            modelo_bloquear_outlier=_bool("MODELO_BLOQUEAR_OUTLIER", True),
             smtp_host=os.getenv("SMTP_HOST", "smtp.gmail.com").strip(),
             smtp_porta=int(os.getenv("SMTP_PORTA", "465")),
             smtp_usuario=os.getenv("SMTP_USUARIO", "").strip(),
