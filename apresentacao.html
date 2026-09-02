@@ -472,7 +472,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <strong>Cotador de frete por email</strong>
   <span>Grupo Ouro e Prata</span>
   <span class="spacer"></span>
-  <span class="counter"><span id="cur">1</span> / <span id="tot">14</span></span>
+  <span class="counter"><span id="cur">1</span> / <span id="tot">15</span></span>
   <button id="btn-ov" type="button">Índice · G</button>
   <button id="btn-prev" type="button">←</button>
   <button id="btn-next" type="button">→</button>
@@ -491,7 +491,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
     <div class="meta">
       <div><span>O que é</span>Um agente que lê a caixa comercial,<br>entende o pedido e devolve o preço da tabela.</div>
       <div><span>Estágio hoje</span>Piloto enviando de verdade,<br>em caixa de teste com remetentes internos.</div>
-      <div><span>Verificável</span>65 testes automatizados,<br>sem rede e sem credenciais. Verdes.</div>
+      <div><span>Verificável</span>107 testes automatizados,<br>sem rede e sem credenciais. Verdes.</div>
     </div>
     <div class="pagenum">01</div>
   </section>
@@ -712,8 +712,8 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           </ul>
         </div>
         <div>
-          <div class="lbl">O número antes e depois <span class="stamp st-none">Em branco</span></div>
-          <p>O comando <code>--validar-planilha</code> já imprime linhas lidas contra tarifas vigentes. <strong>Não trouxemos o número para esta apresentação</strong> — e é exatamente a diferença entre um dado tratado e um dado maquiado.</p>
+          <div class="lbl">O número antes e depois <span class="stamp st-part">Parcial</span></div>
+          <p><code>--auditar-planilha</code> imprime linhas lidas, tarifas vigentes, bloqueios e alertas. <strong>O comando existe; o número desta semana não foi trazido para cá</strong> — e é essa a diferença entre um dado tratado e um dado maquiado.</p>
           <div class="lbl" style="margin-top:1.5cqw">Dado pessoal e base legal <span class="stamp st-part">Parcial</span></div>
           <p>Hoje o piloto roda em <strong>caixa de teste com remetentes internos</strong>: não há dado pessoal de terceiro em tratamento. Na caixa real, email, nome e telefone do cliente são dado pessoal, e a base prevista é o <strong>art. 7.º, V da LGPD</strong> — procedimentos preliminares a pedido do titular. Cotação é literalmente isso. Não é consentimento.</p>
           <div class="lbl" style="margin-top:1.5cqw">Prazo de retenção <span class="stamp st-none">Em branco</span></div>
@@ -725,7 +725,70 @@ svg{display:block;width:100%;height:auto;overflow:visible}
     <div class="pagenum">07</div>
   </section>
 
-  <!-- ============ 8 · BLOCO 4.1 A ============ -->
+  <!-- ============ 8 · CURADORIA ============ -->
+  <section class="slide dense" data-title="3.4 · A curadoria da tabela">
+    <div class="eyebrow"><b>Bloco 3.4</b> A curadoria <span class="q">quem impede um erro de digitação de virar preço?</span></div>
+    <h2>A tabela é digitada à mão e recarregada a cada dois minutos</h2>
+    <div class="body">
+      <div class="cols c2w">
+        <div>
+        <figure>
+          <div class="figtitle">A mesma cotação, sob três estados da tabela</div>
+          <div class="figsub">10 volumes · NF R$ 8 000 · rota R00001. Barras a partir do zero: são totais em reais.</div>
+          <svg viewBox="0 0 558 148" role="img" aria-label="Barras comparando o total da mesma cotação em três estados da tabela: tabela correta R$ 252,50; erro plausível R$ 272,50, cerca de 8 por cento acima, que não viola nenhuma faixa; erro absurdo R$ 2.628,50, dez vezes maior, bloqueado pela curadoria.">
+            <line class="grid" x1="305.2" y1="10" x2="305.2" y2="122"/>
+            <line class="grid" x1="460.4" y1="10" x2="460.4" y2="122"/>
+            <line class="base" x1="150" y1="10" x2="150" y2="122"/>
+            <line class="base" x1="150" y1="122" x2="558" y2="122"/>
+            <text class="ax" x="150" y="136">R$ 0</text>
+            <text class="ax" x="305.2" y="136" text-anchor="middle">R$ 1.000</text>
+            <text class="ax" x="460.4" y="136" text-anchor="middle">R$ 2.000</text>
+
+            <text class="axl" x="0" y="35">Tabela correta</text>
+            <rect x="150" y="18" width="39.2" height="24" fill="var(--c2)"/>
+            <text class="val" x="197" y="35">R$ 252,50</text>
+
+            <text class="axl" x="0" y="71">Erro plausível</text>
+            <rect x="150" y="54" width="42.3" height="24" fill="var(--c1)"/>
+            <text class="val" x="200" y="71">R$ 272,50 · +7,9% · não viola faixa nenhuma</text>
+
+            <text class="axl" x="0" y="107">Erro absurdo</text>
+            <rect x="150" y="90" width="408" height="24" fill="var(--c4)"/>
+            <text class="val" x="160" y="107" fill="#fff">R$ 2.628,50 · 10× · bloqueado antes de sair</text>
+          </svg>
+          <figcaption>O absurdo é o <code>GRIS 0,30%</code> digitado como <code>30%</code>. O plausível é <code>16,65 → 18,65</code>: passa por todos os limites e cotaria errado para sempre — só aparece contra a versão anterior da tabela.</figcaption>
+        </figure>
+          <div class="lbl" style="margin-top:1.4cqw">Fora da curva estatístico <span class="stamp st-none">Não implementado</span></div>
+          <p style="font-size:.94em">Mediana ± MAD sobre o R$/km: desenhado, fora do ar. Com o número atual de rotas não tem poder estatístico — e não pega o erro que dói.</p>
+        </div>
+        <div>
+          <div class="lbl">Três camadas <span class="stamp st-ok">Especificado</span></div>
+          <table>
+            <tbody>
+              <tr>
+                <td style="width:30%"><strong>Versão</strong><br><span style="color:var(--muted)">camada 0</span></td>
+                <td>Cada carga guardada por hash; cada cotação guarda a tarifa inteira, não só o <code>id_rota</code>. Corrigir a planilha amanhã não apaga o porquê de hoje.</td>
+              </tr>
+              <tr>
+                <td><strong>Limites duros</strong><br><span style="color:var(--muted)">camada 1</span></td>
+                <td>Intervalos declarados por pessoas, campo a campo. Bloqueia também duas tarifas vigentes no mesmo trecho — o preço viria da ordem das linhas.</td>
+              </tr>
+              <tr>
+                <td><strong>Quarentena</strong><br><span style="color:var(--muted)">camada 5</span></td>
+                <td>A linha implausível <strong>para de cotar</strong>; a thread vai para revisão com o motivo. Nunca vira «não atendemos»: o erro é nosso.</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="lbl" style="margin-top:1.2cqw">Quem pode liberar o quê</div>
+          <p><strong>Alerta:</strong> o comercial silencia assinando a linha (<code>REVISADO_POR</code> + <code>REVISADO_EM</code>). <strong>Bloqueio ninguém libera</strong> — um GRIS de 30% não é tarifa a autorizar, é um 0,30 errado.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Nada disto garante acurácia — acurácia de preço só o comercial afirma. Garante que nenhuma mudança de preço saia em silêncio.</span></div>
+    <div class="pagenum">08</div>
+  </section>
+
+  <!-- ============ 10 · BLOCO 4.1 A ============ -->
   <section class="slide" data-title="4.1 · Regra, não modelo">
     <div class="eyebrow"><b>Bloco 4.1</b> A adequação da análise <span class="q">por que este método?</span></div>
     <h2>Isto não precisa de IA para decidir o preço. Precisa de uma regra e de um dono.</h2>
@@ -764,12 +827,12 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <div class="lbl" style="margin-top:1.5cqw">O peso não entra no preço</div>
           <p>Não há cobrança por peso nem por cubagem nesta tabela. O peso serve para <strong>uma coisa só</strong>: se o peso médio por volume estourar o limite da rota, o agente <strong>não responde</strong> e manda para revisão humana. É uma recusa por segurança, não um cálculo.</p>
           <div class="lbl" style="margin-top:1.5cqw">Regressão <span class="stamp st-ok">Especificado</span></div>
-          <p><strong>65 testes</strong>, sem rede e sem credenciais, rodando em 4 segundos. Um deles reproduz a aba EXEMPLO_CALCULO da planilha e exige exatamente os R$ 252,50 acima.</p>
+          <p><strong>107 testes</strong>, sem rede e sem credenciais. Um deles reproduz a aba EXEMPLO_CALCULO e exige exatamente os R$ 252,50 acima.</p>
         </div>
       </div>
     </div>
     <div class="claim"><span class="k">A FRASE</span><span>Concluir que uma regra basta é uma resposta forte. A nossa: regra para o preço, modelo só para ler o português do cliente.</span></div>
-    <div class="pagenum">08</div>
+    <div class="pagenum">09</div>
   </section>
 
   <!-- ============ 9 · BLOCO 4.1 B ============ -->
@@ -824,10 +887,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">A FRASE</span><span>A análise falharia de forma visível se estivesse errada: o preço sai escrito no email, com a composição aberta, e o cliente confere.</span></div>
-    <div class="pagenum">09</div>
+    <div class="pagenum">10</div>
   </section>
 
-  <!-- ============ 10 · BLOCO 4.2 ============ -->
+  <!-- ============ 11 · BLOCO 4.2 ============ -->
   <section class="slide dense" data-title="4.2 · A gestão">
     <div class="eyebrow"><b>Bloco 4.2</b> A gestão <span class="q">quem mantém isto vivo depois do piloto?</span></div>
     <h2>Aqui não há deriva estatística. Há deriva de cadastro.</h2>
@@ -837,10 +900,11 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <div class="lbl">Donos <span class="stamp st-part">Parcial</span></div>
           <p><strong>Comercial</strong> responde pelo preço enviado. <strong>TI</strong> responde pelo código e pela disponibilidade. O fórum dessa prestação de contas e a consequência de um preço errado <strong>não estão escritos</strong> — e um dono sem fórum e sem consequência não é um dono.</p>
           <div class="lbl" style="margin-top:1.4cqw">O sinal a monitorar</div>
-          <p>A tabela muda de forma <strong>esporádica</strong>, sem cadência: uma tarifa vencida é indistinguível de uma esquecida. Dois indicadores revelam isso:</p>
+          <p>A tabela muda de forma <strong>esporádica</strong>, sem cadência: uma tarifa vencida é indistinguível de uma esquecida. Três indicadores revelam isso:</p>
           <ul class="tight">
             <li>Taxa de <code>cotador-revisar</code> por motivo, semana a semana.</li>
             <li>Idade da linha de tarifa mais velha ainda vigente.</li>
+            <li>Bloqueios da curadoria por semana, e quanto tempo cada rota fica em quarentena.</li>
           </ul>
           <p style="margin-top:.7cqw">Por desenho, um trecho cadastrado <strong>sem tarifa vigente nunca vira «não atendemos»</strong>: vai para revisão humana, porque é falha de cadastro, não ausência de rota.</p>
         </div>
@@ -849,7 +913,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <table>
             <thead><tr><th style="width:12%">Portão</th><th style="width:52%">Critério, escrito antes</th><th>Data</th></tr></thead>
             <tbody>
-              <tr><td class="who">G1</td><td>65 testes verdes e piloto enviando em caixa de teste. <span class="stamp st-ok">Cumprido</span></td><td>hoje</td></tr>
+              <tr><td class="who">G1</td><td>107 testes verdes e piloto enviando em caixa de teste. <span class="stamp st-ok">Cumprido</span></td><td>hoje</td></tr>
               <tr><td class="who">G2</td><td>4 semanas de caixa real em <code>MODO_RESPOSTA=rascunho</code>, com zero divergência de preço na amostra conferida → passa a <code>enviar</code>.</td><td><span class="stamp st-none">Em branco</span></td></tr>
               <tr><td class="who">G3</td><td>90 dias em <code>enviar</code>, tempo mediano de resposta abaixo de 5 min e zero divergência → amplia para toda a caixa comercial.</td><td><span class="stamp st-none">Em branco</span></td></tr>
             </tbody>
@@ -864,10 +928,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">A FRASE</span><span>Um portão sem critério escrito antes e sem data no calendário é uma reunião. Temos os critérios; faltam as datas.</span></div>
-    <div class="pagenum">10</div>
+    <div class="pagenum">11</div>
   </section>
 
-  <!-- ============ 11 · BLOCO 5 ============ -->
+  <!-- ============ 12 · BLOCO 5 ============ -->
   <section class="slide" data-title="5 · A ética">
     <div class="eyebrow"><b>Bloco 5</b> A ética, nesta aplicação <span class="q">quem é afetado e não está nesta sala?</span></div>
     <h2>O que acontece quando ele funciona exatamente como foi desenhado</h2>
@@ -903,10 +967,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">A FRASE</span><span>Cumprir a LGPD responde ao bloco 3. A pergunta aqui é outra: o que a pessoa afetada pode fazer? Hoje, nada.</span></div>
-    <div class="pagenum">11</div>
+    <div class="pagenum">12</div>
   </section>
 
-  <!-- ============ 12 · BLOCO 6 ============ -->
+  <!-- ============ 13 · BLOCO 6 ============ -->
   <section class="slide dense" data-title="6 · A configuração da decisão">
     <div class="eyebrow"><b>Bloco 6</b> A configuração da decisão <span class="q">quem decide o quê, passo a passo?</span></div>
     <h2>Automação não é um interruptor. É um nível por passo.</h2>
@@ -919,8 +983,8 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <tr><td class="who">Escolher o que tratar na caixa</td><td>agente</td><td><span class="stamp st-part">Automático</span></td><td>ninguém</td><td>o email fica na caixa sem label. <strong>Ninguém percebe até alguém olhar.</strong></td></tr>
           <tr><td class="who">É cotação, sim ou não?</td><td>agente, corte 0,35</td><td><span class="stamp st-part">Automático</span></td><td>comercial, ao abrir a thread</td><td>falso negativo = pedido tratado como spam e arquivado em silêncio. <strong>É a pior falha do sistema, e é a única invisível.</strong></td></tr>
           <tr><td class="who">Extrair os cinco campos</td><td>agente</td><td><span class="stamp st-part">Automático</span></td><td>o próprio cliente, na resposta seguinte</td><td>campo errado → preço errado. O corte 0,60 é o que segura.</td></tr>
-          <tr><td class="who">Escolher rota e tarifa</td><td>a tabela (regra)</td><td><span class="stamp st-part">Automático</span></td><td>comercial, editando a planilha</td><td>tarifa vencida → não cota, vai para revisão. <strong>Falha visível, por desenho.</strong></td></tr>
-          <tr><td class="who">Calcular o preço</td><td>ninguém — é aritmética</td><td><span class="stamp st-part">Automático</span></td><td>—</td><td>aparece no teste, não no cliente. 65 testes cobrem a conta.</td></tr>
+          <tr><td class="who">Escolher rota e tarifa</td><td>a tabela + a curadoria</td><td><span class="stamp st-part">Automático</span></td><td>comercial, corrigindo a planilha</td><td>tarifa vencida ou implausível → não cota, vai para revisão com o motivo. <strong>Falha visível, por desenho.</strong></td></tr>
+          <tr><td class="who">Calcular o preço</td><td>ninguém — é aritmética</td><td><span class="stamp st-part">Automático</span></td><td>—</td><td>aparece no teste, não no cliente. 107 testes cobrem a conta.</td></tr>
           <tr style="background:var(--stop-wash)"><td class="who">Emitir o preço ao cliente</td><td>agente, se confiança ≥ 0,60</td><td><span class="stamp st-none">Automático hoje</span></td><td>conferência amostral, <strong>depois</strong> do envio</td><td>o cliente já recebeu. <strong>Irreversível na prática — e é aqui que a fronteira está no lugar errado.</strong></td></tr>
           <tr><td class="who">Dizer «não atendemos»</td><td>agente</td><td><span class="stamp st-none">Automático</span></td><td>ninguém</td><td>oportunidade perdida, em silêncio</td></tr>
           <tr><td class="who">Negociar, dar desconto, abrir exceção · mudar a tarifa</td><td>comercial, sempre</td><td><span class="stamp st-ok">Nunca automático</span></td><td>—</td><td>a conta de serviço é somente leitura: o agente não escreve na tabela nem por engano. A alçada nunca sai de mãos humanas.</td></tr>
@@ -928,10 +992,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </table>
     </div>
     <div class="claim"><span class="k">A FRASE</span><span>O freio existe — <code>MODO_RESPOSTA=rascunho</code> — e não está puxado. Essa é a decisão que sai desta apresentação.</span></div>
-    <div class="pagenum">12</div>
+    <div class="pagenum">13</div>
   </section>
 
-  <!-- ============ 13 · EM BRANCO ============ -->
+  <!-- ============ 14 · EM BRANCO ============ -->
   <section class="slide dense" data-title="O que ficou em branco">
     <div class="eyebrow"><b>Consolidado</b> <span class="q">o que não sabemos, dito em voz alta</span></div>
     <h2>Nove campos em branco — e nenhum deles é um projeto</h2>
@@ -942,7 +1006,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <tr><td class="who">1</td><td>Nenhum dos três KPIs está escrito nem acordado</td><td>sem critério, o piloto não tem como terminar</td><td>uma página, assinada por comercial e TI</td></tr>
           <tr><td class="who">1</td><td>Tempo de resposta atual, medido</td><td>é a linha de base de tudo</td><td>consulta ao SQLite; os carimbos de hora já estão lá</td></tr>
           <tr><td class="who">3.2</td><td>% de emails que chegam com os cinco campos</td><td>decide se o agente resolve ou só repergunta</td><td>uma consulta por desfecho no SQLite</td></tr>
-          <tr><td class="who">3.4</td><td>Linhas lidas × tarifas vigentes na planilha</td><td>é a diferença entre dado tratado e dado maquiado</td><td><code>python main.py --validar-planilha</code></td></tr>
+          <tr><td class="who">3.4</td><td>Linhas lidas × tarifas vigentes na planilha</td><td>é a diferença entre dado tratado e dado maquiado</td><td><code>main.py --auditar-planilha</code></td></tr>
           <tr><td class="who">3.3</td><td>Prazo de retenção do SQLite; não há backup</td><td>vira obrigação quando a caixa for real</td><td>definir prazo, escrever, apagar o resto</td></tr>
           <tr><td class="who">4.1</td><td>Custo em reais de cotar a menos e de cotar a mais</td><td>é o que calibraria 0,35 e 0,60 por custo, não por intuição</td><td>duas conversas com o comercial</td></tr>
           <tr><td class="who">4.2</td><td>Fórum e consequência do dono nomeado</td><td>dono sem fórum não é dono</td><td>ponto fixo na reunião comercial semanal</td></tr>
@@ -952,20 +1016,20 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </table>
     </div>
     <div class="claim"><span class="k">A FRASE</span><span>Sete dos nove se resolvem com uma consulta, uma conversa ou uma data. Nenhum precisa de mais tecnologia.</span></div>
-    <div class="pagenum">13</div>
+    <div class="pagenum">14</div>
   </section>
 
-  <!-- ============ 14 · FECHO ============ -->
+  <!-- ============ 15 · FECHO ============ -->
   <section class="slide cover" data-title="Fecho">
     <div class="kicker">O que levamos daqui</div>
     <h1 style="font-size:4.6cqw;max-width:26ch">Um agente que lê português<br>e uma planilha que decide o preço.</h1>
     <div class="rule"></div>
     <div class="meta" style="font-size:1.24cqw">
-      <div><span>O que está pronto</span>A regra, a fórmula, os 65 testes,<br>a triagem e o freio de mão.</div>
+      <div><span>O que está pronto</span>A regra, a fórmula, os 107 testes,<br>a triagem e o freio de mão.</div>
       <div><span>O que falta</span>Os números que provariam<br>que ele está servindo.</div>
       <div><span>A decisão de hoje</span>Puxar o freio: voltar a <code>rascunho</code><br>até o portão G2 ter data.</div>
     </div>
-    <div class="pagenum">14</div>
+    <div class="pagenum">15</div>
   </section>
 </div>
 </div>

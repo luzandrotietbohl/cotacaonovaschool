@@ -5,7 +5,7 @@ import dataclasses
 import logging
 
 from cotador.config import Config
-from cotador.core import mensagens, precificacao
+from cotador.core import curadoria, mensagens, precificacao
 from cotador.core.extracao import Extrator
 from cotador.core.modelos import Desfecho, Email, PedidoCotacao
 from cotador.integracoes.banco import Banco
@@ -57,6 +57,7 @@ class Agente:
 
     def _ciclo(self) -> dict[str, int]:
         self.tarifas.carregar()
+        self._versionar_tabela()
         ids = self.caixa.buscar(self.cfg.gmail_query)
         log.info("Emails a avaliar: %d", len(ids))
 
@@ -73,6 +74,43 @@ class Agente:
                 desfecho = "erro"
             contagem[desfecho] = contagem.get(desfecho, 0) + 1
         return contagem
+
+    def _versionar_tabela(self) -> None:
+        """Camada 0 da curadoria: guarda esta carga da planilha.
+
+        Registra sempre, mas so grita quando o conteudo mudou — o agente
+        recarrega a tabela a cada ciclo e um log por ciclo nao seria lido por
+        ninguem. Falha aqui nao pode derrubar o ciclo: auditoria e importante,
+        atender o cliente e mais.
+        """
+        try:
+            nova = self.banco.registrar_versao_tabela(
+                hash_conteudo=self.tarifas.hash_conteudo,
+                aba=self.cfg.sheet_aba,
+                linhas=len(self.tarifas.linhas_brutas),
+                tarifas=len(self.tarifas.tarifas),
+                bloqueios=len(curadoria.bloqueios(self.tarifas.achados)),
+                impressao=self.tarifas.impressao(),
+            )
+        except Exception:
+            log.exception("Falha ao versionar a tabela de tarifas; seguindo o ciclo")
+            return
+
+        if not nova:
+            return
+        log.warning(
+            "Tabela de tarifas mudou (hash %s): %d tarifas, %d em quarentena",
+            self.tarifas.hash_conteudo[:12],
+            len(self.tarifas.tarifas),
+            len(self.tarifas.quarentena),
+        )
+        anterior = self.banco.versao_anterior(
+            self.cfg.sheet_aba, self.tarifas.hash_conteudo
+        )
+        if not anterior:
+            return
+        for mudanca in curadoria.comparar(anterior["impressao"], self.tarifas.impressao()):
+            log.warning("Curadoria (mudanca): %s", mudanca)
 
     # ---------------- unidade ----------------
     def _processar(self, uid: str) -> Desfecho:
@@ -215,6 +253,9 @@ class Agente:
             valor_nf=cotacao.valor_nf,
             peso_kg=pedido.peso_kg,
             valor_frete=cotacao.total,
+            # A tarifa inteira, nao so o id: amanha o comercial corrige a
+            # planilha e esta cotacao tem de continuar reconstruivel.
+            tarifa=dataclasses.asdict(tarifa),
         )
 
     # ---------------- auxiliares ----------------
@@ -226,10 +267,15 @@ class Agente:
             return None
 
         if self.tarifas.trecho_cadastrado(pedido.origem, pedido.destino):
-            # Trecho existe mas a tarifa esta INATIVA ou fora da vigencia.
-            # Nunca dizer ao cliente que nao atendemos: e falha de cadastro.
+            # Trecho existe mas a tarifa esta em quarentena, INATIVA ou fora da
+            # vigencia. Nunca dizer ao cliente que nao atendemos: e falha nossa
+            # de cadastro, e a resposta certa e um humano olhando.
+            quarentena = self.tarifas.motivo_quarentena(pedido.origem, pedido.destino)
             motivo = (
-                f"trecho {pedido.origem} -> {pedido.destino} cadastrado, "
+                f"trecho {pedido.origem} -> {pedido.destino} em quarentena pela "
+                f"curadoria: {quarentena}"
+                if quarentena
+                else f"trecho {pedido.origem} -> {pedido.destino} cadastrado, "
                 "porem sem tarifa vigente (INATIVO ou vigencia expirada)"
             )
             log.warning("Tarifa indisponivel: %s", motivo)

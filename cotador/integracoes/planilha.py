@@ -13,6 +13,7 @@ from datetime import date, datetime
 
 from googleapiclient.discovery import build
 
+from cotador.core import curadoria
 from cotador.core.modelos import Tarifa
 from cotador.core.precificacao import normalizar_local
 
@@ -40,6 +41,10 @@ COLUNAS: dict[str, list[str]] = {
     "vigencia_inicio": ["vigencia_inicio"],
     "vigencia_fim": ["vigencia_fim"],
     "status": ["status"],
+    # Colunas de liberacao humana. Nao precisam existir na planilha: sem elas,
+    # nenhuma linha esta revisada e os alertas simplesmente aparecem todos.
+    "revisado_por": ["revisado_por", "revisado"],
+    "revisado_em": ["revisado_em", "revisado_data"],
 }
 
 OBRIGATORIAS = {
@@ -91,15 +96,60 @@ def _data(valor: str | None) -> date | None:
 
 
 class TabelaTarifas:
-    def __init__(self, credenciais, sheet_id: str, aba: str) -> None:
+    # Defaults de classe para que os metodos de consulta funcionem numa
+    # instancia criada por __new__ — os testes fazem isso de proposito, para
+    # exercitar a decisao sobre as tarifas sem exigir credenciais do Sheets.
+    _auditoria_bloqueia: bool = True
+    _linhas_brutas: list[list[str]] = []
+    _linha_da_tarifa: list[int] = []
+    _achados: list[curadoria.Achado] = []
+    _quarentena: frozenset[int] = frozenset()
+
+    def __init__(
+        self,
+        credenciais,
+        sheet_id: str,
+        aba: str,
+        auditoria_bloqueia: bool = True,
+    ) -> None:
         self._api = build("sheets", "v4", credentials=credenciais, cache_discovery=False)
         self._sheet_id = sheet_id
         self._aba = aba
+        # False deixa a curadoria em modo relatorio: audita e registra, mas
+        # nao retira nenhuma linha de circulacao. Serve para a primeira
+        # rodada, quando ainda nao se sabe o que a tabela real viola.
+        self._auditoria_bloqueia = auditoria_bloqueia
         self._tarifas: list[Tarifa] = []
+        self._linhas_brutas: list[list[str]] = []
+        self._linha_da_tarifa: list[int] = []
+        self._achados: list[curadoria.Achado] = []
+        self._quarentena: set[int] = set()
 
     @property
     def tarifas(self) -> list[Tarifa]:
         return self._tarifas
+
+    @property
+    def achados(self) -> list[curadoria.Achado]:
+        """Tudo o que a curadoria encontrou na ultima carga."""
+        return self._achados
+
+    @property
+    def quarentena(self) -> list[Tarifa]:
+        """Tarifas que existem na planilha mas estao proibidas de cotar."""
+        return [self._tarifas[i] for i in sorted(self._quarentena)]
+
+    @property
+    def linhas_brutas(self) -> list[list[str]]:
+        return self._linhas_brutas
+
+    @property
+    def hash_conteudo(self) -> str:
+        return curadoria.hash_conteudo(self._linhas_brutas)
+
+    def impressao(self) -> list[dict]:
+        """Snapshot comparavel desta carga (camada 0)."""
+        return curadoria.impressao(self._tarifas)
 
     def carregar(self) -> int:
         resp = (
@@ -113,18 +163,47 @@ class TabelaTarifas:
             raise RuntimeError(f"Aba '{self._aba}' vazia ou sem cabecalho")
 
         indices = self._mapear_colunas(linhas[0])
+        self._linhas_brutas = linhas
         self._tarifas = []
+        self._linha_da_tarifa = []
         descartadas = 0
         for n, linha in enumerate(linhas[1:], start=2):
             tarifa = self._linha_para_tarifa(linha, indices)
             if tarifa:
                 self._tarifas.append(tarifa)
+                self._linha_da_tarifa.append(n)
             else:
                 descartadas += 1
                 log.debug("Linha %d ignorada (incompleta)", n)
 
-        log.info("Tarifas carregadas: %d (descartadas: %d)", len(self._tarifas), descartadas)
+        self._auditar()
+        log.info(
+            "Tarifas carregadas: %d (descartadas: %d, em quarentena: %d)",
+            len(self._tarifas),
+            descartadas,
+            len(self._quarentena),
+        )
         return len(self._tarifas)
+
+    def _auditar(self) -> None:
+        """Camada 1 da curadoria, mais a quarentena da camada 5.
+
+        A linha bloqueada sai de `rotas` e portanto nao cota, mas continua
+        aparecendo em `trecho_cadastrado`. E o que garante que o cliente nunca
+        receba um "nao atendemos" por causa de um erro nosso de cadastro: o
+        agente manda a thread para revisao humana.
+        """
+        self._achados = curadoria.auditar_tabela(self._tarifas, self._linha_da_tarifa)
+        self._quarentena = (
+            curadoria.indices_bloqueados(self._achados)
+            if self._auditoria_bloqueia
+            else set()
+        )
+        for achado in curadoria.bloqueios(self._achados):
+            nivel = log.error if self._auditoria_bloqueia else log.warning
+            nivel("Curadoria (bloqueio): %s", achado)
+        for achado in curadoria.alertas(self._achados):
+            log.warning("Curadoria (alerta): %s", achado)
 
     def _mapear_colunas(self, cabecalho: list[str]) -> dict[str, int]:
         vistos = {_chave(c): i for i, c in enumerate(cabecalho) if c.strip()}
@@ -178,6 +257,8 @@ class TabelaTarifas:
             vigencia_inicio=_data(celula("vigencia_inicio")),
             vigencia_fim=_data(celula("vigencia_fim")),
             status=(celula("status") or "ATIVO").strip().upper(),
+            revisado_por=celula("revisado_por"),
+            revisado_em=_data(celula("revisado_em")),
         )
 
     # ---------------- consulta ----------------
@@ -197,11 +278,35 @@ class TabelaTarifas:
         hoje = dia or date.today()
         return [
             t
-            for t in self._tarifas
-            if self._casa_local(t.cidade_origem, t.uf_origem, origem)
+            for i, t in enumerate(self._tarifas)
+            if i not in self._quarentena
+            and self._casa_local(t.cidade_origem, t.uf_origem, origem)
             and self._casa_local(t.cidade_destino, t.uf_destino, destino)
             and t.vigente_em(hoje)
         ]
+
+    def motivo_quarentena(self, origem: str, destino: str) -> str | None:
+        """Por que este trecho parou de cotar, na linguagem de quem corrige.
+
+        None quando o trecho nao tem linha bloqueada — a indisponibilidade,
+        se houver, e vigencia ou status, nao curadoria.
+        """
+        motivos = [
+            str(a)
+            for a in curadoria.bloqueios(self._achados)
+            if a.indice in self._quarentena
+            and self._casa_local(
+                self._tarifas[a.indice].cidade_origem,
+                self._tarifas[a.indice].uf_origem,
+                origem,
+            )
+            and self._casa_local(
+                self._tarifas[a.indice].cidade_destino,
+                self._tarifas[a.indice].uf_destino,
+                destino,
+            )
+        ]
+        return "; ".join(dict.fromkeys(motivos)) or None
 
     def trecho_cadastrado(self, origem: str, destino: str) -> bool:
         """O trecho existe na planilha, ignorando status e vigencia.
