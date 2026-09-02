@@ -1,0 +1,51 @@
+
+==============================================================================
+OS CINCO MODELOS NO MESMO TESTE TEMPORAL
+==============================================================================
+  modelo                                 AUC   PR-AUC
+  arvores impulsionadas (escolhido)   0.7244   0.1736
+  regressao logistica                 0.7045   0.1662
+  random forest                       0.6980   0.1557
+  catboost                            0.7007   0.1720
+
+==============================================================================
+BOOTSTRAP NA DIFERENCA: 2 p.p. de AUC e sinal ou ruido?
+==============================================================================
+  1000 reamostras do conjunto de teste (n = 18,961)
+
+  contra o escolhido               delta AUC              IC 95%  inclui zero?
+  regressao logistica              +2.02pp      [+0.84, +3.17]   nao
+  random forest                    +2.64pp      [+1.76, +3.44]   nao
+  catboost                         +2.38pp      [+1.56, +3.24]   nao
+
+==============================================================================
+POR QUE CLASSIFICAR, E NAO PREVER OS DIAS DE ATRASO
+==============================================================================
+  Para prever DIAS de atraso e preciso a coluna dias_vs_prazo, que existe
+  apenas onde ha data de entrega registada:
+
+    pedidos no recorte                   97,358
+    com dias_vs_prazo                    95,019    97.60%
+    SEM dias_vs_prazo                     2,339
+
+    desses, contados como atraso pelo denominador honesto:   2,339
+    fracao dos atrasos que a regressao perderia:   23.2%
+
+  A LEITURA: a regressao so treina onde a entrega foi registada, ou seja,
+  exclui exatamente os pedidos que o KPI honesto conta como atraso. Prever
+  dias obriga a voltar ao denominador reportado - o defeito no 1 do E1.2.
+  Classificar e o que permite manter o alvo honesto.
+
+==============================================================================
+HIPERPARAMETROS: FIXOS E NAO AJUSTADOS - QUANTO ISSO CUSTA
+==============================================================================
+  configuracao                                       AUC
+  iter=300 lr=0.06 folhas=31 min=40               0.7244
+  iter=150 lr=0.1 folhas=31 min=40                0.7221
+  iter=600 lr=0.03 folhas=63 min=20               0.7173
+  iter=300 lr=0.06 folhas=15 min=100              0.7297
+
+  amplitude entre as quatro configuracoes: 1.24 p.p.
+  Nao houve busca de hiperparametros. A amplitude acima diz o que isso
+  custou, e e menor do que a diferenca entre modelos - por isso a escolha
+  do modelo importa mais do que o ajuste dele.

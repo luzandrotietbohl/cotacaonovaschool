@@ -1,0 +1,106 @@
+{
+  "n_treino": 78397,
+  "n_teste": 18961,
+  "prevalencia_teste": 0.0646,
+  "modelos": [
+    {
+      "modelo": "arvores impulsionadas (escolhido)",
+      "auc": 0.7244,
+      "pr_auc": 0.1736
+    },
+    {
+      "modelo": "regressao logistica",
+      "auc": 0.7045,
+      "pr_auc": 0.1662
+    },
+    {
+      "modelo": "random forest",
+      "auc": 0.698,
+      "pr_auc": 0.1557
+    },
+    {
+      "modelo": "catboost",
+      "auc": 0.7007,
+      "pr_auc": 0.172
+    }
+  ],
+  "bootstrap_delta_auc": [
+    {
+      "contra": "regressao logistica",
+      "delta_auc_pp": 2.017,
+      "ic95_pp": [
+        0.841,
+        3.174
+      ],
+      "inclui_zero": false
+    },
+    {
+      "contra": "random forest",
+      "delta_auc_pp": 2.643,
+      "ic95_pp": [
+        1.764,
+        3.439
+      ],
+      "inclui_zero": false
+    },
+    {
+      "contra": "catboost",
+      "delta_auc_pp": 2.377,
+      "ic95_pp": [
+        1.564,
+        3.239
+      ],
+      "inclui_zero": false
+    }
+  ],
+  "reamostras": 1000,
+  "regressao_descartada": {
+    "pedidos": 97358,
+    "com_dias_vs_prazo": 95019,
+    "sem_dias_vs_prazo": 2339,
+    "atrasos_que_a_regressao_perderia": 2339,
+    "pct_dos_atrasos": 23.22,
+    "motivo": "dias_vs_prazo so existe onde ha data de entrega; regredir dias obriga a excluir os pedidos vencidos sem registo, que sao justamente os que o denominador honesto conta"
+  },
+  "sensibilidade_hiperparametros": {
+    "configs": [
+      {
+        "config": {
+          "max_iter": 300,
+          "learning_rate": 0.06,
+          "max_leaf_nodes": 31,
+          "min_samples_leaf": 40
+        },
+        "auc": 0.7244
+      },
+      {
+        "config": {
+          "max_iter": 150,
+          "learning_rate": 0.1,
+          "max_leaf_nodes": 31,
+          "min_samples_leaf": 40
+        },
+        "auc": 0.7221
+      },
+      {
+        "config": {
+          "max_iter": 600,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 63,
+          "min_samples_leaf": 20
+        },
+        "auc": 0.7173
+      },
+      {
+        "config": {
+          "max_iter": 300,
+          "learning_rate": 0.06,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 100
+        },
+        "auc": 0.7297
+      }
+    ],
+    "amplitude_pp": 1.24
+  }
+}

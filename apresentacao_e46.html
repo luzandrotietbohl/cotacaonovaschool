@@ -529,7 +529,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <strong>E4.6 · Apresentação final do Módulo 1</strong>
   <span>Prever entregas atrasadas · Dados e IA no Transporte</span>
   <span class="spacer"></span>
-  <span class="counter"><span id="cur">1</span> / <span id="tot">22</span></span>
+  <span class="counter"><span id="cur">1</span> / <span id="tot">23</span></span>
   <button id="btn-ov" type="button">Índice · G</button>
   <button id="btn-prev" type="button">←</button>
   <button id="btn-next" type="button">→</button>
@@ -642,7 +642,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
               <tr class="hi"><td>quantos dias vai atrasar</td><td class="who">não</td></tr>
             </tbody>
           </table>
-          <p style="margin-top:1cqw">«Em parte» é AUC 0,72, e instável — slide 11. O <strong>«não» da terceira linha</strong> delimita o sistema: sem o motivo, ele avisa sem dizer o que fazer.</p>
+          <p style="margin-top:1cqw">«Em parte» é AUC 0,72, e instável — slide 12. O <strong>«não» da terceira linha</strong> delimita o sistema: sem o motivo, ele avisa sem dizer o que fazer.</p>
         </div>
         <div>
           <div class="lbl">3.1 · cada campo é a alegação de alguém</div>
@@ -870,8 +870,8 @@ svg{display:block;width:100%;height:auto;overflow:visible}
             </tbody>
           </table>
           <div class="lbl" style="margin-top:1.2cqw">Método e justificação</div>
-          <p><strong>Cinco grupos</strong>, escolhidos por varredura de 2 a 9. Frete e atraso ficam <strong>fora</strong> das variáveis: são o que se quer explicar, não agrupar. Os grupos são <strong>estáveis</strong> — repetindo em quatro amostras de 80%, saem praticamente iguais.</p>
-          <p style="color:var(--stop)">Mas a separação entre eles é <strong>fraca</strong>, e dizemos isso: são regimes num contínuo, não populações distintas. Não testámos outros algoritmos porque não há fronteira a encontrar.</p>
+          <p><strong>Cinco grupos.</strong> Varremos de 2 a 9: em 5 é onde ficam mais separados entre si e mais compactos por dentro, e a partir de 7 aparecem grupos com menos de 2,5% dos pedidos, que não sustentam decisão. Frete e atraso ficam <strong>fora</strong> das variáveis: são o que se quer explicar.</p>
+          <p style="color:var(--stop)">Mas a separação é <strong>fraca</strong>: são regimes num contínuo, não populações distintas. <strong>Não testámos outros algoritmos</strong>, e é uma limitação — o nosso supõe grupos esféricos, e outro poderia achar estrutura que não vimos.</p>
         </div>
         <div>
           <div class="lbl">Dois achados, e a consequência de cada um</div>
@@ -916,17 +916,74 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <ul class="tight">
             <li class="no"><strong>O grupo do agrupamento:</strong> depende do tempo que a entrega levou, que não se sabe na compra. Seria fuga.</li>
             <li class="no"><strong>Rede neural:</strong> 97 mil linhas e 14 colunas. Sem ganho conhecido sobre árvores neste tamanho, e mais difícil de explicar.</li>
-            <li class="no"><strong>Outras bibliotecas de árvores:</strong> desempenho igual neste tamanho, com mais uma dependência para manter.</li>
-            <li class="no"><strong>Reequilibrar a amostra:</strong> o desequilíbrio de 6,5% trata-se movendo o <em>limiar</em>, que é uma decisão de gestão visível — não distorcendo o treino, que a esconde.</li>
+            <li class="no"><strong>CatBoost:</strong> <em>foi</em> testado — já é dependência do projeto, porque o cotador roda nele. Resultado no slide seguinte.</li>
+            <li class="no"><strong>Reequilibrar a amostra:</strong> o desequilíbrio de 6,5% trata-se movendo o <em>limiar</em>, decisão de gestão visível — não distorcendo o treino, que a esconde.</li>
+            <li class="no"><strong>Prever os dias de atraso</strong> em vez de sim/não: descartado, e o motivo está no slide seguinte.</li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">INTERPRETAÇÃO</span><span>A regra de corte único e a árvore, ajustadas no treino, produzem AUC inferior a 0,50 no teste. O resultado não indica má especificação do modelo, mas alteração da relação entre as duas janelas — analisada no slide seguinte.</span></div>
+    <div class="claim"><span class="k">INTERPRETAÇÃO</span><span>A regra de corte único e a árvore, ajustadas no treino, produzem AUC inferior a 0,50 no teste. O resultado não indica má especificação do modelo, mas alteração da relação entre as duas janelas — analisada no slide 12.</span></div>
     <div class="pagenum">10</div>
   </section>
 
-  <!-- ============ 11 · O SINAL APARECEU ============ -->
+  <!-- ============ 11 · BLOCO 4.1 · POR QUE ESTE MODELO ============ -->
+  <section class="slide dense" data-title="4.1 · Por que este modelo" data-core="1">
+    <div class="eyebrow"><b>Bloco 4.1 · adequação</b><span class="q">por que este, e não o outro?</span></div>
+    <h2>A diferença é pequena. Medimos se é real.</h2>
+    <div class="body">
+      <div class="cols c3">
+        <div>
+          <div class="lbl">Os 2 p.p. são sinal ou ruído?</div>
+          <table>
+            <thead><tr><th>Contra o escolhido</th><th class="num">Δ AUC</th><th class="num">faixa</th></tr></thead>
+            <tbody>
+              <tr><td>regressão logística</td><td class="num">+2,0</td><td class="num">+0,8 a +3,2</td></tr>
+              <tr><td><strong>CatBoost</strong></td><td class="num">+2,4</td><td class="num">+1,6 a +3,2</td></tr>
+              <tr><td>random forest</td><td class="num">+2,6</td><td class="num">+1,8 a +3,4</td></tr>
+            </tbody>
+            <tfoot><tr><td>nenhuma faixa cruza o zero</td><td class="num">—</td><td class="num">—</td></tr></tfoot>
+          </table>
+          <p style="margin-top:1.1cqw">Reamostrando o teste mil vezes, a vantagem <strong>nunca desaparece</strong>: é pequena e é real, não ruído de uma partição de sorte.</p>
+          <p style="color:var(--stop)"><strong>O CatBoost foi testado e perdeu</strong>: 0,7007. E não custaria dependência nova — o cotador do anexo já roda nele.</p>
+        </div>
+        <div>
+          <div class="lbl">Por que não prever os dias de atraso</div>
+          <p>A alternativa óbvia: estimar quantos dias e cortar em zero. Descartada por um motivo que está nos dados.</p>
+          <table>
+            <thead><tr><th>Pedidos</th><th class="num">quantos</th></tr></thead>
+            <tbody>
+              <tr><td>no recorte de análise</td><td class="num">97 358</td></tr>
+              <tr><td>com dias de atraso medidos</td><td class="num">95 019</td></tr>
+              <tr class="hi"><td>sem essa medida</td><td class="num">2 339</td></tr>
+            </tbody>
+            <tfoot><tr><td>e são <strong>23,2%</strong> de todos os atrasos</td><td class="num">—</td></tr></tfoot>
+          </table>
+          <p style="margin-top:1.1cqw">Só se sabe quantos dias atrasou <em>se a entrega foi registrada</em>. Prever dias obriga a excluir os 2 339 vencidos sem registro — o defeito nº 1 do slide 05.</p>
+          <p style="color:var(--stop)"><strong>Classificar é o que mantém o denominador honesto.</strong> A escolha não é técnica: é a do bloco 1.</p>
+        </div>
+        <div>
+          <div class="lbl">O que não fizemos, e quanto custou</div>
+          <table>
+            <thead><tr><th>Configuração testada</th><th class="num">AUC</th></tr></thead>
+            <tbody>
+              <tr><td>a que usamos</td><td class="num">0,7244</td></tr>
+              <tr><td>menos árvores, passo maior</td><td class="num">0,7221</td></tr>
+              <tr><td>mais árvores, passo menor</td><td class="num">0,7173</td></tr>
+              <tr class="hi"><td>árvores mais rasas</td><td class="num">0,7297</td></tr>
+            </tbody>
+            <tfoot><tr><td>amplitude</td><td class="num">1,24 p.p.</td></tr></tfoot>
+          </table>
+          <p style="margin-top:1.1cqw"><strong>Não houve busca de hiperparâmetros.</strong> A amplitude entre as quatro é 1,24 p.p. — menor que a diferença entre modelos. Escolher o modelo importou mais do que afiná-lo.</p>
+          <p style="color:var(--stop)">E a que usamos <strong>não é a melhor das quatro</strong> — a de árvores rasas ganha 0,5 p.p. Dizemos isto porque escolher depois de olhar o teste deixa de ser teste.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A MÉTRICA</span><span>A métrica que decide aqui é a <strong>PR-AUC</strong>, não a AUC: com 6,5% de prevalência, o que importa é a precisão entre os avisados, e é ela que entra na matriz de custo. A AUC está na tabela para comparar, não para decidir.</span></div>
+    <div class="pagenum">11</div>
+  </section>
+
+  <!-- ============ 12 · O SINAL APARECEU ============ -->
   <section class="slide dense" data-title="4.1 · O sinal apareceu" data-core="1">
     <div class="eyebrow"><b>Bloco 4.1 · adequação</b><span class="q">relação aprendida ou mudança de regime?</span></div>
     <h2>A associação entre prazo prometido e atraso é nula no treino e forte no teste: a relação não foi aprendida.</h2>
@@ -962,10 +1019,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">VALIDADE EXTERNA</span><span>O AUC de 0,72 descreve uma alteração de regime, não uma relação estável: é deriva de conceito. Um modelo colocado em produção em maio de 2018 teria sido avaliado pela mudança da política de prazo, e não pelo seu poder preditivo.</span></div>
-    <div class="pagenum">11</div>
+    <div class="pagenum">12</div>
   </section>
 
-  <!-- ============ 12 · CUSTO DO ERRO ============ -->
+  <!-- ============ 13 · CUSTO DO ERRO ============ -->
   <section class="slide dense" data-title="4.1 · Custo do erro" data-core="1">
     <div class="eyebrow"><b>Bloco 4.1 · adequação</b><span class="q">quanto custa cada tipo de erro?</span></div>
     <h2>O melhor limiar poupa R$ 9 827 por ano — abaixo do mínimo que declarámos como viável.</h2>
@@ -999,10 +1056,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">ANÁLISE DE SENSIBILIDADE</span><span>A conclusão depende inteiramente dos parâmetros R$ 45 e R$ 8. Sob um custo de R$ 200 por atraso não sinalizado, o limiar ótimo desce e o sistema torna-se viável. A fixação desses valores é decisão de gestão, e é ela que deve ser submetida à diretoria.</span></div>
-    <div class="pagenum">12</div>
+    <div class="pagenum">13</div>
   </section>
 
-  <!-- ============ 13 · BLOCO 4.2 ============ -->
+  <!-- ============ 14 · BLOCO 4.2 ============ -->
   <section class="slide dense" data-title="4.2 · Deriva e gestão" data-core="1">
     <div class="eyebrow"><b>Bloco 4.2 · a gestão</b><span class="q">quem mantém o sistema após o piloto?</span></div>
     <h2>O desempenho decai de AUC 0,84 para 0,60 no interior da própria janela de teste.</h2>
@@ -1038,10 +1095,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">CONDIÇÃO DE DESISTÊNCIA</span><span>Portões de decisão fixados antes do piloto são requisito de gestão de projeto. A condição de desligamento está escrita, e o valor apurado — R$ 9 827/ano — já a viola.</span></div>
-    <div class="pagenum">13</div>
+    <div class="pagenum">14</div>
   </section>
 
-  <!-- ============ 14 · BLOCO 5 · EVIDÊNCIA ============ -->
+  <!-- ============ 15 · BLOCO 5 · EVIDÊNCIA ============ -->
   <section class="slide dense" data-title="5 · A ética · evidência" data-core="1">
     <div class="eyebrow"><b>Bloco 5 · a ética, nesta aplicação</b><span class="q">o que acontece quando o sistema funciona?</span></div>
     <h2>Em funcionamento nominal, o sistema omite os destinos próximos, onde o atraso é mais frequente.</h2>
@@ -1081,10 +1138,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">ENQUADRAMENTO</span><span>Avaliar o modelo isoladamente não avalia o sistema sociotécnico de que ele faz parte: é a armadilha do enquadramento. O critério aplicável é se a explicação do sistema seria aceitável para quem carrega o risco.</span></div>
-    <div class="pagenum">14</div>
+    <div class="pagenum">15</div>
   </section>
 
-  <!-- ============ 15 · BLOCO 5 · AFETADOS E RECURSO ============ -->
+  <!-- ============ 16 · BLOCO 5 · AFETADOS E RECURSO ============ -->
   <section class="slide dense" data-title="5 · A ética · afetados" data-core="1">
     <div class="eyebrow"><b>Bloco 5 · a ética, nesta aplicação</b><span class="q">quem é afetado e não está nesta sala?</span></div>
     <h2>Quatro grupos carregam a consequência, e nenhum deles participou da decisão.</h2>
@@ -1125,10 +1182,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">O MÍNIMO</span><span>«Cumprimos a LGPD» é resposta ao bloco 3.3, não a este. A pergunta aqui não é se o tratamento é lícito — é o que a pessoa afetada pode fazer. E a resposta, hoje, é nada.</span></div>
-    <div class="pagenum">15</div>
+    <div class="pagenum">16</div>
   </section>
 
-  <!-- ============ 16 · BLOCO 6 ============ -->
+  <!-- ============ 17 · BLOCO 6 ============ -->
   <section class="slide dense" data-title="6 · A decisão" data-core="1">
     <div class="eyebrow"><b>Bloco 6 · a configuração da decisão</b><span class="q">dentro do sistema, quem decide o quê?</span></div>
     <h2>Dois passos automáticos, dois com decisão humana, e um que nunca será automático.</h2>
@@ -1162,10 +1219,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">AGENTE DE IA</span><span>Não há agente de IA neste sistema, nem na acepção clássica nem no uso corrente de mercado: há um classificador e cinco fronteiras de decisão. A designação não acrescentaria informação ao desenho.</span></div>
-    <div class="pagenum">16</div>
+    <div class="pagenum">17</div>
   </section>
 
-  <!-- ============ 17 · FECHO ============ -->
+  <!-- ============ 18 · FECHO ============ -->
   <section class="slide cover" data-title="Fecho" data-core="1">
     <div class="kicker">Limitações declaradas e trabalho subsequente</div>
     <h1 style="font-size:3.9cqw;max-width:34ch">A evidência não sustenta<br>um modelo preditivo. Sustenta<br>uma regra, um registro e um dono.</h1>
@@ -1175,10 +1232,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       <div><span>Em branco</span>O custo real de um atraso: usámos<br>R$ 45 declarado. Toda a conclusão<br>económica pende desse número.</div>
       <div><span>Próximo passo</span>Registar o motivo de atraso, publicar<br>o SLA honesto, e decidir se R$ 9,8 mil<br>por ano paga manter um modelo.</div>
     </div>
-    <div class="pagenum">17</div>
+    <div class="pagenum">18</div>
   </section>
 
-  <!-- ============ 18 · PLUS · PEÇA UMA COTAÇÃO ============ -->
+  <!-- ============ 19 · PLUS · PEÇA UMA COTAÇÃO ============ -->
   <section class="slide cover" data-title="Plus · Peça uma cotação">
     <div class="kicker">Anexo · fora dos seis blocos · agente de cotação por correio eletrônico</div>
     <h1 style="font-size:3.3cqw;max-width:36ch">Demonstração: enviem um pedido<br>de cotação durante a apresentação.</h1>
@@ -1200,10 +1257,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </ul>
       </div>
     </div>
-    <div class="pagenum">18</div>
+    <div class="pagenum">19</div>
   </section>
 
-  <!-- ============ 19 · PLUS · O FLUXO ============ -->
+  <!-- ============ 20 · PLUS · O FLUXO ============ -->
   <section class="slide dense" data-title="Plus · O fluxo">
     <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">do recebimento à resposta</span></div>
     <h2>Dez desfechos, cada um com a ação que dispara.</h2>
@@ -1239,10 +1296,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">OBSERVABILIDADE</span><span>Cada desfecho põe uma etiqueta na própria caixa de correio — processado, para revisar, sem rota, aguardando dados. O estado do agente lê-se de dentro do Gmail, sem abrir o código.</span></div>
-    <div class="pagenum">19</div>
+    <div class="pagenum">20</div>
   </section>
 
-  <!-- ============ 20 · PLUS · AS DECISÕES ============ -->
+  <!-- ============ 21 · PLUS · AS DECISÕES ============ -->
   <section class="slide dense" data-title="Plus · As decisões">
     <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">as três decisões que mais pesaram</span></div>
     <h2>Dois limiares de confiança, porque os dois erros não custam o mesmo.</h2>
@@ -1269,10 +1326,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">CUSTO ASSIMÉTRICO</span><span>É o princípio da matriz de custo do bloco 4.1 aplicado a um limiar de extração por LLM em vez de a um classificador: o ponto de corte determina-se pela consequência do erro, não pela métrica.</span></div>
-    <div class="pagenum">20</div>
+    <div class="pagenum">21</div>
   </section>
 
-  <!-- ============ 21 · PLUS · O MODELO DE PREÇO ============ -->
+  <!-- ============ 22 · PLUS · O MODELO DE PREÇO ============ -->
   <section class="slide dense" data-title="Plus · O modelo de preço">
     <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">por que o preço não é uma média</span></div>
     <h2>Três modelos estimam o preço. O cliente recebe o do meio.</h2>
@@ -1308,10 +1365,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">REVERSIBILIDADE</span><span>A fórmula de tabela continua no código, atrás de uma chave de configuração: volumes × valor, pedágio, frete mínimo, GRIS e ad valorem. Ter caminho de volta é requisito para entrar em produção.</span></div>
-    <div class="pagenum">21</div>
+    <div class="pagenum">22</div>
   </section>
 
-  <!-- ============ 22 · PLUS · O QUE FALTA ============ -->
+  <!-- ============ 23 · PLUS · O QUE FALTA ============ -->
   <section class="slide dense" data-title="Plus · Quarentena e o que falta">
     <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">curadoria da tabela de tarifas</span></div>
     <h2>A mesma disciplina da base curada, aplicada à planilha que o comercial edita à mão.</h2>
@@ -1342,7 +1399,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">GENERALIDADE DA REGRA</span><span>Marcar e reter em vez de corrigir sem registro; atribuir dono a cada regra; reportar o valor antes e depois de cada exclusão. O princípio não depende da escala: aplica-se a 99 441 pedidos e a uma linha de planilha.</span></div>
-    <div class="pagenum">22</div>
+    <div class="pagenum">23</div>
   </section>
 </div>
 </div>
