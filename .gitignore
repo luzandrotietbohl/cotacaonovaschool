@@ -6,3 +6,4 @@ ALERTA_CREDENCIAL.txt
 __pycache__/
 .venv/
 .superpowers/
+*.log
