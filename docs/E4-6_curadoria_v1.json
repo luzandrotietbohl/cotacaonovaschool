@@ -1,0 +1,309 @@
+{
+  "versao": "v1",
+  "gerado_em_curadoria": "2026-09-02T18:21:50+00:00",
+  "fontes": [
+    {
+      "ficheiro": "olist_orders_dataset.csv",
+      "linhas": 99441,
+      "sha256": "8df58ef3d2d7e9944010f7beecd9b75367f5588ec6e3c91cec19ae3345ef9ecf"
+    },
+    {
+      "ficheiro": "olist_order_items_dataset.csv",
+      "linhas": 112650,
+      "sha256": "0bc4d068c4fe38cbb01bd90e8746e3c613fe7b4baef75fab7b0e329701c3e279"
+    },
+    {
+      "ficheiro": "olist_customers_dataset.csv",
+      "linhas": 99441,
+      "sha256": "983a422239e1712ded753b3bf9ecf47dc73f144d306029dcfa99e70a226883d2"
+    },
+    {
+      "ficheiro": "olist_sellers_dataset.csv",
+      "linhas": 3095,
+      "sha256": "1f643d2b950373b85735e7794b20986f528d7a000432e7c6f9bcbb44d0846a0e"
+    },
+    {
+      "ficheiro": "olist_products_dataset.csv",
+      "linhas": 32951,
+      "sha256": "3e6569628a17fbc75fd206ee357b59e20364b9afa90f5b6cd5b4d624c58aa9cc"
+    },
+    {
+      "ficheiro": "olist_order_payments_dataset.csv",
+      "linhas": 103886,
+      "sha256": "4f713964f2815dbbaa40b9488268c55aac3627bfce5aa96cf58d1f3616de3cc0"
+    },
+    {
+      "ficheiro": "olist_geolocation_dataset.csv",
+      "linhas": 1000163,
+      "sha256": "b514f6fc991b9566aeba02aa5d67e2c3630f034b60a0e05aa0d082a3b66d88d6"
+    },
+    {
+      "ficheiro": "olist_order_reviews_dataset.csv",
+      "linhas": 99224,
+      "sha256": "012b61c7593e34f51fa614efdf802b9c7056ce6aae5307ddb93236e7cfc797d7"
+    }
+  ],
+  "saidas": [
+    {
+      "ficheiro": "entregas_curado.csv",
+      "linhas": 99441,
+      "colunas": 56,
+      "sha256": "1b4a4f4ca8949b4a0716ef0c91ca4499a1f288420b1900451af9ef04bcc3beb9"
+    },
+    {
+      "ficheiro": "geolocation_cep_curado.csv",
+      "linhas": 19010,
+      "colunas": 11,
+      "sha256": "1a4a7e1079c382f063a31360cd09fb7aee89871e3386f9811f712893bfd70c43"
+    },
+    {
+      "ficheiro": "geolocation_fora_br.csv",
+      "linhas": 38,
+      "colunas": 6,
+      "sha256": "9b31390b79c1f6a3fffdbd285bc511a0198834ece54c418f40f4b02e0635b8bd"
+    },
+    {
+      "ficheiro": "cidades_mapa.csv",
+      "linhas": 8617,
+      "colunas": 7,
+      "sha256": "85cfc8bdb4017ebd8bbd65075134e8d87f21c9d5ebf6181242ab81aff71a252a"
+    },
+    {
+      "ficheiro": "cidades_suspeitas.csv",
+      "linhas": 73,
+      "colunas": 7,
+      "sha256": "1adbc223d95abbd552841718b8868ca8674f60e26cf4d64210ac47ad173bbf39"
+    },
+    {
+      "ficheiro": "quarentena.csv",
+      "linhas": 1391,
+      "colunas": 57,
+      "sha256": "5a08204c337624da6c29ce45a9469b78b96654032fd42deb392120869b7ecae3"
+    }
+  ],
+  "parametros": {
+    "lead_max_dias": 100,
+    "peso_max_g": 30000,
+    "frete_sobre_mercadoria": 3,
+    "dif_pagamento_reais": 1.0,
+    "cauda_dias": 60,
+    "aliases_cidade": {
+      "sp|SP": "sao paulo",
+      "sbc|SP": "sao bernardo do campo",
+      "sbcampo|SP": "sao bernardo do campo",
+      "rj|RJ": "rio de janeiro",
+      "bh|MG": "belo horizonte"
+    },
+    "separador": ";",
+    "codificacao": "utf-8-sig"
+  },
+  "regime": {
+    "pedidos_entrada": 99441,
+    "pedidos_saida": 99441,
+    "pedidos_sem_flag": 85398,
+    "pedidos_quarentena": 1391,
+    "linhas_removidas": 0
+  },
+  "denominador_sla": {
+    "reportado_pct": 8.1124,
+    "n_reportado": 96470,
+    "honesto_pct": 10.2939,
+    "n_honesto": 98816,
+    "delta_pp": 2.1815,
+    "vencidos_sem_registo": 2346
+  },
+  "vies_quarentena": {
+    "em quarentena": {
+      "pedidos": 1391,
+      "frete_mediano": 18.45,
+      "mercadoria_mediana": 86.45,
+      "peso_mediano_g": 600.0
+    },
+    "fora da quarentena": {
+      "pedidos": 98050,
+      "frete_mediano": 17.16,
+      "mercadoria_mediana": 86.9,
+      "peso_mediano_g": 700.0
+    }
+  },
+  "composicao_quarentena": {
+    "canal_indefinido": 3,
+    "cauda_incompleta": 19,
+    "cep_sem_geo": 5,
+    "cidade_regrafada": 6,
+    "entrega_antes_coleta": 23,
+    "frete_desproporcional": 2,
+    "frete_zero": 11,
+    "lag_despacho_negativo": 1359,
+    "pagamento_divergente": 7,
+    "pagamento_invalido": 3,
+    "peso_invalido": 6,
+    "quase_duplicado": 92,
+    "sem_dt_aprovacao": 3,
+    "sem_dt_coleta": 3,
+    "sem_dt_entrega": 12,
+    "sem_item": 3,
+    "sem_peso": 3,
+    "uf_filial_incoerente": 12
+  },
+  "efeito_flags": [
+    {
+      "flag": "sem_dt_entrega",
+      "pedidos": 2346,
+      "atraso_com_pct": 100.0,
+      "atraso_sem_pct": 8.11,
+      "delta_pp": 91.89,
+      "tautologica": true,
+      "protege": false
+    },
+    {
+      "flag": "sem_dt_coleta",
+      "pedidos": 1233,
+      "atraso_com_pct": 100.0,
+      "atraso_sem_pct": 9.16,
+      "delta_pp": 90.84,
+      "tautologica": true,
+      "protege": false
+    },
+    {
+      "flag": "sem_item",
+      "pedidos": 611,
+      "atraso_com_pct": 100.0,
+      "atraso_sem_pct": 9.74,
+      "delta_pp": 90.26,
+      "tautologica": true,
+      "protege": false
+    },
+    {
+      "flag": "lead_implausivel",
+      "pedidos": 64,
+      "atraso_com_pct": 100.0,
+      "atraso_sem_pct": 10.24,
+      "delta_pp": 89.76,
+      "tautologica": true,
+      "protege": false
+    },
+    {
+      "flag": "sem_peso",
+      "pedidos": 627,
+      "atraso_com_pct": 97.45,
+      "atraso_sem_pct": 9.74,
+      "delta_pp": 87.71,
+      "tautologica": true,
+      "protege": false
+    },
+    {
+      "flag": "entrega_antes_coleta",
+      "pedidos": 23,
+      "atraso_com_pct": 0.0,
+      "atraso_sem_pct": 10.3,
+      "delta_pp": -10.3,
+      "tautologica": false,
+      "protege": true
+    },
+    {
+      "flag": "lag_despacho_negativo",
+      "pedidos": 1359,
+      "atraso_com_pct": 3.09,
+      "atraso_sem_pct": 10.39,
+      "delta_pp": -7.3,
+      "tautologica": false,
+      "protege": true
+    },
+    {
+      "flag": "frete_zero",
+      "pedidos": 338,
+      "atraso_com_pct": 4.73,
+      "atraso_sem_pct": 10.31,
+      "delta_pp": -5.58,
+      "tautologica": false,
+      "protege": true
+    },
+    {
+      "flag": "cep_sem_geo",
+      "pedidos": 277,
+      "atraso_com_pct": 15.16,
+      "atraso_sem_pct": 10.28,
+      "delta_pp": 4.88,
+      "tautologica": false,
+      "protege": false
+    },
+    {
+      "flag": "uf_filial_incoerente",
+      "pedidos": 580,
+      "atraso_com_pct": 6.03,
+      "atraso_sem_pct": 10.32,
+      "delta_pp": -4.28,
+      "tautologica": false,
+      "protege": false
+    },
+    {
+      "flag": "cauda_incompleta",
+      "pedidos": 1458,
+      "atraso_com_pct": 6.72,
+      "atraso_sem_pct": 10.35,
+      "delta_pp": -3.63,
+      "tautologica": false,
+      "protege": false
+    },
+    {
+      "flag": "frete_desproporcional",
+      "pedidos": 77,
+      "atraso_com_pct": 12.99,
+      "atraso_sem_pct": 10.29,
+      "delta_pp": 2.7,
+      "tautologica": false,
+      "protege": false
+    },
+    {
+      "flag": "pagamento_divergente",
+      "pedidos": 247,
+      "atraso_com_pct": 7.69,
+      "atraso_sem_pct": 10.3,
+      "delta_pp": -2.61,
+      "tautologica": false,
+      "protege": false
+    },
+    {
+      "flag": "quase_duplicado",
+      "pedidos": 6930,
+      "atraso_com_pct": 8.38,
+      "atraso_sem_pct": 10.44,
+      "delta_pp": -2.05,
+      "tautologica": false,
+      "protege": false
+    },
+    {
+      "flag": "cidade_regrafada",
+      "pedidos": 267,
+      "atraso_com_pct": 11.24,
+      "atraso_sem_pct": 10.29,
+      "delta_pp": 0.94,
+      "tautologica": false,
+      "protege": false
+    }
+  ],
+  "regras": [
+    "Nenhuma linha e removida da tabela principal; a quarentena e um extrato.",
+    "Peso <= 0 vira nulo; o valor original fica em peso_g_original.",
+    "Grafias de cidade colapsadas por chave NFC + sem acento + sem sufixo de UF; a canonica e a acentuada mais frequente do grupo.",
+    "Duplicados exatos de geolocation removidos antes de calcular o centroide do CEP.",
+    "Coordenadas fora dos limites do Brasil excluidas do centroide e preservadas em geolocation_fora_br.csv.",
+    "Erro de digitacao em nome de cidade NAO e unido automaticamente: vai para cidades_suspeitas.csv com a sugestao e a distancia de edicao.",
+    "Quase-duplicados de order_items marcados, nunca removidos: a decisao e de negocio.",
+    "Pedidos sem vendedor recebem filial 'SEM_FILIAL' para nao sumirem no GROUP BY.",
+    "atraso_honesto usa TODOS os pedidos ativos como denominador; prazo vencido sem registo conta como atraso ate prova em contrario.",
+    "UF declarada e conferida contra a UF do prefixo de CEP; divergencia vai para filial_uf_cep / cliente_uf_cep com flag, sem sobrescrever a filial.",
+    "Implausibilidade (exatidao) e sempre marcada e nunca corrigida."
+  ],
+  "geo_cidades": {
+    "geolocation_duplicados_removidos": 261831,
+    "geolocation_pontos_fora_br": 38,
+    "cidades_grafias_entrada": 8126,
+    "cidades_canonicas_saida": 6066,
+    "cidades_regrafias_estruturais": 31,
+    "cidades_pares_suspeitos": 73,
+    "vendedores_uf_incoerente": 35,
+    "pedidos_uf_filial_incoerente": 581
+  }
+}

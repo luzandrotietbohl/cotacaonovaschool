@@ -715,23 +715,19 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <!-- ============ 07 · BLOCO 3.3 ============ -->
   <section class="slide dense" data-title="3.3 · Proveniência">
     <div class="eyebrow"><b>Bloco 3.3 · Proveniência</b><span class="q">por onde passou até chegar aqui?</span></div>
-    <h2>Seis ficheiros, quatro junções, uma agregação — e um dado pessoal que não precisamos.</h2>
+    <h2>Oito ficheiros com hash na entrada, seis com hash na saída. A versão é o que torna a decisão contestável.</h2>
     <div class="body">
       <div class="cols c2">
         <div>
-          <div class="lbl">Linhagem</div>
-          <table>
-            <thead><tr><th>Origem</th><th>Transformação aplicada</th></tr></thead>
-            <tbody>
-              <tr><td class="mono">orders</td><td>filtro <code>status = delivered</code></td></tr>
-              <tr><td class="mono">order_items</td><td>join por <code>order_id</code>; agregação <code>sum(freight)</code>, <code>count(itens)</code></td></tr>
-              <tr><td class="mono">products</td><td>join por <code>product_id</code> → soma de peso</td></tr>
-              <tr><td class="mono">customers, sellers</td><td>join → prefixo de CEP das duas pontas</td></tr>
-              <tr><td class="mono">geolocation</td><td><strong>mediana</strong> de lat/lng por prefixo; cidade/UF pela moda</td></tr>
-              <tr><td class="mono">— derivado</td><td>haversine origem→destino; rota UF; capital/interior</td></tr>
-            </tbody>
-          </table>
-          <p style="margin-top:1.1cqw">A mediana no centroide é uma decisão nossa: protege dos 26% de linhas duplicadas do <code>geolocation</code>, e apaga a variação dentro do prefixo.</p>
+          <div class="lbl">Linhagem · <code>dados_curados/v1</code> · <code>scripts/curar_dados.py</code></div>
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:1.14cqw;line-height:1.65;color:var(--ink-2)">
+            <div style="color:var(--muted);letter-spacing:.1em">ENTRADA · 8 FICHEIROS · 1 550 851 LINHAS</div>
+            orders <strong>8df58ef3</strong> · order_items <strong>0bc4d068</strong> · customers <strong>983a4222</strong> · sellers <strong>1f643d2b</strong> · products <strong>3e656962</strong> · payments <strong>4f713964</strong> · geolocation <strong>b514f6fc</strong> · reviews <strong>012b61c7</strong>
+            <div style="color:var(--muted);letter-spacing:.1em;margin-top:1cqw">SAÍDA · 6 FICHEIROS VERSIONADOS</div>
+            entregas_curado 99 441×56 <strong>1b4a4f4c</strong> · quarentena 1 391 <strong>5a08204c</strong> · geolocation_cep 19 010 <strong>1a4a7e10</strong> · cidades_mapa 8 617 <strong>85cfc8bd</strong> · cidades_suspeitas 73 <strong>1adbc223</strong> · fora_br 38 <strong>9b31390b</strong>
+          </div>
+          <p style="margin-top:1.3cqw">Entre as duas metades: quatro junções, uma agregação por <code>order_id</code> e o centroide de CEP pela <strong>mediana</strong> — decisão nossa, que protege dos <strong>261 831 duplicados</strong> do <code>geolocation</code> e apaga a variação dentro do prefixo (35,5 m na mediana, 504 prefixos acima de 1 km).</p>
+          <p>Os <strong>parâmetros</strong> ficam no <code>MANIFEST.json</code>. Mudar um é uma <code>v2</code>, não um recálculo silencioso.</p>
         </div>
         <div>
           <div class="lbl">Dado pessoal e LGPD</div>
@@ -741,46 +737,50 @@ svg{display:block;width:100%;height:auto;overflow:visible}
             <li>Retenção: corpo do e-mail e extração ficam no SQLite local. <strong>Prazo declarado: 24 meses</strong>, para auditar cotação enviada. Depois disso, art. 16 manda eliminar.</li>
             <li class="no">Quem tem acesso hoje: quem tem a máquina. <strong>Não há controle de acesso ao SQLite</strong> — está aberto e é preciso dizê-lo.</li>
           </ul>
+          <div class="lbl" style="margin-top:1.4cqw">O que a versão compra</div>
+          <p>Uma cotação de março é reconstruível em setembro: grava-se a tarifa em <code>tarifa_json</code>, a versão do modelo <em>e</em> a da base. Sem a terceira, o número não volta.</p>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">AUDITABILIDADE</span><span>Cada cotação grava a tarifa inteira em <code>tarifa_json</code> e a versão do modelo, não só o id da rota: depois que a planilha mudar, o preço enviado continua reconstruível.</span></div>
+    <div class="claim"><span class="k">AUDITABILIDADE</span><span>Proveniência não é a prosa que descreve o pipeline: é o hash que prova qual base produziu qual número. A janela é fixa — 2016-09-04 a 2018-10-17.</span></div>
     <div class="pagenum">07</div>
   </section>
 
   <!-- ============ 08 · BLOCO 3.4 ============ -->
   <section class="slide dense" data-title="3.4 · Curadoria">
     <div class="eyebrow"><b>Bloco 3.4 · Curadoria</b><span class="q">o número antes e depois de cada regra</span></div>
-    <h2>Três regras excluem 2 961 registos e R$ 65 655 de frete. Nenhuma exclusão é neutra.</h2>
+    <h2>99 441 pedidos entram, 99 441 saem. A exclusão que movia o KPI em 2,18 p.p. era o denominador.</h2>
     <div class="body">
       <div class="cols c2w">
         <div>
+          <div class="lbl">Taxa de atraso honesta, com e sem cada regra · 98 816 pedidos ativos</div>
           <table>
-            <thead><tr><th>Etapa</th><th class="num">linhas</th><th class="num">% bruto</th><th class="num">frete R$</th></tr></thead>
+            <thead><tr><th>Regra (flag)</th><th class="num">pedidos</th><th class="num">com</th><th class="num">sem</th><th class="num">Δ p.p.</th></tr></thead>
             <tbody>
-              <tr><td class="mono">0 · order_items bruto</td><td class="num">112 650</td><td class="num">100,0%</td><td class="num">2 251 910</td></tr>
-              <tr class="hi"><td class="mono">1 · só status = delivered</td><td class="num">110 197</td><td class="num">97,8%</td><td class="num">2 198 276</td></tr>
-              <tr><td class="mono">2 · agregado pedido+vendedor</td><td class="num">97 819</td><td class="num">86,8%</td><td class="num">2 198 276</td></tr>
-              <tr><td class="mono">3 · join clientes + vendedores</td><td class="num">97 819</td><td class="num">86,8%</td><td class="num">2 198 276</td></tr>
-              <tr><td class="mono">4 · dropna geo/peso</td><td class="num">97 333</td><td class="num">86,4%</td><td class="num">2 186 706</td></tr>
-              <tr><td class="mono">5 · frete≥0, peso&gt;0, qtd&gt;0</td><td class="num">97 311</td><td class="num">86,4%</td><td class="num">2 186 254</td></tr>
+              <tr><td class="mono">sem_dt_entrega</td><td class="num">2 346</td><td class="num">100,0%</td><td class="num">8,1%</td><td class="num">+91,9</td></tr>
+              <tr><td class="mono">sem_dt_coleta</td><td class="num">1 233</td><td class="num">100,0%</td><td class="num">9,2%</td><td class="num">+90,8</td></tr>
+              <tr><td class="mono">sem_item</td><td class="num">611</td><td class="num">100,0%</td><td class="num">9,7%</td><td class="num">+90,3</td></tr>
+              <tr><td class="mono">sem_peso</td><td class="num">627</td><td class="num">97,5%</td><td class="num">9,7%</td><td class="num">+87,7</td></tr>
+              <tr class="hi"><td class="mono">lag_despacho_negativo</td><td class="num">1 359</td><td class="num">3,1%</td><td class="num">10,4%</td><td class="num">−7,3</td></tr>
+              <tr class="hi"><td class="mono">frete_zero</td><td class="num">338</td><td class="num">4,7%</td><td class="num">10,3%</td><td class="num">−5,6</td></tr>
             </tbody>
-            <tfoot><tr><td>Excluído de facto (etapas 1, 4, 5)</td><td class="num">2 961</td><td class="num">—</td><td class="num">65 655</td></tr></tfoot>
+            <tfoot><tr><td>SLA reportado → honesto</td><td class="num">2 346</td><td class="num">8,11%</td><td class="num">10,29%</td><td class="num">+2,18</td></tr></tfoot>
           </table>
-          <p style="margin-top:1.1cqw">A etapa 2 não exclui nada: são 12 378 linhas que <em>viram</em> 1 embarque. O frete não se perde — se soma.</p>
+          <p style="margin-top:1.1cqw">As quatro primeiras são <strong>tautológicas</strong>: a flag <em>é</em> a ausência do registo. Excluí-las produz o SLA de 8,11%.</p>
         </div>
         <div>
-          <div class="lbl">Toda exclusão é uma escolha, e tem dono</div>
+          <div class="lbl">Onze regras, e o que cada uma decide</div>
           <ul class="tight">
-            <li class="no"><strong>2 453 linhas por status</strong> (1 107 <code>shipped</code>, 625 <code>canceled</code>, 609 <code>unavailable</code>…). Frete mediano <strong>R$ 16,46</strong> contra R$ 16,26 das mantidas; preço mediano <strong>R$ 82,90</strong> contra R$ 74,90. <strong>O que sai é mais caro do que o que fica.</strong></li>
-            <li class="no"><strong>486 embarques sem distância</strong> — prefixo de CEP sem centroide. Frete mediano R$ 18,23, acima da base. Concentram-se onde a cobertura é pior.</li>
-            <li class="no"><strong>22 embarques com peso zero</strong>: produto sem cadastro de peso. Sai porque o modelo exige peso.</li>
-            <li>Dono declarado das três regras: <strong>quem mantém <code>cotador/ml/treinamento.py</code></strong>. Nenhuma delas foi decidida pelo comercial, e é isso que precisa mudar.</li>
+            <li class="yes"><strong>Nenhuma linha é removida.</strong> A quarentena (1 391, 1,4%) é um <em>extrato</em>, não um corte: 85 398 pedidos ficam sem flag e os outros continuam contáveis.</li>
+            <li class="no">O que a quarentena tira <strong>não é igual ao que fica</strong>: frete mediano <strong>R$ 18,45</strong> contra R$ 17,16 — sai o mais caro.</li>
+            <li class="no">Sinal invertido em <code>lag_despacho_negativo</code> e <code>frete_zero</code>: <strong>a flag apanha pedido bom</strong>, e excluí-los <em>baixaria</em> o KPI de 10,4% para 3,1%.</li>
+            <li><strong>Implausibilidade é marcada, nunca corrigida.</strong> Peso ≤ 0 vira nulo, com o original em <code>peso_g_original</code>; grafia suspeita de cidade vai para <code>cidades_suspeitas.csv</code>, sem união automática.</li>
+            <li class="no">Dono declarado das onze regras: <strong>quem mantém <code>scripts/curar_dados.py</code></strong>. Nenhuma foi decidida pelo comercial — e é isso que precisa mudar antes do piloto.</li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">MAQUIAGEM</span><span>Excluir o não-entregue melhora a métrica e piora a decisão: são justamente os pedidos mais caros e mais problemáticos que o modelo nunca vê.</span></div>
+    <div class="claim"><span class="k">EM ABERTO</span><span>Isto é o bloco 3. O modelo do bloco 4 ainda roda no funil anterior, que <em>excluía</em> 2 961 registos e R$ 65 655 de frete — e no grão de embarque, que a v1 não tem. Repontá-lo é a v2, e é trabalho que ainda não está feito.</span></div>
     <div class="pagenum">08</div>
   </section>
 

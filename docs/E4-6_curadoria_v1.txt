@@ -1,0 +1,117 @@
+
+==============================================================================
+BLOCO 3.3 - PROVENIENCIA: origem com hash, transformacao e saida com hash
+==============================================================================
+Fontes de entrada (sha256 truncado em 12):
+  ficheiro                                      linhas  sha256
+  olist_orders_dataset.csv                      99,441  8df58ef3d2d7
+  olist_order_items_dataset.csv                112,650  0bc4d068c4fe
+  olist_customers_dataset.csv                   99,441  983a422239e1
+  olist_sellers_dataset.csv                      3,095  1f643d2b9503
+  olist_products_dataset.csv                    32,951  3e6569628a17
+  olist_order_payments_dataset.csv             103,886  4f713964f281
+  olist_geolocation_dataset.csv              1,000,163  b514f6fc991b
+  olist_order_reviews_dataset.csv               99,224  012b61c7593e
+
+Saidas versionadas:
+  ficheiro                                      linhas  colunas  sha256
+  entregas_curado.csv                           99,441       56  1b4a4f4ca894
+  geolocation_cep_curado.csv                    19,010       11  1a4a7e1079c3
+  geolocation_fora_br.csv                           38        6  9b31390b79c1
+  cidades_mapa.csv                               8,617        7  85cfc8bdb401
+  cidades_suspeitas.csv                             73        7  1adbc223d95a
+  quarentena.csv                                 1,391       57  5a08204c3376
+
+Parametros que definem esta versao (mudar um deles muda a v):
+  lead_max_dias             100
+  peso_max_g                30000
+  frete_sobre_mercadoria    3
+  dif_pagamento_reais       1.0
+  cauda_dias                60
+  aliases_cidade            {"sp|SP": "sao paulo", "sbc|SP": "sao bernardo do campo", "sbcampo|SP": "sao bernardo do campo", "rj|RJ": "rio de janeiro", "bh|MG": "belo horizonte"}
+  separador                 ";"
+  codificacao               "utf-8-sig"
+
+Janela dos dados: 2016-09-04 a 2018-10-17
+Gerado por: scripts/curar_dados.py em 2026-09-02T18:21:50+00:00
+Diagnostico que a motivou: docs/E1-2_cartao_qualidade.md
+
+==============================================================================
+BLOCO 3.4 - CURADORIA: o numero antes e depois de cada regra
+==============================================================================
+Regime: nenhuma linha e removida da tabela principal.
+  pedidos na entrada      99,441
+  pedidos na saida        99,441
+  sem nenhuma flag        85,398    85.9%
+  em quarentena            1,391     1.4%
+
+A regra que mais move o KPI e a escolha do denominador do SLA:
+  reportado (so quem tem data de entrega)    8.11%  sobre 96,470 pedidos
+  honesto   (todos os ativos)               10.29%  sobre 98,816 pedidos
+  diferenca                                 +2.18 p.p.  = 2,346 pedidos vencidos sem registo
+
+Vies da quarentena (o que sai nao e igual ao que fica):
+  recorte                 pedidos   frete med  mercad. med  peso med g
+  em quarentena             1,391       18.45        86.45       600.0
+  fora da quarentena       98,050       17.16        86.90       700.0
+
+Composicao da quarentena (a regra que a poe la):
+  lag_despacho_negativo        1,359
+  quase_duplicado                 92
+  entrega_antes_coleta            23
+  cauda_incompleta                19
+  sem_dt_entrega                  12
+  uf_filial_incoerente            12
+  frete_zero                      11
+  pagamento_divergente             7
+  cidade_regrafada                 6
+  peso_invalido                    6
+  cep_sem_geo                      5
+  canal_indefinido                 3
+  pagamento_invalido               3
+  sem_dt_aprovacao                 3
+  sem_dt_coleta                    3
+  sem_item                         3
+  sem_peso                         3
+  frete_desproporcional            2
+
+Efeito de cada flag sobre a taxa de atraso honesta (antes e depois):
+  flag                        pedidos  atraso c/  atraso s/  delta p.p.  leitura
+  sem_dt_entrega                2,346     100.0%       8.1%       +91.9  tautologica: a flag E a ausencia do registo
+  sem_dt_coleta                 1,233     100.0%       9.2%       +90.8  tautologica: a flag E a ausencia do registo
+  sem_item                        611     100.0%       9.7%       +90.3  tautologica: a flag E a ausencia do registo
+  lead_implausivel                 64     100.0%      10.2%       +89.8  tautologica: a flag E a ausencia do registo
+  sem_peso                        627      97.5%       9.7%       +87.7  tautologica: a flag E a ausencia do registo
+  entrega_antes_coleta             23       0.0%      10.3%       -10.3  a flag apanha pedido bom: excluir baixaria o KPI
+  lag_despacho_negativo         1,359       3.1%      10.4%        -7.3  a flag apanha pedido bom: excluir baixaria o KPI
+  frete_zero                      338       4.7%      10.3%        -5.6  a flag apanha pedido bom: excluir baixaria o KPI
+  cep_sem_geo                     277      15.2%      10.3%        +4.9
+  uf_filial_incoerente            580       6.0%      10.3%        -4.3
+  cauda_incompleta              1,458       6.7%      10.3%        -3.6
+  frete_desproporcional            77      13.0%      10.3%        +2.7
+  pagamento_divergente            247       7.7%      10.3%        -2.6
+  quase_duplicado               6,930       8.4%      10.4%        -2.0
+  cidade_regrafada                267      11.2%      10.3%        +0.9
+
+As 11 regras aplicadas (cada uma e uma escolha, e esta escrita):
+   1. Nenhuma linha e removida da tabela principal; a quarentena e um extrato.
+   2. Peso <= 0 vira nulo; o valor original fica em peso_g_original.
+   3. Grafias de cidade colapsadas por chave NFC + sem acento + sem sufixo de UF; a canonica e a acentuada mais frequente do grupo.
+   4. Duplicados exatos de geolocation removidos antes de calcular o centroide do CEP.
+   5. Coordenadas fora dos limites do Brasil excluidas do centroide e preservadas em geolocation_fora_br.csv.
+   6. Erro de digitacao em nome de cidade NAO e unido automaticamente: vai para cidades_suspeitas.csv com a sugestao e a distancia de edicao.
+   7. Quase-duplicados de order_items marcados, nunca removidos: a decisao e de negocio.
+   8. Pedidos sem vendedor recebem filial 'SEM_FILIAL' para nao sumirem no GROUP BY.
+   9. atraso_honesto usa TODOS os pedidos ativos como denominador; prazo vencido sem registo conta como atraso ate prova em contrario.
+  10. UF declarada e conferida contra a UF do prefixo de CEP; divergencia vai para filial_uf_cep / cliente_uf_cep com flag, sem sobrescrever a filial.
+  11. Implausibilidade (exatidao) e sempre marcada e nunca corrigida.
+
+Curadoria geografica e de nomes (marcada, nunca corrigida em silencio):
+  geolocation_duplicados_removidos       261,831
+  geolocation_pontos_fora_br                  38
+  cidades_grafias_entrada                  8,126
+  cidades_canonicas_saida                  6,066
+  cidades_regrafias_estruturais               31
+  cidades_pares_suspeitos                     73
+  vendedores_uf_incoerente                    35
+  pedidos_uf_filial_incoerente               581
