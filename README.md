@@ -1,13 +1,33 @@
 # Agente de Cotacao de Frete por Email
 
 Le a caixa do Gmail por IMAP, identifica pedidos de cotacao, extrai os dados com a
-Claude API, busca a rota numa planilha do Google Sheets e responde o cliente por
-SMTP. Quando faltam dados, responde pedindo o que falta e cota na resposta seguinte.
+Claude API, valida a rota numa planilha do Google Sheets e responde o cliente por
+SMTP. O preço padrão é o P50 de um modelo histórico Olist; a planilha continua
+definindo cobertura, modal, prazo e restrições operacionais.
 
-## Modelo de preco
+## Modelo de preço histórico
 
-Vem da aba `DICIONARIO` da planilha. O frete e cobrado **por volume**, nao por peso
-nem por cubagem:
+O modelo agrega o Olist por `order_id + seller_id`, aproximando cada linha de um
+embarque com uma origem, um destino e uma ou mais unidades. O alvo é a soma de
+`freight_value`. As features são distância, peso total, quantidade, valor declarado,
+mês, UFs, rota, mesma UF/interestadual e perfil capital/interior.
+
+Três CatBoosts quantílicos estimam P25, P50 e P75. P50 é o preço enviado ao cliente.
+Um IsolationForest sem preço detecta cargas fora do domínio; nesses casos o agente
+encaminha para revisão humana. A inferência usa os artefatos em
+`modelos/olist/atual/` e não depende do ZIP Olist.
+
+Treino atual: 97.311 embarques, com 70% para treino, 15% para calibração e 15% para
+teste temporal. Resultados: MAE P50 de R$ 5,62, mediana absoluta de R$ 2,11,
+mediana percentual de 12,10% e cobertura P25-P75 de 47,42%.
+
+```bash
+python scripts/treinar_olist.py --zip caminho/para/archive_olist.zip
+python scripts/gerar_tsne.py --zip caminho/para/archive_olist.zip
+python main.py --modelo-info
+```
+
+O preço anterior por tabela permanece como fallback (`PRECIFICADOR=tabela`):
 
 ```
 MAX(QTD_VOLUMES * (VALOR_POR_VOLUME + PEDAGIO_POR_VOLUME), FRETE_MINIMO)
@@ -15,8 +35,8 @@ MAX(QTD_VOLUMES * (VALOR_POR_VOLUME + PEDAGIO_POR_VOLUME), FRETE_MINIMO)
   + TAXA_ENTREGA_DIFICIL
 ```
 
-Peso serve apenas para validar `PESO_MAXIMO_VOLUME_KG` da rota. Se o peso medio por
-volume estourar o limite, o agente **nao responde** e marca a thread para revisao.
+No modo histórico, peso é feature obrigatória e continua validando
+`PESO_MAXIMO_VOLUME_KG` da rota.
 
 Dados obrigatorios no email do cliente: origem, destino, quantidade de volumes,
 valor da nota fiscal e (se `EXIGIR_PESO=true`) peso total.
@@ -120,7 +140,8 @@ IMAP (nao lidos)
       -> faltam dados ............. responde pedindo, label cotador-aguardando-dados
       -> completo, confianca < 0.6  label cotador-revisar (nao emite preco)
       -> peso acima do limite ..... responde "em analise", label cotador-revisar
-      -> completo ................. calcula e responde com a composicao + prazo
+      -> fora do dominio historico  responde "em analise", label cotador-revisar
+      -> completo ................. calcula P25/P50/P75 e responde P50 + prazo
    -> registra tudo em SQLite (idempotencia + auditoria)
 ```
 
@@ -179,7 +200,14 @@ python main.py --auditar-planilha
 ```
 
 ```bash
-python main.py --cotar "Sao Paulo/SP" "Campinas/SP" 10 8000
+python main.py --cotar "Sao Paulo/SP" "Campinas/SP" 10 8000 --peso 300
+```
+
+Aceites e rejeições ficam no SQLite, separados dos emails processados:
+
+```bash
+python main.py --confirmar Q-XXXXXXXXXXXX 225.00 --custo 180.00
+python main.py --rejeitar Q-XXXXXXXXXXXX --notas "cliente considerou caro"
 ```
 
 ```bash
@@ -252,7 +280,7 @@ credencial ruim, e girar em silencio esconde o problema.
 python -m unittest discover -s cotador/tests -t . -v
 ```
 
-194 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de
+202 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de
 thread, os templates de email, a busca de rota, a curadoria da tabela, a fila de
 revisao humana, as rotas do painel e as regressoes conhecidas.
 
@@ -289,6 +317,12 @@ cotador/agente.py                   orquestracao e decisao de desfecho
 cotador/core/modelos.py             dataclasses do dominio
 cotador/core/extracao.py            Claude API com tool_choice forcado
 cotador/core/precificacao.py        formula da planilha + limite de peso
+cotador/ml/historico.py             inferencia P25/P50/P75 e bloqueio de outlier
+cotador/ml/geografia.py             resolucao por CEP ou cidade/UF
+cotador/ml/treinamento.py           agregacao order+seller, treino e calibracao
+scripts/treinar_olist.py            CLI reproduzivel de treinamento
+scripts/gerar_tsne.py               visualizacao exploratoria e outliers de preco
+modelos/olist/atual/                modelos, mapa geografico e metadados
 cotador/core/mensagens.py           templates dos emails
 cotador/integracoes/caixa_imap.py   leitura, labels e rascunhos por IMAP
 cotador/integracoes/email_smtp.py   envio das respostas

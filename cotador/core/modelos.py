@@ -48,6 +48,7 @@ class PedidoCotacao:
     volumes: list[Volume] = field(default_factory=list)
     m3_informado: float | None = None
     modal: str | None = None
+    categoria: str | None = None
     observacoes: str | None = None
 
     @property
@@ -99,6 +100,7 @@ class PedidoCotacao:
             volumes=escolher(self.volumes, anterior.volumes),
             m3_informado=escolher(self.m3_informado, anterior.m3_informado),
             modal=escolher(self.modal, anterior.modal),
+            categoria=escolher(self.categoria, anterior.categoria),
             observacoes=escolher(self.observacoes, anterior.observacoes),
         )
 
@@ -116,6 +118,7 @@ class PedidoCotacao:
             volumes=[Volume(**v) for v in d.get("volumes") or []],
             m3_informado=d.get("m3_informado"),
             modal=d.get("modal"),
+            categoria=d.get("categoria"),
             observacoes=d.get("observacoes"),
         )
 
@@ -205,6 +208,15 @@ class Cotacao:
     prazo_dias: int | None
     tarifa: Tarifa
     alerta_peso: str | None = None
+    fonte: str = "tabela"
+    quote_id: str | None = None
+    p25: float | None = None
+    p50: float | None = None
+    p75: float | None = None
+    distancia_km: float | None = None
+    structural_outlier: bool = False
+    structural_score: float | None = None
+    model_version: str | None = None
 
     @property
     def usou_frete_minimo(self) -> bool:

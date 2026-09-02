@@ -99,6 +99,13 @@ FERRAMENTA = {
                 ),
                 "enum": ["RODOVIARIO", "AEREO", None],
             },
+            "categoria": {
+                "type": ["string", "null"],
+                "description": (
+                    "Categoria da mercadoria apenas quando explicitamente informada. "
+                    "null se ausente; nunca invente uma categoria."
+                ),
+            },
             "observacoes": {
                 "type": ["string", "null"],
                 "description": (
@@ -194,5 +201,6 @@ class Extrator:
             volumes=volumes,
             m3_informado=d.get("m3_informado"),
             modal=(d.get("modal") or None),
+            categoria=(d.get("categoria") or None),
             observacoes=d.get("observacoes"),
         )

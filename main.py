@@ -116,6 +116,13 @@ def montar_enviador(cfg: Config) -> EnviadorSMTP:
     )
 
 
+def montar_precificador(cfg: Config):
+    if cfg.precificador != "historico":
+        return None
+    from cotador.ml import PrecificadorHistorico
+    return PrecificadorHistorico(cfg.modelo_artefatos, cfg.modelo_bloquear_outlier)
+
+
 def _idade(iso: str) -> str:
     """Quanto tempo desde um carimbo ISO, em horas ou dias."""
     try:
@@ -272,6 +279,9 @@ def _executar() -> int:
         action="store_true",
         help="limpa do banco os emails com desfecho erro para tentar de novo",
     )
+    grupo.add_argument("--confirmar", nargs=2, metavar=("QUOTE_ID", "PRECO"), help="registra aceite de cotação histórica")
+    grupo.add_argument("--rejeitar", metavar="QUOTE_ID", help="registra rejeição de cotação histórica")
+    grupo.add_argument("--modelo-info", action="store_true", help="mostra metadados do modelo histórico")
     grupo.add_argument(
         "--cotar",
         nargs=4,
@@ -284,6 +294,9 @@ def _executar() -> int:
         help="sobe a interface web local de gestao (http://localhost:8000)",
     )
     p.add_argument("--porta", type=int, default=8000, help="porta do --painel")
+    p.add_argument("--peso", type=float, help="peso total em kg para --cotar histórico")
+    p.add_argument("--custo", type=float, help="custo real opcional para --confirmar")
+    p.add_argument("--notas", help="observação para aceite ou rejeição")
     p.add_argument("-v", "--verboso", action="store_true")
     args = p.parse_args()
 
@@ -328,11 +341,29 @@ def _executar() -> int:
         print("marque-a como nao lida para que a busca a encontre.")
         return 0
 
+    if args.confirmar:
+        quote_id, preco = args.confirmar
+        resultado = Banco(cfg.banco).confirmar_cotacao(quote_id, float(preco), args.custo, args.notas)
+        print(f"{resultado['quote_id']} confirmado por R$ {resultado['contracted_price']:.2f}")
+        return 0
+
+    if args.rejeitar:
+        resultado = Banco(cfg.banco).rejeitar_cotacao(args.rejeitar, args.notas)
+        print(f"{resultado['quote_id']} rejeitado")
+        return 0
+
+    if args.modelo_info:
+        caminho = cfg.modelo_artefatos / "metadata.json"
+        if not caminho.exists():
+            print(f"Modelo não encontrado: {caminho}")
+            return 1
+        print(caminho.read_text(encoding="utf-8"))
+        return 0
+
     cred = google_sa.credenciais(cfg.service_account_json)
     tabela = TabelaTarifas(
         cred, cfg.sheet_id, cfg.sheet_aba, auditoria_bloqueia=cfg.auditoria_bloqueia
     )
-
     if args.auditar_planilha:
         return auditar_planilha(cfg, tabela)
 
@@ -349,8 +380,13 @@ def _executar() -> int:
             )
         return 0 if total else 1
 
+    precificador_historico = montar_precificador(cfg)
+
     if args.cotar:
         origem, destino, qtd, valor_nf = args.cotar
+        if precificador_historico is not None and (args.peso is None or args.peso <= 0):
+            print("O modo histórico exige --peso com valor maior que zero")
+            return 1
         tabela.carregar()
         tarifa = tabela.buscar(origem, destino)
         if tarifa is None:
@@ -363,13 +399,25 @@ def _executar() -> int:
             destino=destino,
             qtd_volumes=int(qtd),
             valor_nf=float(valor_nf),
+            peso_kg=args.peso,
         )
-        c = precificacao.calcular(pedido, tarifa)
+        c = (
+            precificador_historico.cotar(pedido, tarifa)
+            if precificador_historico is not None
+            else precificacao.calcular(pedido, tarifa)
+        )
         print(f"rota .............. {tarifa.id_rota} [{tarifa.modal}]")
-        print(f"frete volumes ..... R$ {c.frete_volumes:.2f}")
-        print(f"frete aplicado .... R$ {c.frete_aplicado:.2f}")
-        print(f"gris + advalorem .. R$ {c.gris_advalorem:.2f}")
-        print(f"taxa dificil ...... R$ {c.taxa_entrega_dificil:.2f}")
+        if c.fonte == "historico_olist":
+            print(f"P25 ............... R$ {c.p25:.2f}")
+            print(f"P50 (padrão) ...... R$ {c.p50:.2f}")
+            print(f"P75 ............... R$ {c.p75:.2f}")
+            print(f"distância ......... {c.distancia_km:.1f} km")
+            print(f"modelo ............ {c.model_version}")
+        else:
+            print(f"frete volumes ..... R$ {c.frete_volumes:.2f}")
+            print(f"frete aplicado .... R$ {c.frete_aplicado:.2f}")
+            print(f"gris + advalorem .. R$ {c.gris_advalorem:.2f}")
+            print(f"taxa dificil ...... R$ {c.taxa_entrega_dificil:.2f}")
         print(f"TOTAL ............. R$ {c.total:.2f}")
         print(f"prazo ............. {c.prazo_dias} dia(s) uteis")
         return 0
@@ -396,10 +444,11 @@ def _executar() -> int:
                 ),
                 banco=banco,
                 enviador=montar_enviador(cfg) if estado["modo"] == "enviar" else None,
+                precificador_historico=precificador_historico,
             )
 
         servico = ServicoAgente(fabrica_agente, cfg.intervalo_segundos)
-        app = criar_app(cfg, banco, tabela, servico, lambda: montar_caixa(cfg), estado)
+        app = criar_app(cfg, banco, tabela, servico, lambda: montar_caixa(cfg), estado, precificador_historico)
         print(f"Painel em http://localhost:{args.porta} (loop desligado, modo rascunho)")
         app.run(host="127.0.0.1", port=args.porta, debug=False)
         servico.desligar()
@@ -415,6 +464,7 @@ def _executar() -> int:
         banco=Banco(cfg.banco),
         # Em modo rascunho nao exigimos SMTP: nada sai pela rede.
         enviador=montar_enviador(cfg) if cfg.modo_resposta == "enviar" else None,
+        precificador_historico=precificador_historico,
     )
 
     if args.once:

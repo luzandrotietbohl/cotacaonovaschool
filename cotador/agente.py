@@ -12,6 +12,7 @@ from cotador.integracoes.banco import Banco
 from cotador.integracoes.caixa_imap import CaixaIMAP, CredencialInvalida
 from cotador.integracoes.email_smtp import EnviadorSMTP
 from cotador.integracoes.planilha import TabelaTarifas
+from cotador.ml.exceptions import CotacaoForaDoDominio, EntradaHistoricaInvalida
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +32,8 @@ MOTIVOS_REVISAO: tuple[tuple[str, str], ...] = (
     ("quarentena pela curadoria", "tarifa em quarentena (curadoria)"),
     ("sem tarifa vigente", "tarifa inativa ou vencida"),
     ("peso medio", "peso acima do limite da rota"),
+    ("fora do dominio historico", "carga fora do domínio histórico"),
+    ("modelo historico", "modelo histórico indisponível"),
     ("para emitir preco", "confianca insuficiente para emitir preco"),
     ("confianca", "confianca baixa: nao sabemos o que o email pede"),
 )
@@ -59,6 +62,7 @@ class Agente:
         extrator: Extrator,
         banco: Banco,
         enviador: EnviadorSMTP | None = None,
+        precificador_historico=None,
     ) -> None:
         self.cfg = cfg
         self.caixa = caixa
@@ -67,6 +71,7 @@ class Agente:
         self.banco = banco
         # So e exigido em MODO_RESPOSTA=enviar; em rascunho fica None.
         self.enviador = enviador
+        self.precificador_historico = precificador_historico
 
     # ---------------- loop ----------------
     def rodar_ciclo(self) -> dict[str, int]:
@@ -241,7 +246,28 @@ class Agente:
         if tarifa is None:  # ja tratado em _checar_rota; guarda de seguranca
             return self._checar_rota(email, pedido, extraido) or "erro"
 
-        cotacao = precificacao.calcular(pedido, tarifa)
+        usar_historico = getattr(self.cfg, "precificador", "tabela") == "historico"
+        if usar_historico:
+            if (pedido.modal or tarifa.modal).upper() != "RODOVIARIO":
+                motivo = "modelo historico ainda não validado para modal aéreo"
+                self._responder(email, mensagens.aguardar_analise(pedido, email.primeiro_nome))
+                return self._fechar(email, "erro", label=self.cfg.LABEL_REVISAR,
+                    extracao=extraido, origem=pedido.origem, destino=pedido.destino, erro=motivo)
+            if self.precificador_historico is None:
+                motivo = "modelo historico configurado, porém não foi carregado"
+                self._responder(email, mensagens.aguardar_analise(pedido, email.primeiro_nome))
+                return self._fechar(email, "erro", label=self.cfg.LABEL_REVISAR,
+                    extracao=extraido, origem=pedido.origem, destino=pedido.destino, erro=motivo)
+            try:
+                cotacao = self.precificador_historico.cotar(pedido, tarifa)
+            except (EntradaHistoricaInvalida, CotacaoForaDoDominio) as exc:
+                motivo = str(exc)
+                log.warning("Cotação histórica enviada para revisão: %s", motivo)
+                self._responder(email, mensagens.aguardar_analise(pedido, email.primeiro_nome))
+                return self._fechar(email, "erro", label=self.cfg.LABEL_REVISAR,
+                    extracao=extraido, origem=pedido.origem, destino=pedido.destino, erro=motivo)
+        else:
+            cotacao = precificacao.calcular(pedido, tarifa)
         log.info(
             "Cotado %s -> %s | rota %s | %d volumes | R$ %.2f",
             pedido.origem,
@@ -270,6 +296,15 @@ class Agente:
             )
 
         self._responder(email, mensagens.enviar_cotacao(pedido, cotacao, email.primeiro_nome))
+        if cotacao.fonte == "historico_olist":
+            self.banco.registrar_cotacao_modelo(
+                quote_id=cotacao.quote_id, id_email=email.id, thread_id=email.thread_id,
+                payload=extraido, p25=cotacao.p25, p50=cotacao.p50, p75=cotacao.p75,
+                recommended=cotacao.total, distance_km=cotacao.distancia_km,
+                structural_outlier=cotacao.structural_outlier,
+                structural_score=cotacao.structural_score,
+                model_version=cotacao.model_version or "desconhecida",
+            )
         return self._fechar(
             email,
             "cotado",
@@ -282,6 +317,7 @@ class Agente:
             valor_nf=cotacao.valor_nf,
             peso_kg=pedido.peso_kg,
             valor_frete=cotacao.total,
+            quote_id=cotacao.quote_id,
             # A tarifa inteira, nao so o id: amanha o comercial corrige a
             # planilha e esta cotacao tem de continuar reconstruivel.
             tarifa=dataclasses.asdict(tarifa),

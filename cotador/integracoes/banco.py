@@ -45,11 +45,43 @@ CREATE TABLE IF NOT EXISTS versoes_tabela (
     visto_ate       TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_versoes_visto ON versoes_tabela(aba, visto_ate);
+
+CREATE TABLE IF NOT EXISTS cotacoes_modelo (
+    quote_id            TEXT PRIMARY KEY,
+    id_email            TEXT UNIQUE NOT NULL,
+    thread_id           TEXT NOT NULL,
+    payload_json        TEXT NOT NULL,
+    p25                 REAL NOT NULL,
+    p50                 REAL NOT NULL,
+    p75                 REAL NOT NULL,
+    recommended         REAL NOT NULL,
+    distance_km         REAL,
+    structural_outlier  INTEGER NOT NULL,
+    structural_score    REAL,
+    model_version       TEXT NOT NULL,
+    status              TEXT NOT NULL CHECK(status IN ('SENT','ACCEPTED','REJECTED')),
+    contracted_price    REAL,
+    actual_cost         REAL,
+    notes               TEXT,
+    created_at          TEXT NOT NULL,
+    accepted_at         TEXT,
+    rejected_at         TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_cotacoes_modelo_thread ON cotacoes_modelo(thread_id);
+
+CREATE TABLE IF NOT EXISTS eventos_cotacao (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    quote_id    TEXT NOT NULL,
+    event_type  TEXT NOT NULL CHECK(event_type IN ('SENT','ACCEPTED','REJECTED')),
+    details_json TEXT,
+    created_at  TEXT NOT NULL,
+    FOREIGN KEY(quote_id) REFERENCES cotacoes_modelo(quote_id)
+);
 """
 
 # Colunas acrescentadas depois da primeira versao do banco. ALTER TABLE e
 # aplicado so quando falta, para nao exigir que ninguem apague o sqlite.
-_COLUNAS_NOVAS = {"label": "TEXT", "tarifa_json": "TEXT"}
+_COLUNAS_NOVAS = {"label": "TEXT", "tarifa_json": "TEXT", "quote_id": "TEXT"}
 
 _CAMPOS = (
     "id_email",
@@ -68,6 +100,7 @@ _CAMPOS = (
     "tarifa_json",
     "erro",
     "label",
+    "quote_id",
     "criado_em",
 )
 
@@ -133,6 +166,7 @@ class Banco:
         tarifa: dict | None = None,
         erro: str | None = None,
         label: str | None = None,
+        quote_id: str | None = None,
     ) -> None:
         valores = (
             id_email,
@@ -151,6 +185,7 @@ class Banco:
             json.dumps(tarifa, ensure_ascii=False, default=str) if tarifa else None,
             erro,
             label,
+            quote_id,
             datetime.now(timezone.utc).isoformat(timespec="seconds"),
         )
         marcadores = ",".join("?" * len(_CAMPOS))
@@ -161,6 +196,72 @@ class Banco:
                 valores,
             )
             con.commit()
+
+    # ---------------- cotações do modelo histórico ----------------
+    def registrar_cotacao_modelo(
+        self, *, quote_id: str, id_email: str, thread_id: str, payload: dict,
+        p25: float, p50: float, p75: float, recommended: float,
+        distance_km: float | None, structural_outlier: bool,
+        structural_score: float | None, model_version: str,
+    ) -> None:
+        agora = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        with closing(self._conectar()) as con:
+            con.execute(
+                """INSERT OR IGNORE INTO cotacoes_modelo
+                   (quote_id,id_email,thread_id,payload_json,p25,p50,p75,recommended,
+                    distance_km,structural_outlier,structural_score,model_version,status,created_at)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?, 'SENT', ?)""",
+                (quote_id, id_email, thread_id, json.dumps(payload, ensure_ascii=False),
+                 p25, p50, p75, recommended, distance_km, int(structural_outlier),
+                 structural_score, model_version, agora),
+            )
+            con.execute(
+                """INSERT INTO eventos_cotacao (quote_id,event_type,details_json,created_at)
+                   SELECT ?, 'SENT', NULL, ? WHERE changes() > 0""",
+                (quote_id, agora),
+            )
+            con.commit()
+
+    def _alterar_status_cotacao(
+        self, quote_id: str, status: str, *, contracted_price: float | None = None,
+        actual_cost: float | None = None, notes: str | None = None,
+    ) -> dict:
+        if status == "ACCEPTED" and (contracted_price is None or contracted_price <= 0):
+            raise ValueError("preço contratado deve ser maior que zero")
+        if actual_cost is not None and actual_cost < 0:
+            raise ValueError("custo real não pode ser negativo")
+        agora = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        aceito = agora if status == "ACCEPTED" else None
+        rejeitado = agora if status == "REJECTED" else None
+        detalhes = {"contracted_price": contracted_price, "actual_cost": actual_cost, "notes": notes}
+        with closing(self._conectar()) as con:
+            cur = con.execute(
+                """UPDATE cotacoes_modelo SET status=?, contracted_price=?, actual_cost=?,
+                   notes=?, accepted_at=?, rejected_at=? WHERE quote_id=?""",
+                (status, contracted_price, actual_cost, notes, aceito, rejeitado, quote_id),
+            )
+            if cur.rowcount != 1:
+                raise KeyError(f"cotação não encontrada: {quote_id}")
+            con.execute(
+                "INSERT INTO eventos_cotacao (quote_id,event_type,details_json,created_at) VALUES (?,?,?,?)",
+                (quote_id, status, json.dumps(detalhes, ensure_ascii=False), agora),
+            )
+            con.commit()
+        return self.obter_cotacao(quote_id)
+
+    def confirmar_cotacao(self, quote_id: str, contracted_price: float, actual_cost: float | None = None, notes: str | None = None) -> dict:
+        return self._alterar_status_cotacao(quote_id, "ACCEPTED", contracted_price=contracted_price, actual_cost=actual_cost, notes=notes)
+
+    def rejeitar_cotacao(self, quote_id: str, notes: str | None = None) -> dict:
+        return self._alterar_status_cotacao(quote_id, "REJECTED", notes=notes)
+
+    def obter_cotacao(self, quote_id: str) -> dict:
+        with closing(self._conectar()) as con:
+            con.row_factory = sqlite3.Row
+            linha = con.execute("SELECT * FROM cotacoes_modelo WHERE quote_id=?", (quote_id,)).fetchone()
+        if linha is None:
+            raise KeyError(f"cotação não encontrada: {quote_id}")
+        return dict(linha)
 
     # ---------------- consultas do painel ----------------
     def contar_por_desfecho(self, prefixo_dia: str | None = None) -> dict[str, int]:

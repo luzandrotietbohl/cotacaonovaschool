@@ -85,6 +85,28 @@ Pode responder este mesmo email com os dados e retornamos a cotacao em seguida.
 
 
 def enviar_cotacao(pedido: PedidoCotacao, cotacao: Cotacao, nome: str) -> str:
+    if cotacao.fonte == "historico_olist":
+        prazo = (
+            f"Prazo estimado de entrega: {_dias(cotacao.prazo_dias)} apos a coleta.\n"
+            if cotacao.prazo_dias else ""
+        )
+        obs = f"Observacao registrada: {pedido.observacoes}\n" if pedido.observacoes else ""
+        return f"""Ola, {nome},
+
+Segue a cotacao de frete solicitada.
+
+Trecho: {pedido.origem} -> {pedido.destino}
+Volumes: {cotacao.qtd_volumes}
+Valor da mercadoria: {_reais(cotacao.valor_nf)}
+Peso informado: {_kg(pedido.peso_kg)}
+
+VALOR TOTAL DO FRETE: {_reais(cotacao.total)}
+
+{prazo}{obs}
+Cotacao valida por 7 dias, sujeita a conferencia dos dados da carga na coleta.
+Para seguir com a coleta, basta responder este email confirmando.
+{ASSINATURA}"""
+
     t = cotacao.tarifa
     plural = "volume" if cotacao.qtd_volumes == 1 else "volumes"
 
