@@ -13,3 +13,4 @@ catboost_info/
 relatorios/
 /olist_*.csv
 /product_category_name_translation.csv
+docs/_e46_embarques.pkl

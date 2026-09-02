@@ -1,0 +1,488 @@
+{
+  "split": {
+    "treino": 68117,
+    "calibracao": 14597,
+    "teste": 14597,
+    "treino_ate": "2018-04-16",
+    "teste_de": "2018-06-21",
+    "teste_ate": "2018-08-29"
+  },
+  "tabela_cobertura_celula": 98.97,
+  "regra_linear_coef": {
+    "intercepto": 8.9,
+    "por_kg": 2.69,
+    "por_km": 0.0106
+  },
+  "linha_de_base": {
+    "B0 mediana global do treino": {
+      "mae": 11.43,
+      "medae": 5.6,
+      "medape": 28.74,
+      "vies_medio": -7.5,
+      "ganho_vs_B3_pct": -43.8
+    },
+    "B1 mediana por rota UF": {
+      "mae": 9.78,
+      "medae": 3.74,
+      "medape": 25.28,
+      "vies_medio": -7.46,
+      "ganho_vs_B3_pct": -23.0
+    },
+    "B2 mediana por faixa de peso": {
+      "mae": 9.93,
+      "medae": 5.62,
+      "medape": 25.38,
+      "vies_medio": -5.79,
+      "ganho_vs_B3_pct": -24.9
+    },
+    "B3 tabela rota x faixa de peso": {
+      "mae": 7.95,
+      "medae": 3.3,
+      "medape": 18.99,
+      "vies_medio": -6.05,
+      "ganho_vs_B3_pct": 0.0
+    },
+    "B4 regra linear a+b*kg+c*km": {
+      "mae": 7.43,
+      "medae": 2.96,
+      "medape": 20.72,
+      "vies_medio": -3.99,
+      "ganho_vs_B3_pct": 6.5
+    },
+    "M  CatBoost quantilico P50": {
+      "mae": 5.62,
+      "medae": 2.11,
+      "medape": 12.1,
+      "vies_medio": -3.71,
+      "ganho_vs_B3_pct": 29.3
+    }
+  },
+  "cobertura_p25_p75": 47.42,
+  "abaixo_p25": 15.4,
+  "acima_p75": 37.18,
+  "fuga_split": {
+    "temporal": {
+      "mae": 5.67,
+      "medae": 2.14,
+      "medape": 12.19,
+      "vies_medio": -3.74
+    },
+    "aleatorio": {
+      "mae": 4.29,
+      "medae": 1.41,
+      "medape": 8.1,
+      "vies_medio": -1.1
+    },
+    "otimismo_mae_pct": 24.3
+  },
+  "custo_erro": {
+    "dias_no_teste": 69,
+    "fator_anualizacao": 5.29,
+    "n_subprecificado": 9163,
+    "pct_subprecificado": 62.8,
+    "margem_perdida_total": 68081.93,
+    "margem_perdida_media": 7.43,
+    "n_sobreprecificado": 5434,
+    "pct_sobreprecificado": 37.2,
+    "excesso_cobrado_total": 13916.46,
+    "cotacoes_acima_de_10pct": {
+      "n": 2895,
+      "pct": 19.8,
+      "receita_de_frete_em_risco": 39740.59
+    },
+    "cotacoes_acima_de_20pct": {
+      "n": 1202,
+      "pct": 8.2,
+      "receita_de_frete_em_risco": 18206.29
+    },
+    "cotacoes_acima_de_30pct": {
+      "n": 712,
+      "pct": 4.9,
+      "receita_de_frete_em_risco": 10935.78
+    },
+    "margem_perdida_ano": 360143.54,
+    "receita_em_risco_ano_corte20pct": 96308.64
+  },
+  "deriva_mensal": [
+    {
+      "mes": "2016-10",
+      "n": 268,
+      "frete_p50": 17.52,
+      "kg_p50": 1.065,
+      "km_p50": 437.5
+    },
+    {
+      "mes": "2017-01",
+      "n": 753,
+      "frete_p50": 18.0,
+      "kg_p50": 0.8,
+      "km_p50": 457.8
+    },
+    {
+      "mes": "2017-02",
+      "n": 1666,
+      "frete_p50": 17.19,
+      "kg_p50": 0.8,
+      "km_p50": 459.1
+    },
+    {
+      "mes": "2017-03",
+      "n": 2538,
+      "frete_p50": 16.49,
+      "kg_p50": 0.8,
+      "km_p50": 463.0
+    },
+    {
+      "mes": "2017-04",
+      "n": 2301,
+      "frete_p50": 16.46,
+      "kg_p50": 0.8,
+      "km_p50": 479.4
+    },
+    {
+      "mes": "2017-05",
+      "n": 3559,
+      "frete_p50": 16.36,
+      "kg_p50": 0.85,
+      "km_p50": 460.9
+    },
+    {
+      "mes": "2017-06",
+      "n": 3136,
+      "frete_p50": 16.45,
+      "kg_p50": 0.867,
+      "km_p50": 437.2
+    },
+    {
+      "mes": "2017-07",
+      "n": 3918,
+      "frete_p50": 16.3,
+      "kg_p50": 0.909,
+      "km_p50": 441.8
+    },
+    {
+      "mes": "2017-08",
+      "n": 4227,
+      "frete_p50": 16.33,
+      "kg_p50": 0.875,
+      "km_p50": 462.6
+    },
+    {
+      "mes": "2017-09",
+      "n": 4171,
+      "frete_p50": 16.79,
+      "kg_p50": 0.84,
+      "km_p50": 477.8
+    },
+    {
+      "mes": "2017-10",
+      "n": 4519,
+      "frete_p50": 16.67,
+      "kg_p50": 0.8,
+      "km_p50": 471.5
+    },
+    {
+      "mes": "2017-11",
+      "n": 7350,
+      "frete_p50": 16.7,
+      "kg_p50": 0.85,
+      "km_p50": 452.1
+    },
+    {
+      "mes": "2017-12",
+      "n": 5544,
+      "frete_p50": 16.16,
+      "kg_p50": 0.7,
+      "km_p50": 427.3
+    },
+    {
+      "mes": "2018-01",
+      "n": 7148,
+      "frete_p50": 16.25,
+      "kg_p50": 0.75,
+      "km_p50": 429.6
+    },
+    {
+      "mes": "2018-02",
+      "n": 6568,
+      "frete_p50": 16.21,
+      "kg_p50": 0.6,
+      "km_p50": 462.7
+    },
+    {
+      "mes": "2018-03",
+      "n": 7062,
+      "frete_p50": 18.23,
+      "kg_p50": 0.65,
+      "km_p50": 436.1
+    },
+    {
+      "mes": "2018-04",
+      "n": 6895,
+      "frete_p50": 18.23,
+      "kg_p50": 0.75,
+      "km_p50": 410.1
+    },
+    {
+      "mes": "2018-05",
+      "n": 6830,
+      "frete_p50": 17.68,
+      "kg_p50": 0.7,
+      "km_p50": 387.5
+    },
+    {
+      "mes": "2018-06",
+      "n": 6185,
+      "frete_p50": 18.71,
+      "kg_p50": 0.7,
+      "km_p50": 407.8
+    },
+    {
+      "mes": "2018-07",
+      "n": 6234,
+      "frete_p50": 18.94,
+      "kg_p50": 0.611,
+      "km_p50": 430.3
+    },
+    {
+      "mes": "2018-08",
+      "n": 6437,
+      "frete_p50": 18.31,
+      "kg_p50": 0.6,
+      "km_p50": 362.6
+    }
+  ],
+  "deriva_amplitude_frete_p50_pct": 17.2,
+  "mae_por_mes_no_teste": [
+    {
+      "mes": "2018-06",
+      "n": 1926,
+      "mae": 5.7
+    },
+    {
+      "mes": "2018-07",
+      "n": 6234,
+      "mae": 5.99
+    },
+    {
+      "mes": "2018-08",
+      "n": 6437,
+      "mae": 5.23
+    }
+  ],
+  "etica_por_regiao": {
+    "CO": {
+      "n": 823,
+      "frete_real_p50": 21.18,
+      "erro_pct_p50": -11.4,
+      "pct_sobreprecificado": 26.9,
+      "medape": 12.1
+    },
+    "N": {
+      "n": 230,
+      "frete_real_p50": 37.46,
+      "erro_pct_p50": -15.81,
+      "pct_sobreprecificado": 22.6,
+      "medape": 24.9
+    },
+    "NE": {
+      "n": 1253,
+      "frete_real_p50": 28.27,
+      "erro_pct_p50": -18.34,
+      "pct_sobreprecificado": 24.6,
+      "medape": 21.6
+    },
+    "S": {
+      "n": 1951,
+      "frete_real_p50": 19.58,
+      "erro_pct_p50": -11.74,
+      "pct_sobreprecificado": 19.6,
+      "medape": 12.1
+    },
+    "SE": {
+      "n": 10340,
+      "frete_real_p50": 16.43,
+      "erro_pct_p50": -1.71,
+      "pct_sobreprecificado": 43.2,
+      "medape": 11.7
+    }
+  },
+  "etica_por_perfil": {
+    "capital_capital": {
+      "n": 2292,
+      "frete_real_p50": 16.37,
+      "erro_pct_p50": -0.45,
+      "pct_sobreprecificado": 48.0,
+      "medape": 6.0
+    },
+    "capital_interior": {
+      "n": 3132,
+      "frete_real_p50": 18.34,
+      "erro_pct_p50": -4.81,
+      "pct_sobreprecificado": 40.0,
+      "medape": 12.5
+    },
+    "interior_capital": {
+      "n": 3458,
+      "frete_real_p50": 18.62,
+      "erro_pct_p50": -2.48,
+      "pct_sobreprecificado": 43.5,
+      "medape": 12.6
+    },
+    "interior_interior": {
+      "n": 5715,
+      "frete_real_p50": 19.33,
+      "erro_pct_p50": -10.72,
+      "pct_sobreprecificado": 27.6,
+      "medape": 13.1
+    }
+  },
+  "etica_por_decil_distancia": {
+    "1": {
+      "n": 1460,
+      "frete_real_p50": 8.98,
+      "erro_pct_p50": 8.94,
+      "pct_sobreprecificado": 80.2,
+      "medape": 10.3
+    },
+    "2": {
+      "n": 1460,
+      "frete_real_p50": 9.24,
+      "erro_pct_p50": 10.79,
+      "pct_sobreprecificado": 79.0,
+      "medape": 13.1
+    },
+    "3": {
+      "n": 1459,
+      "frete_real_p50": 13.29,
+      "erro_pct_p50": 10.4,
+      "pct_sobreprecificado": 60.0,
+      "medape": 18.0
+    },
+    "4": {
+      "n": 1460,
+      "frete_real_p50": 16.38,
+      "erro_pct_p50": -3.26,
+      "pct_sobreprecificado": 18.4,
+      "medape": 5.1
+    },
+    "5": {
+      "n": 1460,
+      "frete_real_p50": 18.29,
+      "erro_pct_p50": -2.52,
+      "pct_sobreprecificado": 27.0,
+      "medape": 5.2
+    },
+    "6": {
+      "n": 1459,
+      "frete_real_p50": 19.01,
+      "erro_pct_p50": -11.16,
+      "pct_sobreprecificado": 21.1,
+      "medape": 11.7
+    },
+    "7": {
+      "n": 1460,
+      "frete_real_p50": 19.41,
+      "erro_pct_p50": -11.63,
+      "pct_sobreprecificado": 17.8,
+      "medape": 11.9
+    },
+    "8": {
+      "n": 1459,
+      "frete_real_p50": 20.65,
+      "erro_pct_p50": -12.01,
+      "pct_sobreprecificado": 19.5,
+      "medape": 12.4
+    },
+    "9": {
+      "n": 1460,
+      "frete_real_p50": 22.77,
+      "erro_pct_p50": -12.8,
+      "pct_sobreprecificado": 19.2,
+      "medape": 15.0
+    },
+    "10": {
+      "n": 1460,
+      "frete_real_p50": 37.03,
+      "erro_pct_p50": -14.98,
+      "pct_sobreprecificado": 30.1,
+      "medape": 23.9
+    }
+  },
+  "etica_por_porte_vendedor": {
+    "1-10": {
+      "n": 1976,
+      "frete_real_p50": 18.64,
+      "erro_pct_p50": -4.47,
+      "pct_sobreprecificado": 38.3,
+      "medape": 12.3
+    },
+    "11-100": {
+      "n": 5736,
+      "frete_real_p50": 18.71,
+      "erro_pct_p50": -4.49,
+      "pct_sobreprecificado": 35.9,
+      "medape": 12.1
+    },
+    "101-1000": {
+      "n": 5488,
+      "frete_real_p50": 18.48,
+      "erro_pct_p50": -3.34,
+      "pct_sobreprecificado": 38.3,
+      "medape": 12.1
+    },
+    ">1000": {
+      "n": 1397,
+      "frete_real_p50": 17.69,
+      "erro_pct_p50": -2.84,
+      "pct_sobreprecificado": 37.0,
+      "medape": 12.0
+    }
+  },
+  "portao": {
+    "regra_1_fora_do_dominio": {
+      "n": 173,
+      "pct": 1.19,
+      "mae_dentro": 5.63,
+      "mae_fora": 4.89,
+      "medape_dentro": 12.13,
+      "medape_fora": 7.96
+    },
+    "largura_0.6": {
+      "corte": 0.6,
+      "pct_humano": 4.7,
+      "mae_auto": 4.92,
+      "medape_auto": 11.97,
+      "mae_humano": 19.84
+    },
+    "largura_0.8": {
+      "corte": 0.8,
+      "pct_humano": 1.5,
+      "mae_auto": 5.53,
+      "medape_auto": 12.12,
+      "mae_humano": 11.04
+    },
+    "largura_1.0": {
+      "corte": 1.0,
+      "pct_humano": 1.2,
+      "mae_auto": 5.63,
+      "medape_auto": 12.13,
+      "mae_humano": 4.94
+    },
+    "largura_1.2": {
+      "corte": 1.2,
+      "pct_humano": 1.2,
+      "mae_auto": 5.63,
+      "medape_auto": 12.13,
+      "mae_humano": 4.89
+    }
+  },
+  "metricas_producao_metadata": {
+    "mae_p50": 5.617481978334573,
+    "median_absolute_error_p50": 2.1148131671463517,
+    "median_absolute_percentage_error_p50": 12.10445358799802,
+    "coverage_p25_p75": 0.4742070288415428,
+    "below_p25": 0.15400424744810579,
+    "above_p75": 0.37178872371035143
+  }
+}

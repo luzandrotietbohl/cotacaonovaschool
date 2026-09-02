@@ -1,0 +1,70 @@
+
+==============================================================================
+BLOCO 3.4 - CURADORIA: o funil de exclusao, numero antes e depois
+==============================================================================
+etapa                                     linhas    % bruto        frete R$
+0. order_items bruto                     112,650     100.0%    2,251,909.54
+1. so order_status=delivered             110,197      97.8%    2,198,275.64
+2. agregado por order_id+seller_id        97,819      86.8%    2,198,275.64
+3. join clientes+vendedores               97,819      86.8%    2,198,275.64
+4. dropna geo/peso obrigatorios           97,333      86.4%    2,186,706.33
+5. freight>=0, peso>0, qtd>0              97,311      86.4%    2,186,254.17
+
+Vies das exclusoes (o que sai nao e igual ao que fica):
+  excluidos_por_status: {"linhas": 2453, "frete_mediano": 16.46, "frete_medio": 21.86, "preco_mediano": 82.9}
+  mantidos_delivered: {"linhas": 110197, "frete_mediano": 16.26, "frete_medio": 19.95, "preco_mediano": 74.9}
+  descartados_geo_peso: {"linhas": 486, "frete_mediano": 18.23, "sem_peso": 0, "sem_distancia": 486}
+  descartados_dominio: {"linhas": 22, "peso_zero": 22}
+
+  status dos pedidos: {"delivered": 96478, "shipped": 1107, "canceled": 625, "unavailable": 609, "invoiced": 314, "processing": 301, "created": 5, "approved": 2}
+
+==============================================================================
+BLOCO 3.2 - GRAO E UNIDADE DE ANALISE
+==============================================================================
+  linhas_order_items: 112650
+  pedidos: 98666
+  embarques_pedido_vendedor: 100010
+  pedidos_multi_vendedor: 1278
+  pct_pedidos_multi_vendedor: 1.3
+  itens_por_pedido_p50: 1.0
+  itens_por_pedido_max: 21
+  vendedores: 3095
+  rotas_uf_distintas: 407
+  embarques_finais: 97311
+  janela_inicio: 2016-09-04
+  janela_fim: 2018-10-17
+
+==============================================================================
+BLOCO 3.2 - LATENCIA EM HORAS (nao em adjetivos)
+==============================================================================
+  compra->aprovacao    p50=      0.3h  p90=     34.7h  max=   4509.2h  negativos=    0  ausentes=   160
+  aprovacao->coleta    p50=     43.6h  p90=    144.0h  max=   3018.3h  negativos= 1359  ausentes=  1797
+  coleta->entrega      p50=    170.4h  p90=    453.6h  max=   4924.6h  negativos=   23  ausentes=  2966
+  compra->entrega      p50=    245.2h  p90=    554.3h  max=   5031.1h  negativos=    0  ausentes=  2965
+
+  O rotulo (freight_value) existe em t0. O FILTRO de treino (order_status=delivered)
+  so existe 10.2 dias depois, na mediana. Todas as 10 features do modelo estao disponiveis em t0.
+
+==============================================================================
+BLOCO 3.2 - COBERTURA GEOGRAFICA
+==============================================================================
+  prefixos_cep_no_geolocation: 19015
+  linhas_geolocation_brutas: 1000163
+  clientes_sem_geo: 278
+  pct_clientes_sem_geo: 0.28
+  vendedores_sem_geo: 7
+  pct_vendedores_sem_geo: 0.226
+  piores_ufs_sem_geo_pct: {"DF": 7.99, "RO": 0.79, "PI": 0.61, "MA": 0.54, "GO": 0.45, "RN": 0.41}
+
+==============================================================================
+BLOCO 3.1 - AUTORIA: o frete e uma alegacao comercial, nao uma medicao
+==============================================================================
+  valores_distintos_de_frete: 6999
+  pct_nos_10_valores_mais_comuns: 14.86
+  top10_valores: {"15.1": 3707, "7.78": 2262, "14.1": 1875, "11.85": 1846, "18.23": 1575, "7.39": 1521, "16.11": 1152, "15.23": 1010, "8.72": 921, "16.79": 873}
+  frete_zero: 383
+  pct_frete_zero: 0.34
+  celulas_rota_x_faixa_peso_n_min_30: 303
+  cv_mediano_dentro_da_celula: 0.477
+  cv_p90_dentro_da_celula: 0.759
+  exemplos_maior_dispersao: [{"rota": "SP>MT", "faixa_kg": "10-30", "n": 34, "mediana": 61.52, "min": 14.88, "max": 338.3}, {"rota": "PR>BA", "faixa_kg": "0.5-1", "n": 30, "mediana": 35.47, "min": 22.67, "max": 207.64}, {"rota": "SC>SP", "faixa_kg": "10-30", "n": 77, "mediana": 46.48, "min": 16.88, "max": 339.59}]

@@ -1,0 +1,130 @@
+
+==============================================================================
+SPLIT TEMPORAL
+==============================================================================
+  treino     68,117  2016-09-15 a 2018-04-16
+  calibracao 14,597  2018-04-16 a 2018-06-21
+  teste      14,597  2018-06-21 a 2018-08-29
+
+==============================================================================
+BLOCO 4.1 - LINHA DE BASE: contra o que o modelo e comparado
+==============================================================================
+modelo                                  MAE    MedAE   MedAPE     vies  ganho MAE
+B0 mediana global do treino           11.43     5.60    28.7%    -7.50     -43.8%
+B1 mediana por rota UF                 9.78     3.74    25.3%    -7.46     -23.0%
+B2 mediana por faixa de peso           9.93     5.62    25.4%    -5.79     -24.9%
+B3 tabela rota x faixa de peso         7.95     3.30    19.0%    -6.05       0.0%
+B4 regra linear a+b*kg+c*km            7.43     2.96    20.7%    -3.99       6.5%
+M  CatBoost quantilico P50             5.62     2.11    12.1%    -3.71      29.3%
+
+  Intervalo P25-P75: cobertura real 47.42% (nominal 50%); 15.40% abaixo, 37.18% acima
+
+==============================================================================
+BLOCO 4.1 - FUGA DE DADOS: o que muda quando o split e aleatorio
+==============================================================================
+  split temporal  (honesto):  MAE 5.67  MedAPE 12.2%
+  split aleatorio (fuga):     MAE 4.29  MedAPE 8.1%
+  otimismo do split aleatorio: 24.3% de MAE a menos
+
+  Fuga por sobrevivencia: o treino so ve pedidos com order_status=delivered,
+  status que so existe ~10 dias depois da cotacao. Ver bloco 3.4 (2.453 linhas
+  excluidas, frete mediano R$ 16,46 contra R$ 16,26 das mantidas).
+
+==============================================================================
+BLOCO 4.1 - CUSTO EM REAIS DE CADA TIPO DE ERRO
+==============================================================================
+  dias_no_teste: 69
+  fator_anualizacao: 5.29
+  n_subprecificado: 9163
+  pct_subprecificado: 62.8
+  margem_perdida_total: 68081.93
+  margem_perdida_media: 7.43
+  n_sobreprecificado: 5434
+  pct_sobreprecificado: 37.2
+  excesso_cobrado_total: 13916.46
+  cotacoes_acima_de_10pct: {"n": 2895, "pct": 19.8, "receita_de_frete_em_risco": 39740.59}
+  cotacoes_acima_de_20pct: {"n": 1202, "pct": 8.2, "receita_de_frete_em_risco": 18206.29}
+  cotacoes_acima_de_30pct: {"n": 712, "pct": 4.9, "receita_de_frete_em_risco": 10935.78}
+  margem_perdida_ano: 360143.54
+  receita_em_risco_ano_corte20pct: 96308.64
+
+==============================================================================
+BLOCO 4.2 - DERIVA: o alvo se move dentro da propria janela
+==============================================================================
+  mes        n     frete_p50  kg_p50   km_p50
+  2016-10     268      17.52    1.065      438
+  2017-01     753      18.00    0.800      458
+  2017-02   1,666      17.19    0.800      459
+  2017-03   2,538      16.49    0.800      463
+  2017-04   2,301      16.46    0.800      479
+  2017-05   3,559      16.36    0.850      461
+  2017-06   3,136      16.45    0.867      437
+  2017-07   3,918      16.30    0.909      442
+  2017-08   4,227      16.33    0.875      463
+  2017-09   4,171      16.79    0.840      478
+  2017-10   4,519      16.67    0.800      472
+  2017-11   7,350      16.70    0.850      452
+  2017-12   5,544      16.16    0.700      427
+  2018-01   7,148      16.25    0.750      430
+  2018-02   6,568      16.21    0.600      463
+  2018-03   7,062      18.23    0.650      436
+  2018-04   6,895      18.23    0.750      410
+  2018-05   6,830      17.68    0.700      388
+  2018-06   6,185      18.71    0.700      408
+  2018-07   6,234      18.94    0.611      430
+  2018-08   6,437      18.31    0.600      363
+  amplitude do frete mediano mensal: 17.2%
+
+  MAE por mes dentro do teste (o gatilho de revalidacao):
+    2018-06   1,926     5.70
+    2018-07   6,234     5.99
+    2018-08   6,437     5.23
+
+==============================================================================
+BLOCO 5 - QUEM CARREGA O RISCO QUANDO O SISTEMA FUNCIONA COMO DESENHADO
+==============================================================================
+  por regiao de destino:
+    regiao      n  frete_p50  erro%_p50  %sobrepreco  MedAPE
+    SE     10,340      16.43      -1.71        43.2%    11.7%
+    CO        823      21.18     -11.40        26.9%    12.1%
+    S       1,951      19.58     -11.74        19.6%    12.1%
+    N         230      37.46     -15.81        22.6%    24.9%
+    NE      1,253      28.27     -18.34        24.6%    21.6%
+
+  por perfil capital/interior (origem_destino):
+    capital_capital       2,292      16.37      -0.45        48.0%
+    interior_capital      3,458      18.62      -2.48        43.5%
+    capital_interior      3,132      18.34      -4.81        40.0%
+    interior_interior     5,715      19.33     -10.72        27.6%
+
+  por decil de distancia (1 = mais perto):
+    decil  1   1,460       8.98      +8.94%
+    decil  2   1,460       9.24     +10.79%
+    decil  3   1,459      13.29     +10.40%
+    decil  4   1,460      16.38      -3.26%
+    decil  5   1,460      18.29      -2.52%
+    decil  6   1,459      19.01     -11.16%
+    decil  7   1,460      19.41     -11.63%
+    decil  8   1,459      20.65     -12.01%
+    decil  9   1,460      22.77     -12.80%
+    decil 10   1,460      37.03     -14.98%
+
+  por porte do vendedor (n de embarques na base):
+    1-10        1,976      18.64      -4.47%     12.3%
+    11-100      5,736      18.71      -4.49%     12.1%
+    101-1000    5,488      18.48      -3.34%     12.1%
+    >1000       1,397      17.69      -2.84%     12.0%
+
+==============================================================================
+BLOCO 6 - O PORTAO: o que sai automatico e o que vai para humano
+==============================================================================
+  IsolationForest (contaminacao 1%): 173 cotacoes (1.19%)
+    MAE dentro do dominio: R$ 5.63   |  fora: R$ 4.89
+    MedAPE dentro: 12.1%  |  fora: 8.0%
+
+  Portao adicional por largura do intervalo (P75-P25)/P50:
+    corte   %p/humano   MAE automatico   MedAPE automatico   MAE p/humano
+      0.6       4.7%            4.92               12.0%          19.84
+      0.8       1.5%            5.53               12.1%          11.04
+      1.0       1.2%            5.63               12.1%           4.94
+      1.2       1.2%            5.63               12.1%           4.89

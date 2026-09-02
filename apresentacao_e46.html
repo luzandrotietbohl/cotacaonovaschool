@@ -1,0 +1,1154 @@
+<meta charset="utf-8">
+<title>O Preco Que Sai Sozinho</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+/* ============================================================
+   E4.6 — Apresentação final do Módulo 1 (seis blocos)
+   Mesmo sistema visual de apresentacao.html (Cotador de frete).
+   ============================================================ */
+
+:root{
+  --paper:#f4f2ed;
+  --surface:#fbfaf7;
+  --surface-2:#efece4;
+  --ink:#191712;
+  --ink-2:#4a463d;
+  --muted:#807a6d;
+  --rule:#d9d3c6;
+  --rule-soft:#e8e4da;
+  --accent:#b16512;
+
+  --c1:#b16512;   /* ocre  */
+  --c2:#008f7d;   /* teal  */
+  --c3:#426bce;   /* índigo*/
+  --c4:#c14d66;   /* rosa  */
+
+  --ok:#008f7d;
+  --warn:#b16512;
+  --stop:#c14d66;
+
+  --ok-wash:#008f7d1a;
+  --warn-wash:#b165121a;
+  --stop-wash:#c14d661a;
+  --info-wash:#426bce1a;
+
+  --shadow:0 1px 2px #19171208, 0 12px 40px #19171214;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131210;
+    --surface:#1c1a16;
+    --surface-2:#24211b;
+    --ink:#f2efe6;
+    --ink-2:#c4bfb2;
+    --muted:#8f887a;
+    --rule:#3a362c;
+    --rule-soft:#2a2721;
+    --accent:#d08a2e;
+
+    --c1:#be7125;
+    --c2:#0f9b89;
+    --c3:#5c82da;
+    --c4:#cf5971;
+
+    --ok:#0f9b89;
+    --warn:#be7125;
+    --stop:#cf5971;
+
+    --ok-wash:#0f9b8924;
+    --warn-wash:#be712524;
+    --stop-wash:#cf597124;
+    --info-wash:#5c82da24;
+
+    --shadow:0 1px 2px #00000040, 0 12px 40px #00000055;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131210;
+  --surface:#1c1a16;
+  --surface-2:#24211b;
+  --ink:#f2efe6;
+  --ink-2:#c4bfb2;
+  --muted:#8f887a;
+  --rule:#3a362c;
+  --rule-soft:#2a2721;
+  --accent:#d08a2e;
+
+  --c1:#be7125;
+  --c2:#0f9b89;
+  --c3:#5c82da;
+  --c4:#cf5971;
+
+  --ok:#0f9b89;
+  --warn:#be7125;
+  --stop:#cf5971;
+
+  --ok-wash:#0f9b8924;
+  --warn-wash:#be712524;
+  --stop-wash:#cf597124;
+  --info-wash:#5c82da24;
+
+  --shadow:0 1px 2px #00000040, 0 12px 40px #00000055;
+}
+
+*{box-sizing:border-box}
+
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- chrome ---------- */
+
+.bar{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:10px 18px;
+  border-bottom:1px solid var(--rule);
+  background:var(--surface);
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--muted);
+  flex:0 0 auto;
+  position:sticky;
+  top:0;
+  z-index:20;
+}
+.bar strong{color:var(--ink);font-weight:600}
+.bar .spacer{flex:1}
+.bar button{
+  font:inherit;
+  letter-spacing:inherit;
+  text-transform:inherit;
+  color:var(--ink-2);
+  background:transparent;
+  border:1px solid var(--rule);
+  border-radius:2px;
+  padding:4px 9px;
+  cursor:pointer;
+}
+.bar button:hover{border-color:var(--accent);color:var(--accent)}
+.bar button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.counter{font-variant-numeric:tabular-nums;color:var(--ink)}
+
+.stage-wrap{
+  flex:1 1 auto;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  min-height:0;
+}
+
+.stage{
+  width:min(100%, calc((100vh - 130px) * 16 / 9));
+  aspect-ratio:16/9;
+  background:var(--surface);
+  border:1px solid var(--rule);
+  box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden;
+  container-type:size;
+  container-name:slide;
+}
+
+/* ---------- slide skeleton ---------- */
+
+.slide{
+  position:absolute;
+  inset:0;
+  display:none;
+  flex-direction:column;
+  padding:4.6cqw 5.2cqw 0;
+}
+.slide.on{display:flex}
+
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.32cqw;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  display:flex;
+  align-items:baseline;
+  gap:1.1cqw;
+  flex:0 0 auto;
+}
+.eyebrow b{color:var(--accent);font-weight:600}
+.eyebrow .q{
+  font-family:"Source Serif 4",serif;
+  font-size:1.42cqw;
+  letter-spacing:0;
+  text-transform:none;
+  font-style:italic;
+  color:var(--ink-2);
+}
+
+h2{
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;
+  font-weight:700;
+  font-size:3.2cqw;
+  line-height:1.05;
+  letter-spacing:-.022em;
+  margin:1.2cqw 0 0;
+  text-wrap:balance;
+  max-width:34ch;
+  flex:0 0 auto;
+}
+
+.body{
+  flex:1 1 auto;
+  min-height:0;
+  margin-top:1.8cqw;
+  overflow:hidden;
+  font-size:1.44cqw;
+  line-height:1.4;
+  color:var(--ink-2);
+}
+.body p{margin:0 0 .85em}
+.body p:last-child{margin-bottom:0}
+.body strong{color:var(--ink);font-weight:600}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.92em;color:var(--ink)}
+
+/* the claim strip — one defensible sentence per slide */
+.claim{
+  flex:0 0 auto;
+  margin-top:auto;
+  border-top:1px solid var(--rule);
+  padding:1.5cqw 0 1.9cqw;
+  display:flex;
+  gap:1.5cqw;
+  align-items:baseline;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.26cqw;
+  line-height:1.45;
+  color:var(--ink-2);
+}
+.claim .k{
+  color:var(--accent);
+  letter-spacing:.18em;
+  font-weight:600;
+  white-space:nowrap;
+}
+
+.pagenum{
+  position:absolute;
+  right:2.1cqw;
+  bottom:1.7cqw;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.1cqw;
+  color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- notas 1–5: o instrumento deste cartão ---------- */
+
+.nota{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1cqw;
+  letter-spacing:.1em;
+  font-weight:600;
+  padding:.26em .56em;
+  border:1px solid currentColor;
+  border-radius:2px;
+  white-space:nowrap;
+  display:inline-block;
+  vertical-align:.1em;
+  font-variant-numeric:tabular-nums;
+}
+.n1{color:var(--stop);background:var(--stop-wash)}
+.n2{color:var(--warn);background:var(--warn-wash)}
+.n3{color:var(--c3);background:var(--info-wash)}
+.n4,.n5{color:var(--ok);background:var(--ok-wash)}
+
+/* ---------- números grandes ---------- */
+
+.figs{display:grid;gap:2cqw;align-content:start}
+.big{
+  font-family:Archivo,sans-serif;
+  font-weight:800;
+  font-size:4.6cqw;
+  line-height:.92;
+  letter-spacing:-.035em;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+.big.stop{color:var(--stop)}
+.big.warn{color:var(--accent)}
+.big.sm{font-size:3.2cqw}
+.bigsub{font-size:1.16cqw;line-height:1.4;color:var(--muted);margin-top:.55cqw;max-width:30ch}
+.bigsub b{color:var(--ink-2);font-weight:600}
+
+/* ---------- generic layout helpers ---------- */
+
+.cols{display:grid;gap:3cqw}
+.c2{grid-template-columns:1fr 1fr}
+.c2w{grid-template-columns:1.15fr .85fr}
+.c2n{grid-template-columns:.86fr 1.14fr}
+.c2t{grid-template-columns:.62fr 1.38fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+
+.lbl{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.06cqw;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin:0 0 .8cqw;
+  display:flex;
+  gap:.7cqw;
+  align-items:center;
+}
+
+ul.tight{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.62cqw}
+ul.tight li{padding-left:1.4cqw;position:relative}
+ul.tight li::before{
+  content:"";
+  position:absolute;
+  left:0;top:.62em;
+  width:.5cqw;height:.5cqw;
+  background:var(--rule);
+  border-radius:50%;
+}
+ul.tight li.no::before{background:none;border:1px solid var(--stop);border-radius:0;transform:rotate(45deg);top:.55em}
+ul.tight li.yes::before{background:var(--ok)}
+
+/* ---------- tables (Wilke: sem réguas verticais) ---------- */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:1.24cqw;
+  line-height:1.32;
+}
+thead th{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.95cqw;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:500;
+  text-align:left;
+  padding:0 1.1cqw .7cqw 0;
+  border-bottom:1px solid var(--ink);
+  vertical-align:bottom;
+}
+tbody td{
+  padding:.72cqw 1.1cqw .72cqw 0;
+  border-bottom:1px solid var(--rule-soft);
+  vertical-align:top;
+  color:var(--ink-2);
+}
+tbody tr:last-child td{border-bottom:1px solid var(--rule)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;padding-right:0}
+td.who{color:var(--ink);font-weight:600}
+td.mono,th.mono{font-family:"IBM Plex Mono",monospace}
+tr.hi td{background:var(--stop-wash)}
+tfoot td{
+  padding:.7cqw 1.1cqw 0 0;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:1.06cqw;
+  color:var(--ink);
+  font-weight:600;
+  border-top:1px solid var(--ink);
+}
+
+/* slides com tabela longa: mesma hierarquia, um degrau abaixo */
+.slide.dense h2{font-size:2.6cqw;max-width:42ch}
+.slide.dense .body{margin-top:1.5cqw;font-size:1.34cqw}
+.slide.dense table{font-size:1.1cqw;line-height:1.28}
+.slide.dense thead th{font-size:.88cqw;padding-bottom:.55cqw}
+.slide.dense tbody td{padding:.48cqw 1cqw .48cqw 0}
+.slide.dense .claim{padding:1.1cqw 0 1.6cqw}
+.slide.dense .nota{font-size:.92cqw}
+
+/* ---------- figures ---------- */
+
+figure{margin:0}
+figcaption{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1cqw;
+  line-height:1.5;
+  color:var(--muted);
+  margin-top:1cqw;
+}
+.figtitle{
+  font-family:Archivo,sans-serif;
+  font-weight:600;
+  font-size:1.42cqw;
+  color:var(--ink);
+  letter-spacing:-.01em;
+  margin-bottom:.35cqw;
+}
+.figsub{
+  font-size:1.2cqw;
+  color:var(--muted);
+  margin-bottom:1.6cqw;
+  font-style:italic;
+}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.ax{font-family:"IBM Plex Mono",monospace;font-size:9px;fill:var(--muted)}
+.axl{font-family:"IBM Plex Mono",monospace;font-size:9.5px;fill:var(--ink-2)}
+.val{font-family:"IBM Plex Mono",monospace;font-size:10.5px;fill:var(--ink);font-weight:600}
+.grid{stroke:var(--rule-soft);stroke-width:1}
+.base{stroke:var(--ink);stroke-width:1}
+
+/* ---------- grafias: o defeito mostrado como bytes ---------- */
+
+.grafias{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.16cqw;
+  line-height:1.75;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:0 1.2cqw;
+  align-items:baseline;
+}
+.grafias .g{color:var(--ink);white-space:pre}
+.grafias .n{color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+.grafias .note{color:var(--stop);font-size:.98cqw;font-style:normal}
+.grafias .sep{grid-column:1/-1;height:1px;background:var(--rule-soft);margin:.4cqw 0}
+
+/* ---------- cover ---------- */
+
+.cover{justify-content:center;padding-bottom:5.2cqw}
+.cover h1{
+  font-family:Archivo,sans-serif;
+  font-weight:800;
+  font-size:6.4cqw;
+  line-height:.98;
+  letter-spacing:-.035em;
+  margin:.6cqw 0 0;
+  max-width:20ch;
+  text-wrap:balance;
+}
+.cover .kicker{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:1.24cqw;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.cover .rule{height:1px;background:var(--ink);margin:2.6cqw 0 2cqw;width:14cqw}
+.cover .meta{
+  display:flex;gap:3.4cqw;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:1.14cqw;
+  color:var(--ink-2);
+  line-height:1.6;
+}
+.cover .meta div span{display:block;color:var(--muted);font-size:.94cqw;letter-spacing:.13em;text-transform:uppercase}
+
+/* ---------- overview ---------- */
+
+.overview{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:40;
+  background:var(--paper);
+  overflow:auto;
+  padding:26px;
+}
+.overview.on{display:block}
+.ovgrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+  gap:14px;
+  max-width:1200px;
+  margin:0 auto;
+}
+.ovcard{
+  text-align:left;
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-radius:2px;
+  padding:12px 13px 13px;
+  cursor:pointer;
+  font-family:inherit;
+  color:var(--ink-2);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-height:96px;
+}
+.ovcard:hover{border-color:var(--accent)}
+.ovcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ovcard .n{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;
+  color:var(--muted);font-variant-numeric:tabular-nums;
+}
+.ovcard .t{
+  font-family:Archivo,sans-serif;font-weight:600;font-size:14px;line-height:1.2;color:var(--ink);
+}
+.ovcard.cur{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+
+.hint{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);text-align:center;padding:8px 0 18px;
+}
+
+/* ---------- click zones ---------- */
+.zone{position:absolute;top:0;bottom:0;width:14%;z-index:5;cursor:pointer;border:0;background:transparent}
+.zone.l{left:0}
+.zone.r{right:0}
+.zone:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+
+@media (prefers-reduced-motion:no-preference){
+  .slide.on{animation:fade .18s ease-out}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+}
+
+@media print{
+  .bar,.zone,.overview,.hint{display:none!important}
+  body{background:#fff}
+  .stage-wrap{padding:0;display:block}
+  .stage{width:100%;box-shadow:none;border:0;page-break-after:always;container-type:size}
+  .slide{display:flex!important;position:relative;page-break-after:always}
+}
+</style>
+
+<div class="bar">
+  <strong>E4.6 · Apresentação final do Módulo 1</strong>
+  <span>Cotador de frete · Dados e IA no Transporte</span>
+  <span class="spacer"></span>
+  <span class="counter"><span id="cur">1</span> / <span id="tot">16</span></span>
+  <button id="btn-ov" type="button">Índice · G</button>
+  <button id="btn-prev" type="button">←</button>
+  <button id="btn-next" type="button">→</button>
+</div>
+
+<div class="stage-wrap">
+<div class="stage" id="stage">
+  <button class="zone l" id="z-prev" type="button" aria-label="Slide anterior"></button>
+  <button class="zone r" id="z-next" type="button" aria-label="Próximo slide"></button>
+
+  <!-- ============ 01 · CAPA ============ -->
+  <section class="slide cover on" data-title="Capa">
+    <div class="kicker">E4.6 · Dia 4 · Especificação de um sistema, não relatório técnico</div>
+    <h1>O preço que sai<br>sem ninguém olhar</h1>
+    <div class="rule"></div>
+    <div class="meta">
+      <div><span>O sistema</span>Agente que lê o e-mail do cliente,<br>extrai o pedido e responde<br>com um preço de frete.</div>
+      <div><span>Os dados</span>97 311 embarques Olist,<br>2016-09 a 2018-10, teste temporal<br>nos últimos 69 dias.</div>
+      <div><span>O achado</span>O modelo é 29% melhor que a tabela<br>— e subprecifica sistematicamente<br>quem mora longe.</div>
+    </div>
+    <div class="pagenum">01</div>
+  </section>
+
+  <!-- ============ 02 · BLOCO 1 ============ -->
+  <section class="slide" data-title="1 · O objetivo">
+    <div class="eyebrow"><b>Bloco 1 · O objetivo</b><span class="q">para que serve o sistema?</span></div>
+    <h2>Responder cotação de frete por e-mail em minutos, sem tirar o comercial do lugar.</h2>
+    <div class="body">
+      <div class="cols c2">
+        <div>
+          <div class="lbl">O propósito, em uma frase</div>
+          <p>Transformar um e-mail em linguagem livre num <strong>preço defensável de frete rodoviário</strong>, enviado ao cliente sem esperar o comercial abrir a caixa.</p>
+          <div class="lbl" style="margin-top:1.6cqw">Sem ele, o que deixa de ser feito</div>
+          <p>Nada deixa de ser feito — passa a ser feito <strong>mais devagar e de forma desigual</strong>: o mesmo trecho cotado por duas pessoas dá dois preços, e o pedido que chega às 18h espera o dia seguinte.</p>
+        </div>
+        <div>
+          <div class="lbl">O que ele explicitamente <em>não</em> faz</div>
+          <ul class="tight">
+            <li class="no">Não fecha negócio nem emite documento fiscal</li>
+            <li class="no">Não decide cobertura: quem diz se atendemos é a planilha do comercial</li>
+            <li class="no">Não cota carga especial, palete, modal não rodoviário</li>
+            <li class="no">Não substitui o comercial na negociação de preço</li>
+          </ul>
+          <div class="lbl" style="margin-top:1.6cqw">O critério, em reais e em horas</div>
+          <ul class="tight">
+            <li>Erro percentual mediano da cotação <strong>≤ 15%</strong> (hoje 12,1%)</li>
+            <li>Viés médio dentro de <strong>±R$ 2,00</strong> (hoje −R$ 3,71)</li>
+            <li><strong>≥ 80%</strong> das cotações completas respondidas sem humano</li>
+            <li>Tempo até a resposta <strong>&lt; 15 min</strong> em horário comercial</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">FRONTEIRA</span><span>Acurácia não é critério aqui. O critério é o erro em reais por cotação e a fração respondida sem humano — os dois números que quem aprova orçamento consegue ler.</span></div>
+    <div class="pagenum">02</div>
+  </section>
+
+  <!-- ============ 03 · BLOCO 2 ============ -->
+  <section class="slide" data-title="2 · As ações">
+    <div class="eyebrow"><b>Bloco 2 · As ações</b><span class="q">o que dá para executar de verdade?</span></div>
+    <h2>Três ações contam hoje. Duas não contam — e é por isso que estão nesta lista à parte.</h2>
+    <div class="body">
+      <table>
+        <thead><tr><th>Ação</th><th>Quem executa</th><th>Frequência</th><th>Mandato / sistema</th><th class="mono">Conta?</th></tr></thead>
+        <tbody>
+          <tr><td class="who">Enviar preço P50 ao cliente</td><td>Agente, por SMTP</td><td>A cada ciclo (min)</td><td>Tabela do comercial + modelo histórico</td><td class="mono">sim</td></tr>
+          <tr><td class="who">Pedir os dados que faltam</td><td>Agente</td><td>A cada ciclo</td><td>Corte de confiança 0,35</td><td class="mono">sim</td></tr>
+          <tr><td class="who">Mandar para revisão humana</td><td>Agente → comercial</td><td>A cada ciclo</td><td>Fila <code>cotador-revisar</code> no painel</td><td class="mono">sim</td></tr>
+          <tr class="hi"><td class="who">Corrigir a tarifa na origem</td><td>Comercial</td><td>Quando o alerta acusa</td><td class="mono">exige que alguém seja dono da planilha — hoje não é</td><td class="mono">não</td></tr>
+          <tr class="hi"><td class="who">Reprecificar rota deficitária</td><td>Diretoria</td><td>Trimestral</td><td class="mono">exige custo real por embarque — não temos</td><td class="mono">não</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:1.4cqw">As duas últimas são as que mudariam dinheiro de verdade. Para passarem a contar é preciso, respectivamente, <strong>nomear um dono da tabela de tarifas</strong> com fórum e consequência, e <strong>capturar o custo real do embarque</strong> — que hoje não existe em lugar nenhum, nem na Olist nem em nós.</p>
+    </div>
+    <div class="claim"><span class="k">TESTE DO BLOCO 2</span><span>Se nenhuma decisão muda, a análise não produz valor. Aqui muda uma: o preço que sai da porta. As outras duas ficam declaradas como não executáveis.</span></div>
+    <div class="pagenum">03</div>
+  </section>
+
+  <!-- ============ 04 · BLOCO 3.1 ============ -->
+  <section class="slide" data-title="3.1 · A alegação">
+    <div class="eyebrow"><b>Bloco 3.1 · A alegação</b><span class="q">quem afirma o quê, com qual autoridade?</span></div>
+    <h2>O <code>freight_value</code> não é uma medição. É um preço que o vendedor cobrou.</h2>
+    <div class="body">
+      <div class="cols c2n">
+        <div class="figs">
+          <div>
+            <div class="big warn">0,477</div>
+            <div class="bigsub">coeficiente de variação <b>mediano</b> do frete dentro da mesma rota UF e da mesma faixa de peso (303 células com n≥30). Se fosse medição física, seria perto de zero.</div>
+          </div>
+          <div>
+            <div class="big sm">6 999</div>
+            <div class="bigsub">valores distintos de frete em 112 650 linhas; <b>14,9%</b> se concentram em apenas dez valores (R$ 15,10 aparece 3 707 vezes). Isso é tabela comercial, não balança.</div>
+          </div>
+        </div>
+        <div>
+          <div class="lbl">Autoria, fonte a fonte</div>
+          <table>
+            <thead><tr><th>Campo</th><th>Quem produz</th><th>Interesse no valor</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">freight_value</td><td class="who">Vendedor / plataforma</td><td>É a receita dele. Arredonda para cima e usa frete grátis como isca</td></tr>
+              <tr><td class="mono">product_weight_g</td><td class="who">Vendedor, no cadastro</td><td>Peso alto encarece o frete que ele anuncia</td></tr>
+              <tr><td class="mono">zip_code_prefix</td><td class="who">Cliente, no checkout</td><td>Neutro, mas digitado</td></tr>
+              <tr><td class="mono">geolocation_lat/lng</td><td class="who">Fornecedor externo</td><td>Neutro; 26% de linhas duplicadas</td></tr>
+              <tr><td class="mono">order_status</td><td class="who">Sistema Olist</td><td>Neutro, mas só existe depois</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:1.2cqw">Exemplo do que a dispersão esconde: <code>SC&gt;SP</code>, 10–30 kg, 77 embarques — mediana R$ 46,48, <strong>mínimo R$ 16,88, máximo R$ 339,59</strong>.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">CONSEQUÊNCIA</span><span>O modelo aprende a política de preço de milhares de vendedores, não o custo de transportar. É um <em>benchmark de mercado</em> — e é como tal que ele pode ser usado.</span></div>
+    <div class="pagenum">04</div>
+  </section>
+
+  <!-- ============ 05 · BLOCO 3.2 GRÃO ============ -->
+  <section class="slide dense" data-title="3.2 · Grão e unidade">
+    <div class="eyebrow"><b>Bloco 3.2 · Adequação</b><span class="q">qual é o grão, nos quatro eixos?</span></div>
+    <h2>A ação se executa por embarque. Escolhemos o grão que casa com ela — e perdemos 1,3% dos pedidos no caminho.</h2>
+    <div class="body">
+      <div class="cols c2">
+        <div>
+          <div class="lbl">Os quatro eixos</div>
+          <table>
+            <thead><tr><th>Eixo</th><th>O que existe nos dados</th></tr></thead>
+            <tbody>
+              <tr><td class="who">Temporal</td><td>Por evento de pedido; carimbo até o segundo. Coleta em t0, relato mensal — <strong>manda o mensal</strong></td></tr>
+              <tr><td class="who">Espacial</td><td>Prefixo de CEP (5 díg.) → centroide. Rota agregada a <strong>UF×UF</strong>: 407 rotas</td></tr>
+              <tr><td class="who">Entidade</td><td>Linha = item. Agregamos a <strong>pedido+vendedor</strong> = 1 embarque</td></tr>
+              <tr><td class="who">Atributo</td><td>Sem código de ocorrência. Sem motivo de atraso. Capital/interior é binário nosso, não do dado</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="lbl">Do item ao embarque</div>
+          <table>
+            <thead><tr><th>Nível</th><th class="num">n</th><th>Observação</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">linhas order_items</td><td class="num">112 650</td><td>1 linha = 1 unidade vendida</td></tr>
+              <tr><td class="mono">pedidos</td><td class="num">98 666</td><td>até 21 itens num pedido</td></tr>
+              <tr><td class="mono">pedido + vendedor</td><td class="num">100 010</td><td><strong>a unidade de análise</strong></td></tr>
+              <tr><td class="mono">após curadoria</td><td class="num">97 311</td><td>ver bloco 3.4</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:1.2cqw"><strong>1 278 pedidos (1,3%) têm mais de um vendedor</strong> e viram dois embarques. Se decidíssemos por pedido e concluíssemos por embarque, seria falácia ecológica — a ação (uma coleta, uma origem) é por embarque, então é aí que a conclusão tem de ser tirada.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">GRÃO</span><span>O grão só agrega para cima. Não há código de ocorrência nem motivo de atraso em lugar nenhum destes nove ficheiros — e isso não se recupera depois.</span></div>
+    <div class="pagenum">05</div>
+  </section>
+
+  <!-- ============ 06 · BLOCO 3.2 LATÊNCIA ============ -->
+  <section class="slide dense" data-title="3.2 · Latência e cobertura">
+    <div class="eyebrow"><b>Bloco 3.2 · Adequação</b><span class="q">chega a tempo da ação?</span></div>
+    <h2>As dez features chegam em t0. O filtro de treino chega dez dias depois.</h2>
+    <div class="body">
+      <div class="cols c2w">
+        <div>
+          <div class="lbl">Latência, em horas</div>
+          <table>
+            <thead><tr><th>Intervalo</th><th class="num">p50</th><th class="num">p90</th><th class="num">máx</th><th class="num">neg.</th><th class="num">ausentes</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">compra → aprovação</td><td class="num">0,3</td><td class="num">34,7</td><td class="num">4 509</td><td class="num">0</td><td class="num">160</td></tr>
+              <tr><td class="mono">aprovação → coleta</td><td class="num">43,6</td><td class="num">144,0</td><td class="num">3 018</td><td class="num">1 359</td><td class="num">1 797</td></tr>
+              <tr><td class="mono">coleta → entrega</td><td class="num">170,4</td><td class="num">453,6</td><td class="num">4 925</td><td class="num">23</td><td class="num">2 966</td></tr>
+              <tr class="hi"><td class="mono">compra → entrega</td><td class="num">245,2</td><td class="num">554,3</td><td class="num">5 031</td><td class="num">0</td><td class="num">2 965</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:1.2cqw">Os <strong>1 359 lags negativos</strong> (coleta antes da aprovação) são registro retroativo do vendedor, não viagem no tempo.</p>
+        </div>
+        <div>
+          <div class="lbl">Cobertura</div>
+          <ul class="tight">
+            <li>1 000 163 linhas de geolocalização → <strong>19 015 prefixos</strong> de CEP com centroide</li>
+            <li class="yes">99,72% dos clientes e 99,77% dos vendedores casam com um prefixo</li>
+            <li class="no"><strong>DF: 7,99% dos clientes sem geolocalização</strong> — a pior UF, e é onde a distância vira <code>NaN</code></li>
+          </ul>
+          <div class="lbl" style="margin-top:1.4cqw">O que está disponível quando a cotação precisa sair</div>
+          <p><code>distance_km</code>, <code>weight_total_kg</code>, <code>quantity_items</code>, <code>declared_value</code>, <code>month</code>, UFs, rota, mesma-UF, perfil geográfico: <strong>todas em t0</strong>. O rótulo <code>freight_value</code> também.</p>
+          <p><strong>O filtro <code>order_status = delivered</code> não.</strong> Ele só existe 10,2 dias depois, na mediana. É a única coisa no pipeline que a cotação não poderia saber.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">LATÊNCIA</span><span>Dado que chega depois da ação vale zero para ela. Nenhuma feature falha nesse teste — o filtro de treino falha, e é isso que o bloco 4 tem de tratar.</span></div>
+    <div class="pagenum">06</div>
+  </section>
+
+  <!-- ============ 07 · BLOCO 3.3 ============ -->
+  <section class="slide dense" data-title="3.3 · Proveniência">
+    <div class="eyebrow"><b>Bloco 3.3 · Proveniência</b><span class="q">por onde passou até chegar aqui?</span></div>
+    <h2>Seis ficheiros, quatro junções, uma agregação — e um dado pessoal que não precisamos.</h2>
+    <div class="body">
+      <div class="cols c2">
+        <div>
+          <div class="lbl">Linhagem</div>
+          <table>
+            <thead><tr><th>Origem</th><th>Transformação aplicada</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">orders</td><td>filtro <code>status = delivered</code></td></tr>
+              <tr><td class="mono">order_items</td><td>join por <code>order_id</code>; agregação <code>sum(freight)</code>, <code>count(itens)</code></td></tr>
+              <tr><td class="mono">products</td><td>join por <code>product_id</code> → soma de peso</td></tr>
+              <tr><td class="mono">customers, sellers</td><td>join → prefixo de CEP das duas pontas</td></tr>
+              <tr><td class="mono">geolocation</td><td><strong>mediana</strong> de lat/lng por prefixo; cidade/UF pela moda</td></tr>
+              <tr><td class="mono">— derivado</td><td>haversine origem→destino; rota UF; capital/interior</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:1.1cqw">A mediana no centroide é uma decisão nossa: protege dos 26% de linhas duplicadas do <code>geolocation</code>, e apaga a variação dentro do prefixo.</p>
+        </div>
+        <div>
+          <div class="lbl">Dado pessoal e LGPD</div>
+          <ul class="tight">
+            <li>O dataset Olist é <strong>público e pseudonimizado</strong>: nenhum nome, e-mail ou CPF. Base legal para o treino: <strong>art. 7.º, IX</strong> — legítimo interesse, sobre dado já tornado público pelo controlador de origem.</li>
+            <li class="no">O <strong>e-mail do cliente que chega ao agente</strong> é outra coisa: é dado pessoal nosso. Base legal <strong>art. 7.º, V</strong> — execução de procedimentos preliminares a contrato, a pedido do titular.</li>
+            <li>Retenção: corpo do e-mail e extração ficam no SQLite local. <strong>Prazo declarado: 24 meses</strong>, para auditar cotação enviada. Depois disso, art. 16 manda eliminar.</li>
+            <li class="no">Quem tem acesso hoje: quem tem a máquina. <strong>Não há controle de acesso ao SQLite</strong> — está aberto e é preciso dizê-lo.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">AUDITABILIDADE</span><span>Cada cotação grava a tarifa inteira em <code>tarifa_json</code> e a versão do modelo, não só o id da rota: depois que a planilha mudar, o preço enviado continua reconstruível.</span></div>
+    <div class="pagenum">07</div>
+  </section>
+
+  <!-- ============ 08 · BLOCO 3.4 ============ -->
+  <section class="slide dense" data-title="3.4 · Curadoria">
+    <div class="eyebrow"><b>Bloco 3.4 · Curadoria</b><span class="q">o número antes e depois de cada regra</span></div>
+    <h2>Três regras excluem 2 961 registos e R$ 65 655 de frete. Nenhuma exclusão é neutra.</h2>
+    <div class="body">
+      <div class="cols c2w">
+        <div>
+          <table>
+            <thead><tr><th>Etapa</th><th class="num">linhas</th><th class="num">% bruto</th><th class="num">frete R$</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">0 · order_items bruto</td><td class="num">112 650</td><td class="num">100,0%</td><td class="num">2 251 910</td></tr>
+              <tr class="hi"><td class="mono">1 · só status = delivered</td><td class="num">110 197</td><td class="num">97,8%</td><td class="num">2 198 276</td></tr>
+              <tr><td class="mono">2 · agregado pedido+vendedor</td><td class="num">97 819</td><td class="num">86,8%</td><td class="num">2 198 276</td></tr>
+              <tr><td class="mono">3 · join clientes + vendedores</td><td class="num">97 819</td><td class="num">86,8%</td><td class="num">2 198 276</td></tr>
+              <tr><td class="mono">4 · dropna geo/peso</td><td class="num">97 333</td><td class="num">86,4%</td><td class="num">2 186 706</td></tr>
+              <tr><td class="mono">5 · frete≥0, peso&gt;0, qtd&gt;0</td><td class="num">97 311</td><td class="num">86,4%</td><td class="num">2 186 254</td></tr>
+            </tbody>
+            <tfoot><tr><td>Excluído de facto (etapas 1, 4, 5)</td><td class="num">2 961</td><td class="num">—</td><td class="num">65 655</td></tr></tfoot>
+          </table>
+          <p style="margin-top:1.1cqw">A etapa 2 não exclui nada: são 12 378 linhas que <em>viram</em> 1 embarque. O frete não se perde — se soma.</p>
+        </div>
+        <div>
+          <div class="lbl">Toda exclusão é uma escolha, e tem dono</div>
+          <ul class="tight">
+            <li class="no"><strong>2 453 linhas por status</strong> (1 107 <code>shipped</code>, 625 <code>canceled</code>, 609 <code>unavailable</code>…). Frete mediano <strong>R$ 16,46</strong> contra R$ 16,26 das mantidas; preço mediano <strong>R$ 82,90</strong> contra R$ 74,90. <strong>O que sai é mais caro do que o que fica.</strong></li>
+            <li class="no"><strong>486 embarques sem distância</strong> — prefixo de CEP sem centroide. Frete mediano R$ 18,23, acima da base. Concentram-se onde a cobertura é pior.</li>
+            <li class="no"><strong>22 embarques com peso zero</strong>: produto sem cadastro de peso. Sai porque o modelo exige peso.</li>
+            <li>Dono declarado das três regras: <strong>quem mantém <code>cotador/ml/treinamento.py</code></strong>. Nenhuma delas foi decidida pelo comercial, e é isso que precisa mudar.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">MAQUIAGEM</span><span>Excluir o não-entregue melhora a métrica e piora a decisão: são justamente os pedidos mais caros e mais problemáticos que o modelo nunca vê.</span></div>
+    <div class="pagenum">08</div>
+  </section>
+
+  <!-- ============ 09 · BLOCO 4.1 BASELINE ============ -->
+  <section class="slide dense" data-title="4.1 · Linha de base">
+    <div class="eyebrow"><b>Bloco 4.1 · Adequação da análise</b><span class="q">contra o que isto é comparado?</span></div>
+    <h2>Uma tabela de rota × faixa de peso erra R$ 7,95. O modelo erra R$ 5,62.</h2>
+    <div class="body">
+      <figure>
+        <div class="figtitle">Erro absoluto médio no teste temporal · 14 597 embarques, 2018-06-14 a 2018-08-22</div>
+        <div class="figsub">Todas as linhas de base foram ajustadas no mesmo treino e avaliadas no mesmo teste.</div>
+        <svg viewBox="0 0 620 194" style="max-width:86%;margin:0 auto" role="img" aria-label="MAE por modelo">
+<rect x="210" y="8.0" width="333.4" height="19" fill="var(--rule)"/>
+<text class="axl" x="202" y="21.0" text-anchor="end">B0 mediana global do treino</text>
+<text class="val" x="550.4" y="22.0">R$ 11.43</text>
+<rect x="210" y="38.0" width="285.2" height="19" fill="var(--rule)"/>
+<text class="axl" x="202" y="51.0" text-anchor="end">B1 mediana por rota UF</text>
+<text class="val" x="502.2" y="52.0">R$ 9.78</text>
+<rect x="210" y="68.0" width="289.6" height="19" fill="var(--rule)"/>
+<text class="axl" x="202" y="81.0" text-anchor="end">B2 mediana por faixa de peso</text>
+<text class="val" x="506.6" y="82.0">R$ 9.93</text>
+<rect x="210" y="98.0" width="231.9" height="19" fill="var(--rule)"/>
+<text class="axl" x="202" y="111.0" text-anchor="end">B3 tabela rota x faixa de peso</text>
+<text class="val" x="448.9" y="112.0">R$ 7.95</text>
+<rect x="210" y="128.0" width="216.7" height="19" fill="var(--rule)"/>
+<text class="axl" x="202" y="141.0" text-anchor="end">B4 regra linear a+b*kg+c*km</text>
+<text class="val" x="433.7" y="142.0">R$ 7.43</text>
+<rect x="210" y="158.0" width="163.9" height="19" fill="var(--c1)"/>
+<text class="axl" x="202" y="171.0" text-anchor="end">M  CatBoost quantilico P50</text>
+<text class="val" x="380.9" y="172.0">R$ 5.62</text>
+</svg>
+        <figcaption>Erro percentual mediano: B3 tabela <b>19,0%</b> · B4 regra linear <b>20,7%</b> · modelo <b>12,1%</b>. Ganho do modelo sobre a melhor tabela: <b>29,3%</b> de MAE.</figcaption>
+      </figure>
+    </div>
+    <div class="claim"><span class="k">JUSTIFICATIVA</span><span>Três CatBoost quantílicos (P25/P50/P75) porque a decisão precisa de <em>incerteza</em>, não só de ponto: é a largura do intervalo que roteia a cotação para o humano — ver bloco 6.</span></div>
+    <div class="pagenum">09</div>
+  </section>
+
+  <!-- ============ 10 · BLOCO 4.1 FUGA ============ -->
+  <section class="slide dense" data-title="4.1 · Fuga de dados">
+    <div class="eyebrow"><b>Bloco 4.1 · Adequação da análise</b><span class="q">o que fizemos para descartar fuga?</span></div>
+    <h2>Com split aleatório o mesmo modelo erra 24% menos. Esses 24% não existem.</h2>
+    <div class="body">
+      <div class="cols c2">
+        <div class="figs">
+          <div>
+            <div class="big">R$ 5,67</div>
+            <div class="bigsub"><b>Split temporal.</b> Treina no passado, testa no futuro. É o que a operação vai encontrar.</div>
+          </div>
+          <div>
+            <div class="big stop">R$ 4,29</div>
+            <div class="bigsub"><b>Split aleatório.</b> Mesmas features, mesmos hiperparâmetros, mesmas 250 iterações. <b>24,3% de MAE a menos</b> — e 12,2% → 8,1% de erro percentual mediano.</div>
+          </div>
+        </div>
+        <div>
+          <div class="lbl">De onde vem o otimismo</div>
+          <p>O mesmo pedido tem itens em treino e em teste; a mesma rota e o mesmo vendedor aparecem dos dois lados na mesma semana. O modelo não prevê: <strong>ele recorda</strong>.</p>
+          <div class="lbl" style="margin-top:1.5cqw">A fuga que ainda está lá</div>
+          <p>O treino só vê <code>order_status = delivered</code> — um campo que, na mediana, <strong>só existe 10,2 dias depois da cotação</strong>. É seleção pela sobrevivência: o modelo aprende o preço dos embarques que deram certo e cota os que ainda não se sabe.</p>
+          <p>Medida: as 2 453 linhas excluídas têm frete mediano <strong>maior</strong> que as mantidas. Não é ruído — é viés na direção que dói.</p>
+          <div class="lbl" style="margin-top:1.5cqw">O que fazemos com isso</div>
+          <ul class="tight">
+            <li class="yes">Split temporal em produção, sempre — e é o número que reportamos</li>
+            <li class="no">Retreinar sem o filtro de status: <strong>ainda não feito</strong></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">FALHA VISÍVEL</span><span>Uma análise adequada falharia de forma visível se estivesse errada. A nossa falha, se falhar, aparece no erro por mês dentro do teste — e não apareceu ainda.</span></div>
+    <div class="pagenum">10</div>
+  </section>
+
+  <!-- ============ 11 · BLOCO 4.1 CUSTO ============ -->
+  <section class="slide dense" data-title="4.1 · Custo do erro">
+    <div class="eyebrow"><b>Bloco 4.1 · Adequação da análise</b><span class="q">quanto custa cada tipo de erro?</span></div>
+    <h2>Os dois erros não custam o mesmo, e o modelo comete o caro com muito mais frequência.</h2>
+    <div class="body">
+      <div class="cols c2">
+        <div>
+          <div class="lbl">Subprecificar · o preço sai abaixo do mercado</div>
+          <div class="big stop sm">62,8%</div>
+          <div class="bigsub">das 14 597 cotações do teste. <b>R$ 7,43</b> de margem deixada na mesa por cotação; <b>R$ 68 082</b> em 69 dias → <b>R$ 360 144/ano</b> anualizados.</div>
+          <div class="lbl" style="margin-top:1.5cqw">Sobreprecificar · o cliente vai ao concorrente</div>
+          <div class="big warn sm">8,2%</div>
+          <div class="bigsub">das cotações saem <b>mais de 20% acima</b> do frete real. Se todas se perdessem, seriam <b>R$ 96 309/ano</b> de receita de frete em risco.</div>
+        </div>
+        <div>
+          <div class="lbl">O pressuposto, dito em voz alta</div>
+          <p>«Frete real» aqui é <strong>o que o vendedor Olist cobrou</strong>, não o nosso custo. Estes reais medem <em>distância ao mercado</em>, não lucro — o custo por embarque não existe em nenhuma base nossa (bloco 2, ação que não conta).</p>
+          <p>A anualização usa fator <strong>5,29×</strong> (69 dias de teste → 365) e supõe volume e mix constantes. Ambos os supostos são frágeis: o mix muda dentro da própria janela (slide seguinte).</p>
+          <div class="lbl" style="margin-top:1.4cqw">O que isto muda no desenho</div>
+          <ul class="tight">
+            <li>O viés é <strong>assimétrico e conhecido: −R$ 3,71</strong>. Não se corrige com mais acurácia; corrige-se deslocando o quantil emitido.</li>
+            <li>Emitir <strong>P50</strong> é uma escolha de gestão. Emitir P60 reduziria a margem perdida e aumentaria a perda de negócio — a diretoria é que escolhe onde ficar.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">MATRIZ DE CUSTO</span><span>Nenhum ponto de MAE decide isto. O que decide é quanto vale um cliente perdido contra quanto vale um frete cobrado a menos — e essa resposta não está nos dados.</span></div>
+    <div class="pagenum">11</div>
+  </section>
+
+  <!-- ============ 12 · BLOCO 4.2 ============ -->
+  <section class="slide" data-title="4.2 · Deriva e gestão">
+    <div class="eyebrow"><b>Bloco 4.2 · A gestão</b><span class="q">quem mantém isto vivo depois do piloto?</span></div>
+    <h2>O alvo se moveu 17% dentro da própria janela de treino.</h2>
+    <div class="body">
+      <div class="cols c2w">
+        <div>
+          <figure>
+            <div class="figtitle">Frete mediano por mês de compra · R$</div>
+            <div class="figsub">Faixa sombreada: a janela de teste. Linha tracejada: o degrau de 2018-03.</div>
+            <svg viewBox="0 0 620 200" role="img" aria-label="Frete mediano mensal">
+<line class="grid" x1="34" x2="612" y1="153.8" y2="153.8"/>
+<text class="ax" x="28" y="156.8" text-anchor="end">16</text>
+<line class="grid" x1="34" x2="612" y1="113.2" y2="113.2"/>
+<text class="ax" x="28" y="116.2" text-anchor="end">17</text>
+<line class="grid" x1="34" x2="612" y1="72.8" y2="72.8"/>
+<text class="ax" x="28" y="75.8" text-anchor="end">18</text>
+<line class="grid" x1="34" x2="612" y1="32.2" y2="32.2"/>
+<text class="ax" x="28" y="35.2" text-anchor="end">19</text>
+<rect x="554.2" y="12" width="57.8" height="162" fill="var(--info-wash)"/>
+<polyline points="34.0,92.2 62.9,72.8 91.8,105.6 120.7,133.9 149.6,135.1 178.5,139.2 207.4,135.5 236.3,141.6 265.2,140.4 294.1,121.8 323.0,126.6 351.9,125.4 380.8,147.3 409.7,143.6 438.6,145.2 467.5,63.4 496.4,63.4 525.3,85.7 554.2,44.0 583.1,34.7 612.0,60.2" fill="none" stroke="var(--c1)" stroke-width="2.2"/>
+<circle cx="34.0" cy="92.2" r="2.4" fill="var(--c1)"/>
+<circle cx="62.9" cy="72.8" r="2.4" fill="var(--c1)"/>
+<circle cx="91.8" cy="105.6" r="2.4" fill="var(--c1)"/>
+<circle cx="120.7" cy="133.9" r="2.4" fill="var(--c1)"/>
+<circle cx="149.6" cy="135.1" r="2.4" fill="var(--c1)"/>
+<circle cx="178.5" cy="139.2" r="2.4" fill="var(--c1)"/>
+<circle cx="207.4" cy="135.5" r="2.4" fill="var(--c1)"/>
+<circle cx="236.3" cy="141.6" r="2.4" fill="var(--c1)"/>
+<circle cx="265.2" cy="140.4" r="2.4" fill="var(--c1)"/>
+<circle cx="294.1" cy="121.8" r="2.4" fill="var(--c1)"/>
+<circle cx="323.0" cy="126.6" r="2.4" fill="var(--c1)"/>
+<circle cx="351.9" cy="125.4" r="2.4" fill="var(--c1)"/>
+<circle cx="380.8" cy="147.3" r="2.4" fill="var(--c1)"/>
+<circle cx="409.7" cy="143.6" r="2.4" fill="var(--c1)"/>
+<circle cx="438.6" cy="145.2" r="2.4" fill="var(--c1)"/>
+<circle cx="467.5" cy="63.4" r="2.4" fill="var(--c1)"/>
+<circle cx="496.4" cy="63.4" r="2.4" fill="var(--c1)"/>
+<circle cx="525.3" cy="85.7" r="2.4" fill="var(--c1)"/>
+<circle cx="554.2" cy="44.0" r="2.4" fill="var(--c1)"/>
+<circle cx="583.1" cy="34.7" r="2.4" fill="var(--c1)"/>
+<circle cx="612.0" cy="60.2" r="2.4" fill="var(--c1)"/>
+<text class="ax" x="34.0" y="192" text-anchor="middle">2016-10</text>
+<text class="ax" x="207.4" y="192" text-anchor="middle">2017-06</text>
+<text class="ax" x="380.8" y="192" text-anchor="middle">2017-12</text>
+<text class="ax" x="467.5" y="192" text-anchor="middle">2018-03</text>
+<text class="ax" x="612.0" y="192" text-anchor="middle">2018-08</text>
+<line x1="467.5" x2="467.5" y1="12" y2="174" stroke="var(--stop)" stroke-width="1" stroke-dasharray="3 3"/>
+<text class="val" x="473.5" y="55.4" fill="var(--stop)">+12,5% num mês</text>
+</svg>
+            <figcaption>No mesmo intervalo o peso mediano <b>caiu</b> de 1,065 kg para 0,600 kg e a distância mediana caiu de 478 km para 363 km. Cargas mais leves e mais perto, <b>frete mais caro</b>: não é mudança de mix, é reajuste de preço.</figcaption>
+          </figure>
+        </div>
+        <div>
+          <div class="lbl">Portões e cadência</div>
+          <table>
+            <thead><tr><th>Item</th><th>Decisão</th></tr></thead>
+            <tbody>
+              <tr><td class="who">Dono nomeado</td><td>Responsável de TI do cotador; presta contas ao comercial em reunião mensal</td></tr>
+              <tr><td class="who">Revalidação</td><td>Mensal, sobre os últimos 60 dias de cotações aceitas</td></tr>
+              <tr><td class="who">Monitor de deriva</td><td>MAE mensal e frete mediano por mês. Base: <strong>5,23 / 5,70 / 5,99</strong> nos três meses do teste</td></tr>
+              <tr><td class="who">Go / no-go</td><td>MAE mensal &gt; <strong>R$ 8,00</strong> (o nível da tabela) por 2 meses → volta ao <code>PRECIFICADOR=tabela</code></td></tr>
+              <tr class="hi"><td class="who">Desistência</td><td>Se em 6 meses o comercial reverter mais de <strong>20%</strong> dos preços emitidos, o sistema não está servindo e desliga</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">DERIVA</span><span>Um modelo treinado até 2018-06 já carrega um regime de preço que acabou em 2018-03. A revalidação mensal não é higiene: é a única defesa contra um degrau desses.</span></div>
+    <div class="pagenum">12</div>
+  </section>
+
+  <!-- ============ 13 · BLOCO 5 ============ -->
+  <section class="slide dense" data-title="5 · A ética">
+    <div class="eyebrow"><b>Bloco 5 · A ética, nesta aplicação</b><span class="q">quem carrega o risco quando funciona?</span></div>
+    <h2>Funcionando exatamente como foi desenhado, o sistema cota barato para quem mora longe.</h2>
+    <div class="body">
+      <figure>
+        <div class="figtitle">Erro percentual mediano da cotação, por decil de distância</div>
+        <div class="figsub">Positivo = cotamos acima do frete real. Negativo = cotamos abaixo. 1 459–1 460 embarques por decil.</div>
+        <svg viewBox="0 0 620 210" style="max-width:72%;margin:0 auto" role="img" aria-label="Erro percentual por decil de distancia">
+<line class="grid" x1="46" x2="610" y1="31.2" y2="31.2"/>
+<text class="ax" x="40" y="34.2" text-anchor="end">+10%</text>
+<line class="grid" x1="46" x2="610" y1="84.4" y2="84.4"/>
+<text class="ax" x="40" y="87.4" text-anchor="end">+0%</text>
+<line class="grid" x1="46" x2="610" y1="137.5" y2="137.5"/>
+<text class="ax" x="40" y="140.5" text-anchor="end">-10%</text>
+<rect x="55.0" y="36.9" width="38.4" height="47.5" fill="var(--c3)"/>
+<text class="val" x="74.2" y="32.9" text-anchor="middle">+8.9</text>
+<text class="ax" x="74.2" y="204" text-anchor="middle">1</text>
+<rect x="111.4" y="27.1" width="38.4" height="57.3" fill="var(--c3)"/>
+<text class="val" x="130.6" y="23.1" text-anchor="middle">+10.8</text>
+<text class="ax" x="130.6" y="204" text-anchor="middle">2</text>
+<rect x="167.8" y="29.1" width="38.4" height="55.2" fill="var(--c3)"/>
+<text class="val" x="187.0" y="25.1" text-anchor="middle">+10.4</text>
+<text class="ax" x="187.0" y="204" text-anchor="middle">3</text>
+<rect x="224.2" y="84.4" width="38.4" height="17.3" fill="var(--stop)"/>
+<text class="val" x="243.4" y="112.7" text-anchor="middle">-3.3</text>
+<text class="ax" x="243.4" y="204" text-anchor="middle">4</text>
+<rect x="280.6" y="84.4" width="38.4" height="13.4" fill="var(--stop)"/>
+<text class="val" x="299.8" y="108.8" text-anchor="middle">-2.5</text>
+<text class="ax" x="299.8" y="204" text-anchor="middle">5</text>
+<rect x="337.0" y="84.4" width="38.4" height="59.3" fill="var(--stop)"/>
+<text class="val" x="356.2" y="154.7" text-anchor="middle">-11.2</text>
+<text class="ax" x="356.2" y="204" text-anchor="middle">6</text>
+<rect x="393.4" y="84.4" width="38.4" height="61.8" fill="var(--stop)"/>
+<text class="val" x="412.6" y="157.2" text-anchor="middle">-11.6</text>
+<text class="ax" x="412.6" y="204" text-anchor="middle">7</text>
+<rect x="449.8" y="84.4" width="38.4" height="63.8" fill="var(--stop)"/>
+<text class="val" x="469.0" y="159.2" text-anchor="middle">-12.0</text>
+<text class="ax" x="469.0" y="204" text-anchor="middle">8</text>
+<rect x="506.2" y="84.4" width="38.4" height="68.0" fill="var(--stop)"/>
+<text class="val" x="525.4" y="163.4" text-anchor="middle">-12.8</text>
+<text class="ax" x="525.4" y="204" text-anchor="middle">9</text>
+<rect x="562.6" y="84.4" width="38.4" height="79.6" fill="var(--stop)"/>
+<text class="val" x="581.8" y="175.0" text-anchor="middle">-15.0</text>
+<text class="ax" x="581.8" y="204" text-anchor="middle">10</text>
+<line class="base" x1="46" x2="610" y1="84.4" y2="84.4"/>
+</svg>
+        <figcaption>Por região de destino: <b>Sudeste −1,7%</b> · Centro-Oeste −11,4% · Sul −11,7% · <b>Norte −15,8%</b> · <b>Nordeste −18,3%</b>. Por perfil: capital→capital <b>−0,5%</b>, interior→interior <b>−10,7%</b>. Porte do vendedor quase não discrimina (−2,8% a −4,5%): <b>o eixo é geográfico</b>.</figcaption>
+      </figure>
+    </div>
+    <div class="claim"><span class="k">LEGAL E AINDA ASSIM ERRADO</span><span>Cotar barato o Nordeste parece favorecer o cliente. Não favorece: é o preço que depois é revisto, recusado ou vira taxa extra — e a revisão cai sempre no mesmo CEP.</span></div>
+    <div class="pagenum">13</div>
+  </section>
+
+  <!-- ============ 14 · BLOCO 5 CONT ============ -->
+  <section class="slide" data-title="5 · Quem não está na sala">
+    <div class="eyebrow"><b>Bloco 5 · A ética, nesta aplicação</b><span class="q">quem é afetado e não está aqui?</span></div>
+    <h2>Três pessoas fora desta sala, e o que cada uma tem de recurso hoje.</h2>
+    <div class="body">
+      <div class="cols c3">
+        <div>
+          <div class="lbl">O cliente do interior</div>
+          <p>Recebe um preço construído a partir do comportamento de <strong>outros</strong> clientes com CEP parecido. O erro mediano na sua faixa é <strong>−15%</strong>, e é ele que ouve «o valor mudou» depois.</p>
+          <p><strong>Saberia, se explicássemos:</strong> que o preço não foi calculado sobre a sua carga, e sim sobre embarques históricos semelhantes.</p>
+          <p><strong>Recurso hoje:</strong> responder ao e-mail. É pouco, mas cai na fila de revisão humana e um comercial olha.</p>
+        </div>
+        <div>
+          <div class="lbl">O comercial</div>
+          <p>Passa de quem cota a quem <strong>confere</strong> — e a literatura é clara sobre o que acontece com quem confere: o viés de automação faz aceitar o número plausível.</p>
+          <p><strong>Saberia, se explicássemos:</strong> que 62,8% dos preços saem abaixo do mercado e que rever é o trabalho, não a exceção.</p>
+          <p><strong>Recurso hoje:</strong> reverter qualquer cotação e devolver a thread à fila, pelo painel. Sem prazo definido — <strong>e isso é uma lacuna.</strong></p>
+        </div>
+        <div>
+          <div class="lbl">O vendedor Olist</div>
+          <p>Nunca soube que a sua política de preço vira o nosso <em>benchmark</em>. Os dados são públicos e pseudonimizados; a LGPD está cumprida.</p>
+          <p><strong>E ainda assim:</strong> estamos precificando com o trabalho comercial de 3 095 vendedores que não consentiram nem serão informados.</p>
+          <p><strong>Recurso hoje:</strong> nenhum. Dizê-lo é o mínimo — e é a razão de o sistema ser declarado <em>benchmark de referência</em>, não tabela de preço oficial.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">LGPD É O MÍNIMO</span><span>As três situações são legais. Duas são desconfortáveis e uma tem correção óbvia: dar prazo e mandato explícitos a quem revisa.</span></div>
+    <div class="pagenum">14</div>
+  </section>
+
+  <!-- ============ 15 · BLOCO 6 ============ -->
+  <section class="slide dense" data-title="6 · A decisão">
+    <div class="eyebrow"><b>Bloco 6 · A configuração da decisão</b><span class="q">quem decide o quê lá dentro?</span></div>
+    <h2>O detector de anomalia que instalamos para proteger a decisão não protege nada.</h2>
+    <div class="body">
+      <div class="cols c2">
+        <div>
+          <div class="lbl">Quem propõe, quem decide, quem reverte</div>
+          <table>
+            <thead><tr><th>Passo</th><th>Propõe</th><th>Decide</th><th>Reverte</th></tr></thead>
+            <tbody>
+              <tr><td>É cotação?</td><td>LLM</td><td class="who">Automático</td><td>Comercial, na fila</td></tr>
+              <tr><td>Extrair origem/destino/peso</td><td>LLM</td><td class="who">Automático &gt;0,60</td><td>Comercial</td></tr>
+              <tr><td>Atendemos a rota?</td><td>Planilha</td><td class="who">Planilha, nunca o modelo</td><td>Comercial</td></tr>
+              <tr><td>Preço P50</td><td>Modelo</td><td class="who">Automático</td><td>Comercial, sem prazo definido</td></tr>
+              <tr class="hi"><td>Aceitar/negociar valor</td><td>—</td><td class="who">Sempre humano</td><td>—</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:1.1cqw">Quando o agente erra, quem percebe é o cliente que responde — e não há alerta automático. <strong>É a fronteira mais fraca do desenho.</strong></p>
+        </div>
+        <div>
+          <div class="lbl">O portão, medido</div>
+          <table>
+            <thead><tr><th>Regra</th><th class="num">% p/ humano</th><th class="num">MAE auto</th><th class="num">MAE humano</th></tr></thead>
+            <tbody>
+              <tr class="hi"><td>IsolationForest 1% <em>(hoje)</em></td><td class="num">1,19%</td><td class="num">5,63</td><td class="num">4,89</td></tr>
+              <tr><td>Largura (P75−P25)/P50 &gt; 0,6</td><td class="num">4,7%</td><td class="num">4,92</td><td class="num">19,84</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:1.1cqw">O IsolationForest manda para o humano cotações <strong>mais fáceis</strong> que a média (MedAPE 8,0% contra 12,1%). Ele detecta carga rara, não cotação difícil — e as duas coisas não são a mesma.</p>
+          <p>Trocando o portão pela largura do intervalo, o humano recebe 4,7% das cotações e são as que o modelo erra <strong>4× mais</strong>; o que sai automático melhora de R$ 5,63 para R$ 4,92.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A DECISÃO DO PORTÃO</span><span>Trocar o roteador é a mudança de maior efeito e menor custo desta especificação: mesma arquitetura, mesmo modelo, um limiar diferente.</span></div>
+    <div class="pagenum">15</div>
+  </section>
+
+  <!-- ============ 16 · FECHO ============ -->
+  <section class="slide cover" data-title="Fecho">
+    <div class="kicker">O que fica em branco — e é informação, não falha</div>
+    <h1 style="font-size:4.2cqw;max-width:30ch">Isto precifica benchmark.<br>Não precifica o nosso custo.</h1>
+    <div class="rule"></div>
+    <div class="meta" style="font-size:1.16cqw">
+      <div><span>Em branco</span>Custo real por embarque: não existe<br>em base nenhuma. Sem ele, o bloco 4<br>mede distância ao mercado, não margem.</div>
+      <div><span>Em branco</span>Prazo de reversão do comercial e<br>alerta quando o agente erra:<br>não estão definidos.</div>
+      <div><span>Próximo passo</span>Trocar o portão pelo intervalo,<br>retreinar sem o filtro de status,<br>nomear o dono da tabela de tarifas.</div>
+    </div>
+    <div class="pagenum">16</div>
+  </section>
+</div>
+</div>
+
+<div class="hint">← → navegam · G abre o índice · Esc fecha</div>
+
+<div class="overview" id="ov">
+  <div class="hint" style="padding-top:0;padding-bottom:20px">Índice — clique para ir ao slide · Esc fecha</div>
+  <div class="ovgrid" id="ovgrid"></div>
+</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var i = 0;
+  var cur = document.getElementById('cur');
+  var tot = document.getElementById('tot');
+  var ov  = document.getElementById('ov');
+  var ovgrid = document.getElementById('ovgrid');
+  tot.textContent = slides.length;
+
+  slides.forEach(function(s, n){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ovcard';
+    b.innerHTML = '<span class="n">' + String(n+1).padStart(2,'0') + '</span>' +
+                  '<span class="t"></span>';
+    b.querySelector('.t').textContent = s.dataset.title || ('Slide ' + (n+1));
+    b.addEventListener('click', function(){ go(n); closeOv(); });
+    ovgrid.appendChild(b);
+  });
+  var cards = Array.prototype.slice.call(ovgrid.children);
+
+  function go(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function(s, k){ s.classList.toggle('on', k === i); });
+    cards.forEach(function(c, k){ c.classList.toggle('cur', k === i); });
+    cur.textContent = i + 1;
+    try { location.hash = String(i + 1); } catch(e){}
+  }
+  function openOv(){ ov.classList.add('on'); }
+  function closeOv(){ ov.classList.remove('on'); }
+
+  document.getElementById('btn-next').addEventListener('click', function(){ go(i+1); });
+  document.getElementById('btn-prev').addEventListener('click', function(){ go(i-1); });
+  document.getElementById('z-next').addEventListener('click', function(){ go(i+1); });
+  document.getElementById('z-prev').addEventListener('click', function(){ go(i-1); });
+  document.getElementById('btn-ov').addEventListener('click', function(){
+    ov.classList.contains('on') ? closeOv() : openOv();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { go(i+1); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { go(i-1); e.preventDefault(); }
+    else if (e.key === 'Home') { go(0); }
+    else if (e.key === 'End') { go(slides.length-1); }
+    else if (e.key === 'g' || e.key === 'G') { ov.classList.contains('on') ? closeOv() : openOv(); }
+    else if (e.key === 'Escape') { closeOv(); }
+  });
+
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  go(isNaN(start) ? 0 : start - 1);
+})();
+</script>
