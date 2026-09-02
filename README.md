@@ -172,7 +172,7 @@ credencial ruim, e girar em silencio esconde o problema.
 python -m unittest discover -s cotador/tests -t . -v
 ```
 
-129 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de thread, os
+132 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de thread, os
 templates de email, a busca de rota, as rotas do painel e as regressoes conhecidas.
 
 `TestExemploCalculoDaPlanilha` reproduz a aba EXEMPLO_CALCULO: 10 volumes, NF
@@ -184,6 +184,10 @@ R$ 8.000, rota R00001 -> total R$ 252,50.
   `enviar` responde o cliente de verdade. Comece em rascunho.
 - Nunca responde a `noreply@`, `mailer-daemon` ou a propria conta — evita loop de robos.
 - Cada email so e processado uma vez (`X-GM-MSGID` como chave no SQLite + label).
+- Se o projeto estiver em pasta sincronizada (Google Drive/OneDrive), configure
+  `BANCO_CAMINHO` no `.env` apontando para disco local (ex.:
+  `%LOCALAPPDATA%\cotador\cotador.sqlite3`) — clientes de sync corrompem
+  gravacoes do SQLite e perder linhas ali quebra a idempotencia.
 - O historico citado e cortado antes de ir ao LLM, para nao cotar dados antigos.
 - Um email problematico nao derruba o ciclo: falha isolada, os demais seguem.
 - `.env` e `service_account.json` estao no `.gitignore`. Nunca versione os dois.

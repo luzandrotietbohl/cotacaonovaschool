@@ -203,3 +203,45 @@ class TestAgenteGravaLabel(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestCaminhoDoBancoViaEnv(unittest.TestCase):
+    """BANCO_CAMINHO no .env move o SQLite para fora de pastas sincronizadas
+    (Google Drive/OneDrive corrompem gravacoes do SQLite)."""
+
+    _OBRIGATORIAS = {"GMAIL_USER": "conta@gmail.com", "SHEET_ID": "sheet"}
+
+    def _carregar_com(self, **extras):
+        import os
+        from cotador.config import Config
+
+        antes = {k: os.environ.get(k) for k in {**self._OBRIGATORIAS, **extras}}
+
+        def restaurar():
+            for k, v in antes.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+
+        self.addCleanup(restaurar)
+        os.environ.update(self._OBRIGATORIAS)
+        os.environ.update(extras)
+        return Config.carregar()
+
+    def test_env_define_o_caminho(self):
+        cfg = self._carregar_com(BANCO_CAMINHO=r"C:\dados\meu.sqlite3")
+        self.assertEqual(str(cfg.banco), r"C:\dados\meu.sqlite3")
+
+    def test_env_expande_variaveis_do_windows(self):
+        import os
+
+        os.environ["_TESTE_BASE"] = r"C:\base"
+        self.addCleanup(lambda: os.environ.pop("_TESTE_BASE", None))
+        cfg = self._carregar_com(BANCO_CAMINHO=r"%_TESTE_BASE%\cotador.sqlite3")
+        self.assertEqual(str(cfg.banco), r"C:\base\cotador.sqlite3")
+
+    def test_sem_env_usa_o_padrao_no_repo(self):
+        cfg = self._carregar_com(BANCO_CAMINHO="")
+        self.assertTrue(str(cfg.banco).endswith("cotador.sqlite3"))
+        self.assertIn("dados", str(cfg.banco))
