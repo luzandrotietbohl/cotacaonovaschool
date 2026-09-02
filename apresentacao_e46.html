@@ -529,7 +529,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <strong>E4.6 · Apresentação final do Módulo 1</strong>
   <span>Prever entregas atrasadas · Dados e IA no Transporte</span>
   <span class="spacer"></span>
-  <span class="counter"><span id="cur">1</span> / <span id="tot">21</span></span>
+  <span class="counter"><span id="cur">1</span> / <span id="tot">22</span></span>
   <button id="btn-ov" type="button">Índice · G</button>
   <button id="btn-prev" type="button">←</button>
   <button id="btn-next" type="button">→</button>
@@ -1033,26 +1033,27 @@ svg{display:block;width:100%;height:auto;overflow:visible}
     <div class="pagenum">13</div>
   </section>
 
-  <!-- ============ 14 · BLOCO 5 ÉTICA ============ -->
-  <section class="slide dense" data-title="5 · A ética" data-core="1">
-    <div class="eyebrow"><b>Bloco 5 · a ética, nesta aplicação</b><span class="q">quem é afetado e não está nesta sala?</span></div>
-    <h2>Em funcionamento nominal, o sistema sinaliza os destinos distantes e omite os próximos, onde o atraso é mais frequente.</h2>
+  <!-- ============ 14 · BLOCO 5 · EVIDÊNCIA ============ -->
+  <section class="slide dense" data-title="5 · A ética · evidência" data-core="1">
+    <div class="eyebrow"><b>Bloco 5 · a ética, nesta aplicação</b><span class="q">o que acontece quando o sistema funciona?</span></div>
+    <h2>Em funcionamento nominal, o sistema omite os destinos próximos, onde o atraso é mais frequente.</h2>
     <div class="body">
-      <div class="cols c3">
+      <div class="cols c2w">
         <div>
-          <div class="lbl">Recall por decil de distância</div>
+          <div class="lbl">Recall por decil de distância, no limiar escolhido</div>
           <table>
-            <thead><tr><th class="num">decil</th><th class="num">km</th><th class="num">atraso</th><th class="num">recall</th></tr></thead>
+            <thead><tr><th class="num">decil</th><th class="num">km p50</th><th class="num">atraso</th><th class="num">recall</th></tr></thead>
             <tbody>
               <tr class="hi"><td class="num">1</td><td class="num">12</td><td class="num">12,64%</td><td class="num">0,4%</td></tr>
               <tr class="hi"><td class="num">2</td><td class="num">52</td><td class="num">11,53%</td><td class="num">1,4%</td></tr>
+              <tr><td class="num">5</td><td class="num">355</td><td class="num">3,72%</td><td class="num">0,0%</td></tr>
               <tr><td class="num">10</td><td class="num">2 085</td><td class="num">6,30%</td><td class="num">31,6%</td></tr>
             </tbody>
           </table>
-          <p style="margin-top:1cqw">O decil <strong>1</strong> reúne a maior taxa de atraso e <strong>0,4%</strong> de recall; o decil 10, metade do atraso e <strong>31,6%</strong>.</p>
+          <p style="margin-top:1cqw">O decil <strong>1</strong> reúne a maior taxa de atraso e <strong>0,4%</strong> de recall; o decil 10, metade do atraso e <strong>31,6%</strong>. O modelo aprendeu «longe é risco».</p>
           <div class="lbl" style="margin-top:1.1cqw">Por região do cliente</div>
           <table>
-            <thead><tr><th>reg.</th><th class="num">pedidos</th><th class="num">atraso</th><th class="num">recall</th></tr></thead>
+            <thead><tr><th>região</th><th class="num">pedidos</th><th class="num">atraso</th><th class="num">recall</th></tr></thead>
             <tbody>
               <tr class="hi"><td class="mono">N</td><td class="num">317</td><td class="num">2,84%</td><td class="num">0,0%</td></tr>
               <tr><td class="mono">NE</td><td class="num">1 755</td><td class="num">7,07%</td><td class="num">25,8%</td></tr>
@@ -1063,28 +1064,63 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         <div>
           <div class="lbl">Lícito e, ainda assim, injustificável</div>
           <ul class="tight">
-            <li class="no">Reportar «30% dos atrasos sinalizados» omitindo que no decil urbano são <strong>0,4%</strong>: verdadeiro no agregado, falso para quem reside próximo.</li>
+            <li class="no">Reportar «30% dos atrasos sinalizados» omitindo que no decil urbano são <strong>0,4%</strong>: verdadeiro no agregado, falso para quem mora perto.</li>
             <li class="no">Os <strong>390 pedidos sem CEP georreferenciado</strong> apresentam 13,08% de atraso e 62,7% de recall: a lacuna de dados produz vantagem acidental.</li>
           </ul>
-          <div class="lbl" style="margin-top:1.2cqw">Distribuição de benefício e risco</div>
-          <p>O benefício recai sobre a operação. O risco recai sobre o <strong>cliente urbano de pequeno vendedor</strong>: a população com maior taxa de atraso e menor cobertura do sistema.</p>
+          <div class="lbl" style="margin-top:1.2cqw">Por que isto não é uma falha</div>
+          <p>Nenhum destes números vem de um defeito: vêm do sistema operando como especificado. <strong>Corrigir o modelo não corrige isto</strong> — só o critério.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">ENQUADRAMENTO</span><span>Avaliar o modelo isoladamente não avalia o sistema sociotécnico de que ele faz parte: é a armadilha do enquadramento. O critério aplicável é se a explicação do sistema seria aceitável para quem carrega o risco.</span></div>
+    <div class="pagenum">14</div>
+  </section>
+
+  <!-- ============ 15 · BLOCO 5 · AFETADOS E RECURSO ============ -->
+  <section class="slide dense" data-title="5 · A ética · afetados" data-core="1">
+    <div class="eyebrow"><b>Bloco 5 · a ética, nesta aplicação</b><span class="q">quem é afetado e não está nesta sala?</span></div>
+    <h2>Quatro grupos carregam consequência, e nenhum deles participou da especificação.</h2>
+    <div class="body">
+      <div class="cols c3">
+        <div>
+          <div class="lbl">Quem carrega o risco</div>
+          <table>
+            <thead><tr><th>Quem</th><th>O que o sistema lhe faz</th></tr></thead>
+            <tbody>
+              <tr class="hi"><td class="who">Cliente urbano de pequeno vendedor</td><td>maior atraso (12,64%) e menor recall (0,4%)</td></tr>
+              <tr class="hi"><td class="who">O vendedor pequeno</td><td>notificado pela folga curta — e registra pior: <strong>4,40%</strong> sem data contra 1,34% do grande</td></tr>
+              <tr><td class="who">Transportadora e motorista</td><td>produzem <code>dt_entrega</code> e são medidos por ela, sem escolher o denominador</td></tr>
+              <tr><td class="who">A expedição</td><td>fila reordenada por um score que não pode contestar</td></tr>
+            </tbody>
+          </table>
+          <div class="lbl" style="margin-top:1.1cqw">Quem colhe o benefício</div>
+          <p>Expedição, atendimento e o Diretor de Operações. <strong>Nenhum deles carrega o risco.</strong></p>
         </div>
         <div>
           <div class="lbl">O que saberiam, mediante explicação</div>
           <ul class="tight">
             <li>Que existe um <strong>score de atraso</strong> sobre a sua compra, calculado antes do despacho e nunca comunicado.</li>
             <li class="no">Que ele usa o CEP: <strong>morar perto reduz a chance de serem avisados</strong>, não a de atrasarem.</li>
-            <li class="no">Que a fila de expedição é ordenada por esse número, e que a ausência de score implica a última posição.</li>
-            <li class="no">E que <strong>não existe recurso</strong>. O art. 20 confere direito a revisão de decisão automatizada, exercível apenas por quem saiba da sua existência.</li>
+            <li class="no">Que a fila é ordenada por esse número, e que não ter score é ficar no fim dela — o outro lado da mesma ordenação, que ninguém decidiu.</li>
+            <li class="no">Que o vendedor pequeno é cobrado por uma taxa que mede em parte a <strong>qualidade do registro dele</strong>, não a entrega.</li>
+          </ul>
+        </div>
+        <div>
+          <div class="lbl">O que falta para haver recurso</div>
+          <p>Recurso são três coisas: <strong>saber que foi avaliado, contestar o resultado e obter revisão</strong>. Hoje nenhuma das três existe.</p>
+          <ul class="tight">
+            <li class="no"><strong>Saber:</strong> nada comunica ao cliente que há um score. Faltaria declará-lo no rastreio do pedido.</li>
+            <li class="no"><strong>Contestar:</strong> não há canal. Faltaria um registro de discordância no atendimento.</li>
+            <li class="no"><strong>Obter revisão:</strong> o art. 20 dá o direito, mas a exigência de revisor humano foi vetada. Haver revisão humana é <strong>decisão nossa</strong>, e não está tomada.</li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">ENQUADRAMENTO</span><span>Avaliar o modelo isoladamente não avalia o sistema sociotécnico de que ele faz parte: é a armadilha do enquadramento. O critério aplicável é se a explicação do sistema seria aceitável para quem carrega o risco; neste momento não é.</span></div>
-    <div class="pagenum">14</div>
+    <div class="claim"><span class="k">O MÍNIMO</span><span>«Cumprimos a LGPD» é resposta ao bloco 3.3, não a este. A pergunta aqui não é se o tratamento é lícito — é o que a pessoa afetada pode fazer. E a resposta, hoje, é nada.</span></div>
+    <div class="pagenum">15</div>
   </section>
 
-  <!-- ============ 15 · BLOCO 6 ============ -->
+  <!-- ============ 16 · BLOCO 6 ============ -->
   <section class="slide dense" data-title="6 · A decisão" data-core="1">
     <div class="eyebrow"><b>Bloco 6 · a configuração da decisão</b><span class="q">dentro do sistema, quem decide o quê?</span></div>
     <h2>Dois passos automáticos, dois com decisão humana e um vedado à automação.</h2>
@@ -1118,10 +1154,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">AGENTE DE IA</span><span>Não há agente de IA neste sistema, nem na acepção clássica nem no uso corrente de mercado: há um classificador e cinco fronteiras de decisão. A designação não acrescentaria informação ao desenho.</span></div>
-    <div class="pagenum">15</div>
+    <div class="pagenum">16</div>
   </section>
 
-  <!-- ============ 16 · FECHO ============ -->
+  <!-- ============ 17 · FECHO ============ -->
   <section class="slide cover" data-title="Fecho" data-core="1">
     <div class="kicker">Limitações declaradas e trabalho subsequente</div>
     <h1 style="font-size:3.9cqw;max-width:34ch">A evidência não sustenta<br>um modelo preditivo. Sustenta<br>uma regra, um registro e um dono.</h1>
@@ -1131,10 +1167,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       <div><span>Em branco</span>O custo real de um atraso: usámos<br>R$ 45 declarado. Toda a conclusão<br>económica pende desse número.</div>
       <div><span>Próximo passo</span>Registar o motivo de atraso, publicar<br>o SLA honesto, e decidir se R$ 9,8 mil<br>por ano paga manter um modelo.</div>
     </div>
-    <div class="pagenum">16</div>
+    <div class="pagenum">17</div>
   </section>
 
-  <!-- ============ 17 · PLUS · PEÇA UMA COTAÇÃO ============ -->
+  <!-- ============ 18 · PLUS · PEÇA UMA COTAÇÃO ============ -->
   <section class="slide cover" data-title="Plus · Peça uma cotação">
     <div class="kicker">Anexo · fora dos seis blocos · agente de cotação por correio eletrônico</div>
     <h1 style="font-size:3.3cqw;max-width:36ch">Demonstração: enviem um pedido<br>de cotação durante a apresentação.</h1>
@@ -1156,10 +1192,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </ul>
       </div>
     </div>
-    <div class="pagenum">17</div>
+    <div class="pagenum">18</div>
   </section>
 
-  <!-- ============ 18 · PLUS · O FLUXO ============ -->
+  <!-- ============ 19 · PLUS · O FLUXO ============ -->
   <section class="slide dense" data-title="Plus · O fluxo">
     <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">do recebimento à resposta</span></div>
     <h2>Dez desfechos explicitados, cada um com a ação correspondente.</h2>
@@ -1195,10 +1231,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">OBSERVABILIDADE</span><span>Cada desfecho corresponde a uma etiqueta na caixa de correio: <code>cotador-processado</code>, <code>cotador-revisar</code>, <code>cotador-sem-rota</code>, <code>cotador-aguardando-dados</code>. O estado do agente é inspecionável sem acesso ao código.</span></div>
-    <div class="pagenum">18</div>
+    <div class="pagenum">19</div>
   </section>
 
-  <!-- ============ 19 · PLUS · AS DECISÕES ============ -->
+  <!-- ============ 20 · PLUS · AS DECISÕES ============ -->
   <section class="slide dense" data-title="Plus · As decisões">
     <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">as três decisões de desenho determinantes</span></div>
     <h2>Dois limiares de confiança, justificados pela assimetria de custo dos dois erros.</h2>
@@ -1225,10 +1261,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">CUSTO ASSIMÉTRICO</span><span>É o princípio da matriz de custo do bloco 4.1 aplicado a um limiar de extração por LLM em vez de a um classificador: o ponto de corte determina-se pela consequência do erro, não pela métrica.</span></div>
-    <div class="pagenum">19</div>
+    <div class="pagenum">20</div>
   </section>
 
-  <!-- ============ 20 · PLUS · O MODELO DE PREÇO ============ -->
+  <!-- ============ 21 · PLUS · O MODELO DE PREÇO ============ -->
   <section class="slide dense" data-title="Plus · O modelo de preço">
     <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">estimação por quantis, não por média</span></div>
     <h2>Três estimadores quantílicos; o valor comunicado ao cliente é a mediana condicional.</h2>
@@ -1264,10 +1300,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">REVERSIBILIDADE</span><span>A fórmula tabelar permanece no código (<code>PRECIFICADOR=tabela</code>): volumes × valor, pedágio, frete mínimo, GRIS e ad valorem. A existência de um caminho de reversão é requisito de entrada em produção.</span></div>
-    <div class="pagenum">20</div>
+    <div class="pagenum">21</div>
   </section>
 
-  <!-- ============ 21 · PLUS · O QUE FALTA ============ -->
+  <!-- ============ 22 · PLUS · O QUE FALTA ============ -->
   <section class="slide dense" data-title="Plus · Quarentena e o que falta">
     <div class="eyebrow"><b>Plus · como foi feito</b><span class="q">curadoria da tabela de tarifas</span></div>
     <h2>A mesma disciplina de curadoria aplicada à tabela de tarifas, de edição manual.</h2>
@@ -1298,7 +1334,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">GENERALIDADE DA REGRA</span><span>Marcar e reter em vez de corrigir sem registro; atribuir dono a cada regra; reportar o valor antes e depois de cada exclusão. O princípio não depende da escala: aplica-se a 99 441 pedidos e a uma linha de planilha.</span></div>
-    <div class="pagenum">21</div>
+    <div class="pagenum">22</div>
   </section>
 </div>
 </div>
