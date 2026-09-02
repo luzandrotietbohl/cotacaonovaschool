@@ -472,7 +472,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   <strong>Cotador de frete por email</strong>
   <span>Grupo Ouro e Prata</span>
   <span class="spacer"></span>
-  <span class="counter"><span id="cur">1</span> / <span id="tot">15</span></span>
+  <span class="counter"><span id="cur">1</span> / <span id="tot">16</span></span>
   <button id="btn-ov" type="button">Índice · G</button>
   <button id="btn-prev" type="button">←</button>
   <button id="btn-next" type="button">→</button>
@@ -608,7 +608,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   </section>
 
   <!-- ============ 5 · BLOCO 2 ============ -->
-  <section class="slide" data-title="2 · As ações">
+  <section class="slide dense" data-title="2 · As ações">
     <div class="eyebrow"><b>Bloco 2</b> As ações <span class="q">o que dá para executar de verdade?</span></div>
     <h2>O que a operação executa — e o que ela não pode executar</h2>
     <div class="body">
@@ -621,9 +621,11 @@ svg{display:block;width:100%;height:auto;overflow:visible}
               <tr><td class="who">Enviar a cotação</td><td>agente</td><td>por email, 24/7 · só dentro da tabela vigente</td></tr>
               <tr><td class="who">Pedir o dado que falta</td><td>agente</td><td>por email · reperguntar até completar</td></tr>
               <tr><td class="who">Recusar trecho não atendido</td><td>agente</td><td>resposta padrão, sem negociação</td></tr>
-              <tr><td class="who">Triar para revisão</td><td>agente → comercial</td><td>label <code>cotador-revisar</code> · humano responde à mão</td></tr>
-              <tr><td class="who">Conferir o que saiu</td><td>comercial</td><td>amostral, sem cadência escrita</td></tr>
-              <tr><td class="who">Manter a tabela de tarifas</td><td>comercial</td><td>esporádica · dono do preço</td></tr>
+              <tr><td class="who">Triar para revisão</td><td>agente → comercial</td><td>label <code>cotador-revisar</code></td></tr>
+              <tr><td class="who">Conferir o que saiu</td><td>comercial, no painel</td><td>amostral, sem cadência escrita</td></tr>
+              <tr><td class="who">Devolver uma thread à fila</td><td>comercial, no painel</td><td>por thread · um clique</td></tr>
+              <tr><td class="who">Ligar, desligar, trocar o modo</td><td>TI, no painel</td><td>a qualquer momento</td></tr>
+              <tr><td class="who">Manter a tabela de tarifas</td><td>comercial</td><td>esporádica, sem cadência</td></tr>
             </tbody>
           </table>
         </div>
@@ -754,7 +756,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 
             <text class="axl" x="0" y="107">Erro absurdo</text>
             <rect x="150" y="90" width="408" height="24" fill="var(--c4)"/>
-            <text class="val" x="160" y="107" fill="#fff">R$ 2.628,50 · 10× · bloqueado antes de sair</text>
+            <text class="val" x="160" y="107" style="fill:#fff">R$ 2.628,50 · 10× · bloqueado antes de sair</text>
           </svg>
           <figcaption>O absurdo é o <code>GRIS 0,30%</code> digitado como <code>30%</code>. O plausível é <code>16,65 → 18,65</code>: passa por todos os limites e cotaria errado para sempre — só aparece contra a versão anterior da tabela.</figcaption>
         </figure>
@@ -805,9 +807,9 @@ svg{display:block;width:100%;height:auto;overflow:visible}
               <!-- 208,50 / 252,50 = 82,57% de 556 px; 2 px de folga entre segmentos -->
               <rect x="0" y="30" width="459.1" height="34" fill="var(--c1)"/>
               <rect x="461.1" y="30" width="96.9" height="34" fill="var(--c2)"/>
-              <text class="val" x="10" y="52" fill="#fff">R$ 208,50</text>
+              <text class="val" x="10" y="52" style="fill:#fff">R$ 208,50</text>
               <text class="ax" x="0" y="22" fill="var(--c1)" style="font-weight:600">FRETE POR VOLUME · 10 × (16,65 + 4,20)</text>
-              <text class="val" x="466" y="52" fill="#fff">R$ 44,00</text>
+              <text class="val" x="466" y="52" style="fill:#fff">R$ 44,00</text>
               <text class="ax" x="558" y="22" text-anchor="end" fill="var(--c2)" style="font-weight:600">GRIS + ADVALOREM · 0,55% DA NF</text>
               <!-- linha de referência: frete mínimo 55/252,50 = 21,78% -->
               <line x1="121.1" y1="26" x2="121.1" y2="96" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3"/>
@@ -848,9 +850,9 @@ svg{display:block;width:100%;height:auto;overflow:visible}
             <rect x="0" y="26" width="194.6" height="32" fill="var(--stop)" opacity=".9"/>
             <rect x="196.6" y="26" width="137" height="32" fill="var(--c1)" opacity=".9"/>
             <rect x="335.6" y="26" width="224.4" height="32" fill="var(--c2)" opacity=".9"/>
-            <text class="val" x="10" y="47" fill="#fff">Revisão humana</text>
-            <text class="val" x="206.6" y="47" fill="#fff">Pode perguntar</text>
-            <text class="val" x="345.6" y="47" fill="#fff">Pode emitir preço</text>
+            <text class="val" x="10" y="47" style="fill:#fff">Revisão humana</text>
+            <text class="val" x="206.6" y="47" style="fill:#fff">Pode perguntar</text>
+            <text class="val" x="345.6" y="47" style="fill:#fff">Pode emitir preço</text>
             <line class="base" x1="0" y1="58" x2="560" y2="58"/>
             <line x1="195.6" y1="58" x2="195.6" y2="70" stroke="var(--ink)" stroke-width="1.5"/>
             <line x1="334.6" y1="58" x2="334.6" y2="70" stroke="var(--ink)" stroke-width="1.5"/>
@@ -931,7 +933,58 @@ svg{display:block;width:100%;height:auto;overflow:visible}
     <div class="pagenum">11</div>
   </section>
 
-  <!-- ============ 12 · BLOCO 5 ============ -->
+  <!-- ============ 12 · PAINEL ============ -->
+  <section class="slide dense" data-title="4.2 · O painel de gestão">
+    <div class="eyebrow"><b>Bloco 4.2</b> A gestão <span class="q">onde a operação consegue ver e parar o agente?</span></div>
+    <h2>O freio deixou de ser uma variável de ambiente</h2>
+    <div class="body">
+      <div class="cols c2w">
+        <div>
+          <figure>
+            <div class="figtitle">Exposição do agente, pelos dois botões do painel</div>
+            <div class="figsub">Faixas de largura igual: são estados, não quantidades — nada aqui codifica magnitude.</div>
+            <svg viewBox="0 0 558 96" role="img" aria-label="Três estados de exposição do agente: loop desligado, em que nada acontece; ligado em modo rascunho, em que a resposta fica em Rascunhos e um humano envia; e ligado em modo enviar, em que o cliente recebe. O painel inicia sempre nos dois primeiros estados.">
+              <text class="ax" x="0" y="10">MENOS EXPOSIÇÃO</text>
+              <text class="ax" x="558" y="10" text-anchor="end">MAIS EXPOSIÇÃO</text>
+              <rect x="0" y="18" width="184" height="38" fill="var(--c2)"/>
+              <rect x="186" y="18" width="184" height="38" fill="var(--c1)"/>
+              <rect x="372" y="18" width="186" height="38" fill="var(--c4)"/>
+              <text class="val" x="10" y="34" style="fill:#fff">Loop desligado</text>
+              <text class="ax" x="10" y="48" style="fill:#fff">nada acontece</text>
+              <text class="val" x="196" y="34" style="fill:#fff">Ligado em rascunho</text>
+              <text class="ax" x="196" y="48" style="fill:#fff">grava em Rascunhos</text>
+              <text class="val" x="382" y="34" style="fill:#fff">Ligado em enviar</text>
+              <text class="ax" x="382" y="48" style="fill:#fff">o cliente recebe</text>
+              <line x1="0" y1="66" x2="370" y2="66" stroke="var(--ink)" stroke-width="1.5"/>
+              <line x1="0" y1="60" x2="0" y2="66" stroke="var(--ink)" stroke-width="1.5"/>
+              <line x1="370" y1="60" x2="370" y2="66" stroke="var(--ink)" stroke-width="1.5"/>
+              <text class="val" x="185" y="82" text-anchor="middle">o painel inicia aqui, sempre</text>
+              <text class="ax" x="558" y="82" text-anchor="end">exige um clique consciente</text>
+            </svg>
+            <figcaption>Antes era editar o <code>.env</code> e reiniciar o processo. Agora o padrão seguro é o estado inicial, e sair dele é uma ação visível. Pelo <code>--loop</code> no terminal, ainda vale o que estiver no <code>.env</code>.</figcaption>
+          </figure>
+        </div>
+        <div>
+          <div class="lbl">Quatro telas <span class="stamp st-ok">Especificado</span></div>
+          <table>
+            <thead><tr><th style="width:22%">Tela</th><th>A pergunta que responde</th><th style="width:20%">Quem usa</th></tr></thead>
+            <tbody>
+              <tr><td class="who">Visão geral</td><td>quantos foram cotados, ficaram incompletos, caíram em erro ou sem rota <strong>hoje</strong></td><td>comercial e TI</td></tr>
+              <tr><td class="who">Revisão</td><td>a fila humana, com a extração que o modelo fez, e um botão que <strong>devolve a thread à fila</strong></td><td>comercial</td></tr>
+              <tr><td class="who">Cotar</td><td>o preço da mesma planilha, à mão, sem gastar chamada de API</td><td>comercial</td></tr>
+              <tr><td class="who">Agente</td><td>ligar, desligar, rodar um ciclo, mudar intervalo e modo, e ver o alerta de credencial</td><td>TI</td></tr>
+            </tbody>
+          </table>
+          <div class="lbl" style="margin-top:1.2cqw">Uma assimetria deliberada</div>
+          <p>A cotação manual <strong>cota mesmo com o peso acima do limite</strong>, exibindo alerta. Por email o agente se recusa; na tela a pessoa vê o número e decide. O mesmo dado, duas fronteiras — porque num caso quem responde é o sistema e no outro é ela.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>O painel não muda o que o agente decide. Muda quem consegue vê-lo decidindo, e em quanto tempo consegue pará-lo.</span></div>
+    <div class="pagenum">12</div>
+  </section>
+
+  <!-- ============ 14 · BLOCO 5 ============ -->
   <section class="slide dense" data-title="5 · A ética">
     <div class="eyebrow"><b>Bloco 5</b> A ética, nesta aplicação <span class="q">quem é afetado e não está nesta sala?</span></div>
     <h2>O que acontece quando ele funciona exatamente como foi desenhado</h2>
@@ -967,7 +1020,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </div>
     </div>
     <div class="claim"><span class="k">A FRASE</span><span>Cumprir a LGPD responde ao bloco 3. A pergunta aqui é o que a pessoa afetada pode fazer — e a resposta deixou de ser «nada».</span></div>
-    <div class="pagenum">12</div>
+    <div class="pagenum">13</div>
   </section>
 
   <!-- ============ 13 · BLOCO 6 ============ -->
@@ -980,22 +1033,22 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <tr><th style="width:19%">Passo do fluxo</th><th style="width:13%">Quem decide</th><th style="width:13%">Nível</th><th style="width:16%">Quem reverte, e quando</th><th>O que acontece quando erra — e quem percebe</th></tr>
         </thead>
         <tbody>
-          <tr><td class="who">Escolher o que tratar na caixa</td><td>agente</td><td><span class="stamp st-part">Automático</span></td><td>ninguém</td><td>o email fica na caixa sem label. <strong>Ninguém percebe até alguém olhar.</strong></td></tr>
+          <tr><td class="who">Escolher o que tratar na caixa</td><td>agente</td><td><span class="stamp st-part">Automático</span></td><td>ninguém</td><td>o email fica na caixa sem label. Aparece nos contadores do painel, mas <strong>ninguém é avisado</strong>.</td></tr>
           <tr><td class="who">É cotação, sim ou não?</td><td>agente, corte 0,35</td><td><span class="stamp st-part">Automático</span></td><td>comercial, ao abrir a thread</td><td>falso negativo = pedido tratado como spam e arquivado em silêncio. <strong>É a pior falha do sistema, e é a única invisível.</strong></td></tr>
           <tr><td class="who">Extrair os cinco campos</td><td>agente</td><td><span class="stamp st-part">Automático</span></td><td>o próprio cliente, na resposta seguinte</td><td>campo errado → preço errado. O corte 0,60 é o que segura.</td></tr>
           <tr><td class="who">Escolher rota e tarifa</td><td>a tabela + a curadoria</td><td><span class="stamp st-part">Automático</span></td><td>comercial, corrigindo a planilha</td><td>tarifa vencida ou implausível → não cota, vai para revisão com o motivo. <strong>Falha visível, por desenho.</strong></td></tr>
           <tr><td class="who">Calcular o preço</td><td>ninguém — é aritmética</td><td><span class="stamp st-part">Automático</span></td><td>—</td><td>aparece no teste, não no cliente. 194 testes cobrem a conta.</td></tr>
-          <tr style="background:var(--stop-wash)"><td class="who">Emitir o preço ao cliente</td><td>agente, se confiança ≥ 0,60</td><td><span class="stamp st-none">Automático hoje</span></td><td>conferência amostral, <strong>depois</strong> do envio</td><td>o cliente já recebeu. <strong>Irreversível na prática — e é aqui que a fronteira está no lugar errado.</strong></td></tr>
+          <tr style="background:var(--stop-wash)"><td class="who">Emitir o preço ao cliente</td><td>agente, se confiança ≥ 0,60</td><td><span class="stamp st-none">Automático hoje</span></td><td>conferência amostral <strong>depois</strong> do envio; no painel, um clique volta a rascunho</td><td>o cliente já recebeu. <strong>Irreversível na prática — e é aqui que a fronteira está no lugar errado.</strong></td></tr>
           <tr><td class="who">Dizer «não atendemos»</td><td>agente</td><td><span class="stamp st-none">Automático</span></td><td>ninguém</td><td>oportunidade perdida, em silêncio</td></tr>
           <tr><td class="who">Negociar, dar desconto, abrir exceção · mudar a tarifa</td><td>comercial, sempre</td><td><span class="stamp st-ok">Nunca automático</span></td><td>—</td><td>a conta de serviço é somente leitura: o agente não escreve na tabela nem por engano. A alçada nunca sai de mãos humanas.</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="claim"><span class="k">A FRASE</span><span>O freio existe — <code>MODO_RESPOSTA=rascunho</code> — e não está puxado. Essa é a decisão que sai desta apresentação.</span></div>
-    <div class="pagenum">13</div>
+    <div class="claim"><span class="k">A FRASE</span><span>O freio virou botão: o painel inicia desligado e em rascunho. Pelo <code>--loop</code>, ainda vale o que estiver no <code>.env</code> — e é lá que ele está solto.</span></div>
+    <div class="pagenum">14</div>
   </section>
 
-  <!-- ============ 14 · EM BRANCO ============ -->
+  <!-- ============ 15 · EM BRANCO ============ -->
   <section class="slide dense" data-title="O que ficou em branco">
     <div class="eyebrow"><b>Consolidado</b> <span class="q">o que não sabemos, dito em voz alta</span></div>
     <h2>Oito campos em branco — e nenhum deles é um projeto</h2>
@@ -1015,20 +1068,20 @@ svg{display:block;width:100%;height:auto;overflow:visible}
       </table>
     </div>
     <div class="claim"><span class="k">A FRASE</span><span>Todos os oito se resolvem com uma consulta, uma conversa ou uma data. Nenhum precisa de mais tecnologia.</span></div>
-    <div class="pagenum">14</div>
+    <div class="pagenum">15</div>
   </section>
 
-  <!-- ============ 15 · FECHO ============ -->
+  <!-- ============ 16 · FECHO ============ -->
   <section class="slide cover" data-title="Fecho">
     <div class="kicker">O que levamos daqui</div>
     <h1 style="font-size:4.6cqw;max-width:26ch">Um agente que lê português<br>e uma planilha que decide o preço.</h1>
     <div class="rule"></div>
     <div class="meta" style="font-size:1.24cqw">
-      <div><span>O que está pronto</span>A regra, a fórmula, os 194 testes,<br>a triagem e o freio de mão.</div>
+      <div><span>O que está pronto</span>A regra, a fórmula, os 194 testes,<br>a curadoria, o painel e o freio de mão.</div>
       <div><span>O que falta</span>Os números que provariam<br>que ele está servindo.</div>
-      <div><span>A decisão de hoje</span>Puxar o freio: voltar a <code>rascunho</code><br>até o portão G2 ter data.</div>
+      <div><span>A decisão de hoje</span>Operar pelo painel, que já inicia<br>em <code>rascunho</code>, até o G2 ter data.</div>
     </div>
-    <div class="pagenum">15</div>
+    <div class="pagenum">16</div>
   </section>
 </div>
 </div>
