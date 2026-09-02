@@ -40,6 +40,9 @@ class Config:
     modo_resposta: str
     intervalo_segundos: int
     exigir_peso: bool
+    # False deixa a curadoria da tabela em modo relatorio: audita e registra,
+    # mas nao retira nenhuma linha de circulacao.
+    auditoria_bloqueia: bool
     # Envio por SMTP: mantem o gmail.send fora dos escopos OAuth.
     smtp_host: str
     smtp_porta: int
@@ -82,6 +85,7 @@ class Config:
             modo_resposta=os.getenv("MODO_RESPOSTA", "rascunho"),
             intervalo_segundos=int(os.getenv("INTERVALO_SEGUNDOS", "120")),
             exigir_peso=_bool("EXIGIR_PESO", True),
+            auditoria_bloqueia=_bool("AUDITORIA_BLOQUEIA", True),
             smtp_host=os.getenv("SMTP_HOST", "smtp.gmail.com").strip(),
             smtp_porta=int(os.getenv("SMTP_PORTA", "465")),
             smtp_usuario=os.getenv("SMTP_USUARIO", "").strip(),

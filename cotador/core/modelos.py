@@ -162,6 +162,16 @@ class Tarifa:
     vigencia_inicio: date | None = None
     vigencia_fim: date | None = None
     status: str = "ATIVO"
+    # Liberacao humana de um alerta da curadoria: silencia os alertas desta
+    # linha. Nunca silencia bloqueio — valor implausivel se corrige na
+    # planilha, nao se aprova por email.
+    revisado_por: str | None = None
+    revisado_em: date | None = None
+
+    @property
+    def revisado(self) -> bool:
+        """Alguem assinou esta linha, com nome e data."""
+        return bool(self.revisado_por and self.revisado_em)
 
     @property
     def chave_origem(self) -> str:

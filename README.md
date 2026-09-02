@@ -40,6 +40,53 @@ A leitura usa as extensoes IMAP do Gmail, que preservam o que a API oferecia:
 `X-GM-RAW` (busca com a sintaxe do Gmail), `X-GM-MSGID` (id estavel para
 idempotencia), `X-GM-THRID` (conversa) e `X-GM-LABELS` (labels).
 
+## Curadoria da tabela de tarifas
+
+A tabela e editada a mao pelo comercial e recarregada a cada ciclo: um erro de
+digitacao entra em producao em dois minutos. Tres camadas cuidam disso.
+
+**Limites duros** (`cotador/core/curadoria.py`). Intervalos declarados por
+pessoas, nao estatistica. Duas severidades, porque as consequencias diferem:
+
+| | O que e | O que acontece |
+|---|---|---|
+| **BLOQUEIO** | valor implausivel para o negocio | a linha entra em quarentena e para de cotar |
+| **ALERTA** | valor incomum, possivelmente legitimo | relata e segue cotando |
+
+O caso que a camada existe para pegar: `GRIS 0,30` digitado como `30` multiplica
+por 100 a parcela cobrada sobre a nota fiscal. Tambem bloqueia duas tarifas
+vigentes para o mesmo trecho e modal — `buscar` devolveria a primeira da lista,
+e o preco do cliente dependeria da ordem das linhas na planilha.
+
+Alertas sao silenciaveis: preencha `REVISADO_POR` e `REVISADO_EM` na linha (as
+colunas sao opcionais; sem elas nenhuma linha esta revisada). **Bloqueio nunca
+e silenciavel** — um GRIS de 30% nao e uma tarifa a autorizar, e um 0,30
+digitado errado. Corrige-se na planilha.
+
+**Quarentena** (`MODO`: `AUDITORIA_BLOQUEIA`). A linha bloqueada sai de `rotas`
+e nao cota, mas continua em `trecho_cadastrado`. E isso que garante que o
+cliente **nunca ouca «nao atendemos» por causa de um erro nosso**: a thread vai
+para `cotador-revisar` com o motivo em portugues. Comece com
+`AUDITORIA_BLOQUEIA=false` para ver o que a tabela real viola sem tirar nada
+do ar.
+
+**Versionamento** (tabela `versoes_tabela` no SQLite). Cada carga da planilha e
+guardada por hash de conteudo, com um snapshot dos campos que mexem no preco.
+Cada cotacao grava a `Tarifa` inteira em `tarifa_json`, nao so o `id_rota`:
+depois que o comercial corrigir a planilha, a cotacao enviada continua
+reconstruivel. Quando o conteudo muda, o agente loga campo a campo o que mudou.
+
+Isto e o que pega o erro **plausivel**. `16,65 -> 166,50` qualquer limite pega;
+`16,65 -> 18,65` nao viola faixa nenhuma e cotaria errado para sempre — so
+aparece na comparacao com a versao anterior.
+
+```bash
+python main.py --auditar-planilha
+```
+
+Imprime bloqueios, alertas e o diff contra a versao anterior. Sai com codigo 1
+quando ha bloqueio, para virar tarefa agendada.
+
 ## Memoria da thread
 
 O cliente responde so o campo que faltava ("valor da nota R$ 200"), e o historico
@@ -69,6 +116,7 @@ IMAP (nao lidos)
       -> confianca < 0.35 ......... label cotador-revisar (revisao humana)
       -> rota fora da planilha .... responde "nao atendemos", label cotador-sem-rota
       -> rota sem tarifa vigente .. label cotador-revisar, nada e enviado
+      -> rota em quarentena ....... label cotador-revisar, com o motivo
       -> faltam dados ............. responde pedindo, label cotador-aguardando-dados
       -> completo, confianca < 0.6  label cotador-revisar (nao emite preco)
       -> peso acima do limite ..... label cotador-revisar, nada e enviado
@@ -127,6 +175,10 @@ python main.py --validar-planilha
 ```
 
 ```bash
+python main.py --auditar-planilha
+```
+
+```bash
 python main.py --cotar "Sao Paulo/SP" "Campinas/SP" 10 8000
 ```
 
@@ -172,8 +224,9 @@ credencial ruim, e girar em silencio esconde o problema.
 python -m unittest discover -s cotador/tests -t . -v
 ```
 
-132 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de thread, os
-templates de email, a busca de rota, as rotas do painel e as regressoes conhecidas.
+174 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de
+thread, os templates de email, a busca de rota, a curadoria da tabela, as rotas
+do painel e as regressoes conhecidas.
 
 `TestExemploCalculoDaPlanilha` reproduz a aba EXEMPLO_CALCULO: 10 volumes, NF
 R$ 8.000, rota R00001 -> total R$ 252,50.
@@ -200,6 +253,7 @@ R$ 8.000, rota R00001 -> total R$ 252,50.
 ```
 main.py                             CLI e tratamento de alerta
 cotador/config.py                   configuracao via .env
+cotador/core/curadoria.py           limites duros, quarentena e diff de versoes
 cotador/agente.py                   orquestracao e decisao de desfecho
 cotador/core/modelos.py             dataclasses do dominio
 cotador/core/extracao.py            Claude API com tool_choice forcado

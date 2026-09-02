@@ -453,6 +453,7 @@ def cfg_de_teste(tmp: Path):
         anthropic_workspace_id="",
         gmail_user="conta@gmail.com",
         gmail_query="is:unread",
+        auditoria_bloqueia=True,
         sheet_id="sheet",
         sheet_aba="TABELA_ROTAS",
         modo_resposta="rascunho",

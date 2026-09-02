@@ -2,6 +2,7 @@
 
 Uso:
     python main.py --validar-planilha        # so testa a leitura das tarifas
+    python main.py --auditar-planilha        # curadoria: limites, quarentena e mudancas
     python main.py --testar-texto "..."      # so testa a extracao (nao toca no email)
     python main.py --cotar "Sao Paulo/SP" "Campinas/SP" 10 8000
     python main.py --testar-imap             # valida a leitura da caixa
@@ -25,7 +26,7 @@ from pathlib import Path
 
 from cotador.agente import Agente
 from cotador.config import Config
-from cotador.core import precificacao
+from cotador.core import curadoria, precificacao
 from cotador.core.extracao import Extrator
 from cotador.core.modelos import PedidoCotacao
 from cotador.integracoes import google_sa
@@ -114,6 +115,60 @@ def montar_enviador(cfg: Config) -> EnviadorSMTP:
     )
 
 
+def auditar_planilha(cfg: Config, tabela: TabelaTarifas) -> int:
+    """Curadoria da tabela: limites duros, quarentena e o que mudou desde ontem.
+
+    Codigo de saida 1 quando ha bloqueio, para poder virar tarefa agendada:
+    quem roda isto num agendador quer o alerta, nao a leitura do relatorio.
+    """
+    total = tabela.carregar()
+    achados = tabela.achados
+    travados = curadoria.bloqueios(achados)
+    avisos = curadoria.alertas(achados)
+
+    print(f"{total} tarifas carregadas de '{cfg.sheet_aba}'")
+    print(f"versao da tabela: {tabela.hash_conteudo[:12]}")
+    if not cfg.auditoria_bloqueia:
+        print("AUDITORIA_BLOQUEIA=false: nada sai de circulacao, so relata")
+
+    print()
+    print(f"BLOQUEIO  {len(travados)}")
+    for a in travados:
+        print(f"  {a}")
+    print()
+    print(f"ALERTA    {len(avisos)}")
+    for a in avisos:
+        print(f"  {a}")
+
+    banco = Banco(cfg.banco)
+    banco.registrar_versao_tabela(
+        hash_conteudo=tabela.hash_conteudo,
+        aba=cfg.sheet_aba,
+        linhas=len(tabela.linhas_brutas),
+        tarifas=total,
+        bloqueios=len(travados),
+        impressao=tabela.impressao(),
+    )
+    anterior = banco.versao_anterior(cfg.sheet_aba, tabela.hash_conteudo)
+    if anterior is None:
+        print()
+        print("Primeira versao registrada: nada com que comparar ainda.")
+    else:
+        mudancas = curadoria.comparar(anterior["impressao"], tabela.impressao())
+        print()
+        print(f"MUDANCAS desde {anterior['visto_ate']}  ({len(mudancas)})")
+        for m in mudancas:
+            print(f"  {m}")
+
+    if travados:
+        print()
+        print(
+            f"{len(tabela.quarentena)} rota(s) em quarentena: nao cotam, e a thread "
+            "do cliente vai para revisao humana."
+        )
+    return 1 if travados else 0
+
+
 def main() -> int:
     """Qualquer comando pode esbarrar na credencial recusada — inclusive no
     login IMAP, antes do primeiro ciclo. Por isso o alerta e tratado aqui em
@@ -130,6 +185,11 @@ def _executar() -> int:
     grupo.add_argument("--once", action="store_true", help="processa a caixa uma vez")
     grupo.add_argument("--loop", action="store_true", help="processa em intervalos")
     grupo.add_argument("--validar-planilha", action="store_true")
+    grupo.add_argument(
+        "--auditar-planilha",
+        action="store_true",
+        help="roda a curadoria da tabela: limites duros, quarentena e o que mudou",
+    )
     grupo.add_argument("--testar-texto", metavar="TEXTO")
     grupo.add_argument(
         "--testar-imap",
@@ -196,7 +256,12 @@ def _executar() -> int:
         return 0
 
     cred = google_sa.credenciais(cfg.service_account_json)
-    tabela = TabelaTarifas(cred, cfg.sheet_id, cfg.sheet_aba)
+    tabela = TabelaTarifas(
+        cred, cfg.sheet_id, cfg.sheet_aba, auditoria_bloqueia=cfg.auditoria_bloqueia
+    )
+
+    if args.auditar_planilha:
+        return auditar_planilha(cfg, tabela)
 
     if args.validar_planilha:
         total = tabela.carregar()
