@@ -194,6 +194,22 @@ python main.py --once
 python main.py --loop
 ```
 
+## Painel de gestao
+
+```bash
+python main.py --painel
+```
+
+Sobe a interface web local de gestao em http://localhost:8000 (use `--porta` para
+trocar). O painel mostra a operacao do dia, a fila de revisao humana (com botao
+que devolve a fila os emails em revisao daquela thread), cotacao manual sem
+gastar API e o controle do loop (ligar/desligar, ciclo unico, modo
+rascunho/enviar). Inicia sempre com o loop desligado e em modo rascunho.
+
+A cotacao manual do painel cota mesmo quando o peso estoura o limite da rota,
+exibindo um alerta — de proposito, para o humano ver o numero e decidir. Por
+email o agente **nao** responde esse caso: manda para revisao.
+
 ## A fila de revisao humana
 
 Todo desfecho `erro` recebe o label `cotador-revisar` e uma linha no SQLite com o
@@ -208,6 +224,9 @@ esta em analise humana, sem o motivo interno. Abaixo de 0,35 de confianca o
 agente **nao responde**: nesse ponto ele nao sabe o que o email pede, e mandar um
 formulario de cotacao para uma reclamacao e pior que o silencio.
 
+O painel e a tela para trabalhar a fila. O comando abaixo e a versao para
+agendador: agrupa por motivo e sai com codigo 1 quando ha qualquer item.
+
 ```bash
 python main.py --resumo-revisar
 ```
@@ -220,7 +239,7 @@ deposito.
 Corrigido o que causou a falha, devolva os emails a fila do agente:
 
 ```bash
-python main.py --resumo-revisar
+python main.py --reprocessar-erros
 ```
 
 Codigos de saida: `0` ok, `1` falha de dados, `2` credencial recusada. No codigo 2 o
@@ -233,9 +252,9 @@ credencial ruim, e girar em silencio esconde o problema.
 python -m unittest discover -s cotador/tests -t . -v
 ```
 
-127 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de thread,
-os templates de email, a busca de rota, a curadoria da tabela, a fila de revisao
-humana e as regressoes conhecidas.
+194 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de
+thread, os templates de email, a busca de rota, a curadoria da tabela, a fila de
+revisao humana, as rotas do painel e as regressoes conhecidas.
 
 `TestExemploCalculoDaPlanilha` reproduz a aba EXEMPLO_CALCULO: 10 volumes, NF
 R$ 8.000, rota R00001 -> total R$ 252,50.
@@ -246,12 +265,19 @@ R$ 8.000, rota R00001 -> total R$ 252,50.
   `enviar` responde o cliente de verdade. Comece em rascunho.
 - Nunca responde a `noreply@`, `mailer-daemon` ou a propria conta — evita loop de robos.
 - Cada email so e processado uma vez (`X-GM-MSGID` como chave no SQLite + label).
+- Se o projeto estiver em pasta sincronizada (Google Drive/OneDrive), configure
+  `BANCO_CAMINHO` no `.env` apontando para disco local (ex.:
+  `%LOCALAPPDATA%\cotador\cotador.sqlite3`) — clientes de sync corrompem
+  gravacoes do SQLite e perder linhas ali quebra a idempotencia.
 - O historico citado e cortado antes de ir ao LLM, para nao cotar dados antigos.
 - Um email problematico nao derruba o ciclo: falha isolada, os demais seguem.
 - Todo email do agente diz que foi enviado automaticamente e como falar com uma
   pessoa. E o recurso de quem recebe: sem isso o cliente nao sabe que foi
   atendido por um sistema, nem a quem recorrer.
 - `.env` e `service_account.json` estao no `.gitignore`. Nunca versione os dois.
+- O painel escuta so em `127.0.0.1` (nao fica exposto na rede), protege cada POST
+  com um token anti-CSRF gerado por processo e sobe com o loop desligado e em modo
+  rascunho, independentemente do `MODO_RESPOSTA` do `.env`.
 
 ## Estrutura
 
@@ -270,4 +296,7 @@ cotador/integracoes/mime.py         decodificacao de email cru
 cotador/integracoes/planilha.py     TABELA_ROTAS -> Tarifa normalizada
 cotador/integracoes/google_sa.py    credencial da conta de servico
 cotador/integracoes/banco.py        SQLite (idempotencia + auditoria)
+painel/app.py                       rotas e telas do painel web
+painel/servico_agente.py            loop do agente em thread (liga/desliga)
+painel/consultas.py                 leituras do SQLite para as telas
 ```

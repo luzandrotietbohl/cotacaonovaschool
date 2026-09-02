@@ -20,6 +20,8 @@ from cotador.core import mensagens
 from cotador.core.modelos import Email, PedidoCotacao
 from cotador.integracoes.banco import Banco
 
+LABEL = "cotador-revisar"
+
 
 def email_exemplo() -> Email:
     return Email(
@@ -187,6 +189,7 @@ class TestFilaNoBanco(unittest.TestCase):
             remetente=f"{id_email}@exemplo.com",
             assunto="cotacao",
             desfecho="erro",
+            label=LABEL,
             origem="SAO PAULO/SP",
             destino="CAMPINAS/SP",
             erro=motivo,
@@ -205,16 +208,16 @@ class TestFilaNoBanco(unittest.TestCase):
             con.close()
 
     def test_fila_vazia(self):
-        self.assertEqual(self.banco.contar_pendentes_revisao(), 0)
-        self.assertEqual(self.banco.pendentes_revisao(), [])
+        self.assertEqual(len(self.banco.por_label(LABEL)), 0)
+        self.assertEqual(self.banco.por_label(LABEL), [])
 
     def test_conta_e_ordena_do_mais_antigo(self):
         agora = datetime.now(timezone.utc)
         self._erro("novo", agora, "confianca 0.20 abaixo de 0.35")
         self._erro("velho", agora - timedelta(days=5), "peso medio de 250.0 kg")
 
-        self.assertEqual(self.banco.contar_pendentes_revisao(), 2)
-        fila = self.banco.pendentes_revisao()
+        self.assertEqual(len(self.banco.por_label(LABEL)), 2)
+        fila = sorted(self.banco.por_label(LABEL), key=lambda i: i["criado_em"])
         self.assertEqual([i["remetente"] for i in fila],
                          ["velho@exemplo.com", "novo@exemplo.com"])
         self.assertIn("peso", classificar_erro(fila[0]["erro"]))
@@ -226,21 +229,22 @@ class TestFilaNoBanco(unittest.TestCase):
             remetente="c@x.com",
             assunto="a",
             desfecho="cotado",
+            label="cotador-processado",
             valor_frete=252.50,
         )
-        self.assertEqual(self.banco.contar_pendentes_revisao(), 0)
+        self.assertEqual(len(self.banco.por_label(LABEL)), 0)
 
     def test_reprocessar_limpa_a_fila(self):
         self._erro("a", datetime.now(timezone.utc), "confianca 0.20 abaixo de 0.35")
         self.assertEqual(self.banco.limpar_erros(), 1)
-        self.assertEqual(self.banco.contar_pendentes_revisao(), 0)
+        self.assertEqual(len(self.banco.por_label(LABEL)), 0)
 
     def test_limite_respeitado(self):
         agora = datetime.now(timezone.utc)
         for n in range(5):
             self._erro(f"e{n}", agora - timedelta(hours=n), "falha X")
-        self.assertEqual(len(self.banco.pendentes_revisao(limite=2)), 2)
-        self.assertEqual(self.banco.contar_pendentes_revisao(), 5)
+        self.assertEqual(len(self.banco.por_label(LABEL)[:2]), 2)
+        self.assertEqual(len(self.banco.por_label(LABEL)), 5)
 
 
 if __name__ == "__main__":

@@ -491,7 +491,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
     <div class="meta">
       <div><span>O que é</span>Um agente que lê a caixa comercial,<br>entende o pedido e devolve o preço da tabela.</div>
       <div><span>Estágio hoje</span>Piloto enviando de verdade,<br>em caixa de teste com remetentes internos.</div>
-      <div><span>Verificável</span>127 testes automatizados,<br>sem rede e sem credenciais. Verdes.</div>
+      <div><span>Verificável</span>194 testes automatizados,<br>sem rede e sem credenciais. Verdes.</div>
     </div>
     <div class="pagenum">01</div>
   </section>
@@ -827,7 +827,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <div class="lbl" style="margin-top:1.5cqw">O peso não entra no preço</div>
           <p>Não há cobrança por peso nem por cubagem nesta tabela. O peso serve para <strong>uma coisa só</strong>: se o peso médio por volume estourar o limite da rota, o agente <strong>não responde</strong> e manda para revisão humana. É uma recusa por segurança, não um cálculo.</p>
           <div class="lbl" style="margin-top:1.5cqw">Regressão <span class="stamp st-ok">Especificado</span></div>
-          <p><strong>127 testes</strong>, sem rede e sem credenciais. Um deles reproduz a aba EXEMPLO_CALCULO e exige exatamente os R$ 252,50 acima.</p>
+          <p><strong>194 testes</strong>, sem rede e sem credenciais. Um deles reproduz a aba EXEMPLO_CALCULO e exige exatamente os R$ 252,50 acima.</p>
         </div>
       </div>
     </div>
@@ -913,7 +913,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <table>
             <thead><tr><th style="width:12%">Portão</th><th style="width:52%">Critério, escrito antes</th><th>Data</th></tr></thead>
             <tbody>
-              <tr><td class="who">G1</td><td>127 testes verdes e piloto enviando em caixa de teste. <span class="stamp st-ok">Cumprido</span></td><td>hoje</td></tr>
+              <tr><td class="who">G1</td><td>194 testes verdes e piloto enviando em caixa de teste. <span class="stamp st-ok">Cumprido</span></td><td>hoje</td></tr>
               <tr><td class="who">G2</td><td>4 semanas de caixa real em <code>MODO_RESPOSTA=rascunho</code>, com zero divergência de preço na amostra conferida → passa a <code>enviar</code>.</td><td><span class="stamp st-none">Em branco</span></td></tr>
               <tr><td class="who">G3</td><td>90 dias em <code>enviar</code>, tempo mediano de resposta abaixo de 5 min e zero divergência → amplia para toda a caixa comercial.</td><td><span class="stamp st-none">Em branco</span></td></tr>
             </tbody>
@@ -984,7 +984,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <tr><td class="who">É cotação, sim ou não?</td><td>agente, corte 0,35</td><td><span class="stamp st-part">Automático</span></td><td>comercial, ao abrir a thread</td><td>falso negativo = pedido tratado como spam e arquivado em silêncio. <strong>É a pior falha do sistema, e é a única invisível.</strong></td></tr>
           <tr><td class="who">Extrair os cinco campos</td><td>agente</td><td><span class="stamp st-part">Automático</span></td><td>o próprio cliente, na resposta seguinte</td><td>campo errado → preço errado. O corte 0,60 é o que segura.</td></tr>
           <tr><td class="who">Escolher rota e tarifa</td><td>a tabela + a curadoria</td><td><span class="stamp st-part">Automático</span></td><td>comercial, corrigindo a planilha</td><td>tarifa vencida ou implausível → não cota, vai para revisão com o motivo. <strong>Falha visível, por desenho.</strong></td></tr>
-          <tr><td class="who">Calcular o preço</td><td>ninguém — é aritmética</td><td><span class="stamp st-part">Automático</span></td><td>—</td><td>aparece no teste, não no cliente. 127 testes cobrem a conta.</td></tr>
+          <tr><td class="who">Calcular o preço</td><td>ninguém — é aritmética</td><td><span class="stamp st-part">Automático</span></td><td>—</td><td>aparece no teste, não no cliente. 194 testes cobrem a conta.</td></tr>
           <tr style="background:var(--stop-wash)"><td class="who">Emitir o preço ao cliente</td><td>agente, se confiança ≥ 0,60</td><td><span class="stamp st-none">Automático hoje</span></td><td>conferência amostral, <strong>depois</strong> do envio</td><td>o cliente já recebeu. <strong>Irreversível na prática — e é aqui que a fronteira está no lugar errado.</strong></td></tr>
           <tr><td class="who">Dizer «não atendemos»</td><td>agente</td><td><span class="stamp st-none">Automático</span></td><td>ninguém</td><td>oportunidade perdida, em silêncio</td></tr>
           <tr><td class="who">Negociar, dar desconto, abrir exceção · mudar a tarifa</td><td>comercial, sempre</td><td><span class="stamp st-ok">Nunca automático</span></td><td>—</td><td>a conta de serviço é somente leitura: o agente não escreve na tabela nem por engano. A alçada nunca sai de mãos humanas.</td></tr>
@@ -1024,7 +1024,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
     <h1 style="font-size:4.6cqw;max-width:26ch">Um agente que lê português<br>e uma planilha que decide o preço.</h1>
     <div class="rule"></div>
     <div class="meta" style="font-size:1.24cqw">
-      <div><span>O que está pronto</span>A regra, a fórmula, os 127 testes,<br>a triagem e o freio de mão.</div>
+      <div><span>O que está pronto</span>A regra, a fórmula, os 194 testes,<br>a triagem e o freio de mão.</div>
       <div><span>O que falta</span>Os números que provariam<br>que ele está servindo.</div>
       <div><span>A decisão de hoje</span>Puxar o freio: voltar a <code>rascunho</code><br>até o portão G2 ter data.</div>
     </div>

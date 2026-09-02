@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS processados (
     valor_frete     REAL,
     extracao_json   TEXT,
     erro            TEXT,
+    label           TEXT,
     criado_em       TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_processados_thread ON processados(thread_id);
@@ -48,7 +49,7 @@ CREATE INDEX IF NOT EXISTS idx_versoes_visto ON versoes_tabela(aba, visto_ate);
 
 # Colunas acrescentadas depois da primeira versao do banco. ALTER TABLE e
 # aplicado so quando falta, para nao exigir que ninguem apague o sqlite.
-_COLUNAS_NOVAS = {"tarifa_json": "TEXT"}
+_COLUNAS_NOVAS = {"label": "TEXT", "tarifa_json": "TEXT"}
 
 _CAMPOS = (
     "id_email",
@@ -66,6 +67,7 @@ _CAMPOS = (
     "extracao_json",
     "tarifa_json",
     "erro",
+    "label",
     "criado_em",
 )
 
@@ -105,28 +107,6 @@ class Banco:
             linha = cur.fetchone()
         return json.loads(linha[0]) if linha else None
 
-    # ---------------- fila de revisao humana ----------------
-    def contar_pendentes_revisao(self) -> int:
-        with closing(self._conectar()) as con:
-            cur = con.execute("SELECT COUNT(*) FROM processados WHERE desfecho = 'erro'")
-            return cur.fetchone()[0]
-
-    def pendentes_revisao(self, limite: int = 50) -> list[dict]:
-        """Emails que pararam em erro e esperam uma pessoa, do mais antigo.
-
-        Do mais antigo porque a pergunta operacional e "quem esta esperando
-        ha mais tempo?", nao "o que chegou agora".
-        """
-        campos = ("criado_em", "remetente", "assunto", "origem", "destino", "erro")
-        with closing(self._conectar()) as con:
-            linhas = con.execute(
-                f"""SELECT {','.join(campos)} FROM processados
-                    WHERE desfecho = 'erro'
-                    ORDER BY criado_em ASC LIMIT ?""",
-                (limite,),
-            ).fetchall()
-        return [dict(zip(campos, linha)) for linha in linhas]
-
     def limpar_erros(self) -> int:
         """Esquece os emails com desfecho 'erro' para que voltem para a fila."""
         with closing(self._conectar()) as con:
@@ -152,6 +132,7 @@ class Banco:
         extracao: dict | None = None,
         tarifa: dict | None = None,
         erro: str | None = None,
+        label: str | None = None,
     ) -> None:
         valores = (
             id_email,
@@ -169,6 +150,7 @@ class Banco:
             json.dumps(extracao, ensure_ascii=False) if extracao else None,
             json.dumps(tarifa, ensure_ascii=False, default=str) if tarifa else None,
             erro,
+            label,
             datetime.now(timezone.utc).isoformat(timespec="seconds"),
         )
         marcadores = ",".join("?" * len(_CAMPOS))
@@ -179,6 +161,66 @@ class Banco:
                 valores,
             )
             con.commit()
+
+    # ---------------- consultas do painel ----------------
+    def contar_por_desfecho(self, prefixo_dia: str | None = None) -> dict[str, int]:
+        """Contagem por desfecho; `prefixo_dia` ('2026-09-01') filtra o dia UTC."""
+        sql = "SELECT desfecho, COUNT(*) FROM processados"
+        parametros: tuple = ()
+        if prefixo_dia:
+            sql += " WHERE criado_em LIKE ?"
+            parametros = (f"{prefixo_dia}%",)
+        sql += " GROUP BY desfecho"
+        with closing(self._conectar()) as con:
+            return dict(con.execute(sql, parametros).fetchall())
+
+    def ultimos(self, limite: int = 50) -> list[dict]:
+        """Registros mais recentes primeiro. rowid desempata o mesmo segundo."""
+        with closing(self._conectar()) as con:
+            con.row_factory = sqlite3.Row
+            cur = con.execute(
+                "SELECT * FROM processados ORDER BY criado_em DESC, rowid DESC LIMIT ?",
+                (limite,),
+            )
+            return [dict(linha) for linha in cur.fetchall()]
+
+    def por_label(self, label: str) -> list[dict]:
+        with closing(self._conectar()) as con:
+            con.row_factory = sqlite3.Row
+            cur = con.execute(
+                "SELECT * FROM processados WHERE label = ? "
+                "ORDER BY criado_em DESC, rowid DESC",
+                (label,),
+            )
+            return [dict(linha) for linha in cur.fetchall()]
+
+    def ids_da_thread(self, thread_id: str, label: str | None = None) -> list[str]:
+        """Ids da thread, sem apagar nada; `label` restringe ao label gravado.
+
+        Quem devolve email para a fila precisa da lista ANTES de mexer no
+        Gmail, para so apagar o que o IMAP confirmou. O filtro por label evita
+        arrastar junto emails da mesma thread que ja foram resolvidos.
+        """
+        sql = "SELECT id_email FROM processados WHERE thread_id = ?"
+        parametros: tuple = (thread_id,)
+        if label is not None:
+            sql += " AND label = ?"
+            parametros += (label,)
+        with closing(self._conectar()) as con:
+            return [linha[0] for linha in con.execute(sql, parametros).fetchall()]
+
+    def apagar_emails(self, ids: list[str]) -> int:
+        """Apaga apenas os ids informados; devolve quantos sairam."""
+        if not ids:
+            return 0
+        marcadores = ",".join("?" * len(ids))
+        with closing(self._conectar()) as con:
+            cur = con.execute(
+                f"DELETE FROM processados WHERE id_email IN ({marcadores})",
+                tuple(ids),
+            )
+            con.commit()
+            return cur.rowcount
 
     # ---------------- camada 0: versoes da tabela de tarifas ----------------
     def registrar_versao_tabela(

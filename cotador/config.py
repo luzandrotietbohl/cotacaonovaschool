@@ -67,7 +67,14 @@ class Config:
 
     @classmethod
     def carregar(cls) -> "Config":
+        # SQLite em pasta sincronizada (Google Drive/OneDrive) perde gravacoes:
+        # o cliente de sync troca o arquivo no meio da escrita. BANCO_CAMINHO
+        # permite mover o banco para disco local (aceita %VARIAVEIS% do Windows).
+        caminho_banco = os.path.expandvars(os.getenv("BANCO_CAMINHO", "").strip())
         return cls(
+            banco=Path(caminho_banco)
+            if caminho_banco
+            else RAIZ / "cotador" / "dados" / "cotador.sqlite3",
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", "").strip(),
             anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5"),
             anthropic_workspace_id=os.getenv("ANTHROPIC_WORKSPACE_ID", "").strip(),

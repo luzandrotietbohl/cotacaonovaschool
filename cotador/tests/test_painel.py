@@ -1,0 +1,917 @@
+"""Testes do painel: IMAP de devolucao, servico do loop e rotas Flask."""
+from __future__ import annotations
+
+import sqlite3
+import subprocess
+import sys
+import tempfile
+import threading
+import time
+import unittest
+from pathlib import Path
+
+from cotador.integracoes.banco import Banco
+from cotador.integracoes.caixa_imap import CaixaIMAP
+
+
+class ConIMAPFake:
+    """Grava os comandos UID emitidos e devolve respostas configuraveis."""
+
+    def __init__(
+        self,
+        uid_encontrado: bytes | None = b"7",
+        store_ok: bool = True,
+        search_ok: bool = True,
+    ):
+        self.comandos: list[tuple] = []
+        self._uid = uid_encontrado
+        self._store_ok = store_ok
+        self._search_ok = search_ok
+
+    def uid(self, comando, *args):
+        self.comandos.append((comando, *args))
+        if comando == "SEARCH":
+            if not self._search_ok:
+                return "NO", [b"erro de busca"]
+            return "OK", [self._uid or b""]
+        if not self._store_ok:
+            return "NO", [b"erro"]
+        return "OK", [b""]
+
+
+def caixa_com_con(con) -> CaixaIMAP:
+    caixa = CaixaIMAP(host="x", porta=993, usuario="u@x.com", senha="s")
+    caixa._con = con  # injeta a conexao fake; nada de rede nos testes
+    return caixa
+
+
+class TestDevolverParaFila(unittest.TestCase):
+    def test_remove_labels_e_marca_nao_lido(self):
+        con = ConIMAPFake(uid_encontrado=b"42")
+        caixa = caixa_com_con(con)
+
+        ok = caixa.devolver_para_fila("111222333", ["cotador-revisar"])
+
+        self.assertTrue(ok)
+        self.assertIn(("SEARCH", "X-GM-MSGID", "111222333"), con.comandos)
+        self.assertIn(("STORE", "42", "-X-GM-LABELS", '("cotador-revisar")'), con.comandos)
+        self.assertIn(("STORE", "42", "-FLAGS", r"(\Seen)"), con.comandos)
+
+    def test_email_nao_encontrado_devolve_false_sem_store(self):
+        con = ConIMAPFake(uid_encontrado=None)
+        caixa = caixa_com_con(con)
+
+        ok = caixa.devolver_para_fila("999", ["cotador-revisar"])
+
+        self.assertFalse(ok)
+        stores = [c for c in con.comandos if c[0] == "STORE"]
+        self.assertEqual(stores, [])
+
+    def test_falha_ao_remover_label_devolve_false(self):
+        # Sem o label removido o email nunca volta para 'is:unread -label:...',
+        # entao reportar sucesso enganaria o painel.
+        con = ConIMAPFake(uid_encontrado=b"42", store_ok=False)
+        caixa = caixa_com_con(con)
+
+        ok = caixa.devolver_para_fila("111222333", ["cotador-revisar"])
+
+        self.assertFalse(ok)
+
+    def test_busca_com_erro_avisa_causa_diferente(self):
+        con = ConIMAPFake(search_ok=False)
+        caixa = caixa_com_con(con)
+
+        with self.assertLogs("cotador.integracoes.caixa_imap", "WARNING") as reg:
+            ok = caixa.devolver_para_fila("999", ["cotador-revisar"])
+
+        self.assertFalse(ok)
+        self.assertNotIn("nao encontrado", "\n".join(reg.output))
+
+
+class AgenteFake:
+    """Dubla o Agente: conta ciclos e falha sob demanda."""
+
+    def __init__(self, resumo=None, excecao=None):
+        self.resumo = resumo or {"cotado": 1}
+        self.excecao = excecao
+        self.ciclos = 0
+
+    def rodar_ciclo(self):
+        self.ciclos += 1
+        if self.excecao:
+            raise self.excecao
+        return self.resumo
+
+
+class AgenteTravado:
+    """Fica dentro de rodar_ciclo ate o teste liberar, simulando ciclo longo."""
+
+    def __init__(self):
+        self.entrou = threading.Event()
+        self.liberar = threading.Event()
+        self.ciclos = 0
+
+    def rodar_ciclo(self):
+        self.ciclos += 1
+        self.entrou.set()
+        self.liberar.wait(timeout=10)  # rede de seguranca: nao trava a suite
+        return {"cotado": 0}
+
+
+class TestServicoAgente(unittest.TestCase):
+    def test_ciclo_unico_guarda_o_resumo(self):
+        from painel.servico_agente import ServicoAgente
+
+        agente = AgenteFake(resumo={"cotado": 2, "erro": 1})
+        servico = ServicoAgente(lambda: agente, intervalo_segundos=60)
+
+        resumo = servico.ciclo_unico()
+
+        self.assertEqual(resumo, {"cotado": 2, "erro": 1})
+        self.assertEqual(servico.ultimo_resumo, {"cotado": 2, "erro": 1})
+        self.assertIsNone(servico.ultimo_erro)
+        self.assertIsNotNone(servico.ultimo_ciclo_em)
+        self.assertFalse(servico.rodando)
+
+    def test_excecao_no_ciclo_fica_registrada(self):
+        from painel.servico_agente import ServicoAgente
+
+        servico = ServicoAgente(
+            lambda: AgenteFake(excecao=RuntimeError("boom")), intervalo_segundos=60
+        )
+        with self.assertRaises(RuntimeError):
+            servico.ciclo_unico()
+        self.assertIn("boom", servico.ultimo_erro)
+
+    def test_ligar_roda_ciclos_e_desligar_para(self):
+        from painel.servico_agente import ServicoAgente
+
+        agente = AgenteFake()
+        servico = ServicoAgente(lambda: agente, intervalo_segundos=0.01)
+
+        servico.ligar()
+        self.assertTrue(servico.rodando)
+        # Espera ao menos um ciclo acontecer, sem depender de sleep fixo.
+        for _ in range(200):
+            if agente.ciclos >= 1:
+                break
+            time.sleep(0.01)
+        servico.desligar()
+
+        self.assertFalse(servico.rodando)
+        self.assertGreaterEqual(agente.ciclos, 1)
+        ciclos_apos_desligar = agente.ciclos
+        time.sleep(0.05)
+        self.assertEqual(agente.ciclos, ciclos_apos_desligar)
+
+    def test_credencial_recusada_desliga_o_loop_e_sinaliza(self):
+        from cotador.integracoes.caixa_imap import CredencialInvalida
+        from painel.servico_agente import ServicoAgente
+
+        agente = AgenteFake(excecao=CredencialInvalida("senha ruim"))
+        servico = ServicoAgente(lambda: agente, intervalo_segundos=0.01)
+
+        servico.ligar()
+        for _ in range(200):
+            if not servico.rodando:
+                break
+            time.sleep(0.01)
+
+        self.assertFalse(servico.rodando)
+        self.assertTrue(servico.credencial_recusada)
+        self.assertIn("senha ruim", servico.ultimo_erro)
+        self.assertEqual(agente.ciclos, 1)  # nao insiste em credencial ruim
+
+    def test_ligar_duas_vezes_nao_cria_segunda_thread(self):
+        from painel.servico_agente import ServicoAgente
+
+        servico = ServicoAgente(lambda: AgenteFake(), intervalo_segundos=60)
+
+        servico.ligar()
+        self.addCleanup(servico.desligar)
+        primeira = servico._thread
+        servico.ligar()
+
+        self.assertIs(servico._thread, primeira)
+        self.assertTrue(servico.rodando)
+
+    def test_desligar_sem_ligar_nao_quebra(self):
+        from painel.servico_agente import ServicoAgente
+
+        servico = ServicoAgente(lambda: AgenteFake(), intervalo_segundos=60)
+
+        servico.desligar()
+
+        self.assertFalse(servico.rodando)
+
+    def test_desligar_com_ciclo_travado_preserva_o_handle(self):
+        from painel.servico_agente import ServicoAgente
+
+        agente = AgenteTravado()
+        servico = ServicoAgente(
+            lambda: agente, intervalo_segundos=0.01, timeout_desligar=0.05
+        )
+        self.addCleanup(agente.liberar.set)  # nunca deixa a thread pendurada
+
+        servico.ligar()
+        self.assertTrue(agente.entrou.wait(timeout=5))
+
+        # O join estoura: o ciclo ainda esta dentro do fake.
+        with self.assertLogs("painel.servico_agente", "WARNING") as reg:
+            servico.desligar()
+        self.assertIn("ainda em andamento", "\n".join(reg.output))
+
+        self.assertTrue(servico.rodando)
+        self.assertIsNotNone(servico._thread)
+        orfa = servico._thread
+
+        servico.ligar()  # com a orfa viva, ligar nao pode criar um segundo laco
+        self.assertIs(servico._thread, orfa)
+
+        agente.liberar.set()
+        for _ in range(500):
+            if not servico.rodando:
+                break
+            time.sleep(0.01)
+
+        self.assertFalse(servico.rodando)
+        self.assertEqual(agente.ciclos, 1)  # o pedido de parada seguiu valendo
+        servico.desligar()  # agora sim recolhe o handle, sem erro
+        self.assertIsNone(servico._thread)
+
+    def test_desligando_sinaliza_a_espera_do_ciclo_corrente(self):
+        # Entre "pedi para parar" e "parou" o painel precisa dizer algo alem de
+        # '● rodando', senao o botao parece nao ter funcionado.
+        from painel.servico_agente import ServicoAgente
+
+        agente = AgenteTravado()
+        servico = ServicoAgente(
+            lambda: agente, intervalo_segundos=0.01, timeout_desligar=0.05
+        )
+        self.addCleanup(agente.liberar.set)
+
+        self.assertFalse(servico.desligando)
+        servico.ligar()
+        self.assertTrue(agente.entrou.wait(timeout=5))
+        self.assertFalse(servico.desligando)
+
+        with self.assertLogs("painel.servico_agente", "WARNING"):
+            servico.desligar()  # o join estoura com o ciclo ainda dentro do fake
+        self.assertTrue(servico.desligando)
+
+        agente.liberar.set()
+        for _ in range(500):
+            if not servico.rodando:
+                break
+            time.sleep(0.01)
+
+        self.assertFalse(servico.desligando)
+
+    def test_ligar_de_novo_apos_credencial_recusada_rearma_o_loop(self):
+        from cotador.integracoes.caixa_imap import CredencialInvalida
+        from painel.servico_agente import ServicoAgente
+
+        agente = AgenteFake(excecao=CredencialInvalida("senha ruim"))
+        servico = ServicoAgente(lambda: agente, intervalo_segundos=0.01)
+
+        servico.ligar()
+        for _ in range(200):
+            if not servico.rodando:
+                break
+            time.sleep(0.01)
+        self.assertTrue(servico.credencial_recusada)
+
+        agente.excecao = None  # humano corrigiu a senha e religou
+        servico.ligar()
+        self.addCleanup(servico.desligar)
+        for _ in range(200):
+            if not servico.credencial_recusada:
+                break
+            time.sleep(0.01)
+
+        self.assertFalse(servico.credencial_recusada)
+        self.assertEqual(servico.ultimo_resumo, {"cotado": 1})
+        self.assertIsNone(servico.ultimo_erro)
+
+
+class TestConsultas(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.caminho = Path(self._tmp.name) / "t.sqlite3"
+        self.banco = Banco(self.caminho)
+
+    def test_contadores_de_hoje_zera_o_que_nao_ha(self):
+        from painel import consultas
+
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="x@y.com", assunto="s",
+            desfecho="cotado", label="cotador-processado",
+        )
+        contadores = consultas.contadores_de_hoje(self.banco)
+        self.assertEqual(contadores["cotado"], 1)
+        self.assertEqual(contadores["erro"], 0)
+        self.assertEqual(contadores["incompleto"], 0)
+        self.assertEqual(contadores["sem_rota"], 0)
+
+    def test_ultimos_processados_formata_quando_e_rota(self):
+        from painel import consultas
+
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="x@y.com", assunto="s",
+            desfecho="cotado", origem="Sao Paulo/SP", destino="Campinas/SP",
+            valor_frete=252.5, label="cotador-processado",
+        )
+        self.banco.registrar(
+            id_email="b", thread_id="t2", remetente="w@y.com", assunto="s2",
+            desfecho="erro", label="cotador-revisar",
+        )
+        linhas = consultas.ultimos_processados(self.banco)
+        self.assertEqual(len(linhas), 2)
+        por_id = {l["id_email"]: l for l in linhas}
+        self.assertEqual(por_id["a"]["rota"], "Sao Paulo/SP → Campinas/SP")
+        self.assertEqual(por_id["b"]["rota"], "—")
+        self.assertRegex(por_id["a"]["quando"], r"\d{2}/\d{2} \d{2}:\d{2}")
+
+    def test_fila_de_revisao_expande_a_extracao(self):
+        from painel import consultas
+
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="x@y.com", assunto="s",
+            desfecho="erro", label="cotador-revisar",
+            erro="confianca 0.20 abaixo de 0.35",
+            extracao={"e_cotacao": True, "confianca": 0.2, "origem": "SP"},
+        )
+        self.banco.registrar(
+            id_email="b", thread_id="t2", remetente="w@y.com", assunto="s2",
+            desfecho="cotado", label="cotador-processado",
+        )
+        itens = consultas.fila_de_revisao(self.banco, "cotador-revisar")
+        self.assertEqual(len(itens), 1)
+        self.assertEqual(itens[0]["id_email"], "a")
+        self.assertIn("confianca 0.20", itens[0]["erro"])
+        self.assertIn('"origem": "SP"', itens[0]["extracao"])
+
+    def test_fila_de_revisao_tolera_extracao_corrompida(self):
+        from painel import consultas
+
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="x@y.com", assunto="s",
+            desfecho="erro", label="cotador-revisar", extracao={"origem": "SP"},
+        )
+        con = sqlite3.connect(self.caminho)
+        con.execute(
+            "UPDATE processados SET extracao_json = ? WHERE id_email = ?",
+            ("{isto nao e json", "a"),
+        )
+        con.commit()
+        con.close()
+
+        itens = consultas.fila_de_revisao(self.banco, "cotador-revisar")
+
+        self.assertEqual(itens[0]["extracao"], "{isto nao e json")
+
+
+from cotador.core.precificacao import normalizar_local
+from cotador.tests.test_precificacao import tarifa_exemplo
+
+
+class TarifasFake:
+    """Mesma interface de TabelaTarifas, servida de uma lista em memoria.
+
+    Como a real, comeca vazia: `tarifas` so tem conteudo depois de `carregar`,
+    que e o que permite testar o cache no processo.
+    """
+
+    def __init__(self, tarifas):
+        self._catalogo = list(tarifas)  # o que a "planilha" contem
+        self._tarifas = []              # o que ja foi carregado
+        self.carregamentos = 0
+
+    @property
+    def tarifas(self):
+        return self._tarifas
+
+    def carregar(self):
+        self.carregamentos += 1
+        self._tarifas = list(self._catalogo)
+        return len(self._tarifas)
+
+    def buscar(self, origem, destino, modal=None):
+        o, d = normalizar_local(origem), normalizar_local(destino)
+        for t in self._tarifas:
+            if (
+                normalizar_local(t.chave_origem) == o
+                and normalizar_local(t.chave_destino) == d
+            ):
+                return t
+        return None
+
+    def trecho_cadastrado(self, origem, destino):
+        return self.buscar(origem, destino) is not None
+
+
+class CaixaDevolvedoraFake:
+    """Devolve tudo com sucesso, salvo os ids listados em `falham`."""
+
+    def __init__(self, falham=()):
+        self.devolvidos = []
+        self.falham = set(falham)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+    def devolver_para_fila(self, id_email, labels_remover):
+        if id_email in self.falham:
+            return False
+        self.devolvidos.append(id_email)
+        return True
+
+
+class CaixaQueNaoConecta:
+    """Explode ao entrar no `with`, como uma credencial recusada no login."""
+
+    def __init__(self, excecao):
+        self._excecao = excecao
+
+    def __enter__(self):
+        raise self._excecao
+
+    def __exit__(self, *args):
+        pass
+
+
+def cfg_de_teste(tmp: Path):
+    from cotador.config import Config
+
+    return Config(
+        anthropic_api_key="",
+        anthropic_model="claude-sonnet-5",
+        anthropic_workspace_id="",
+        gmail_user="conta@gmail.com",
+        gmail_query="is:unread",
+        auditoria_bloqueia=True,
+        sheet_id="sheet",
+        sheet_aba="TABELA_ROTAS",
+        modo_resposta="rascunho",
+        intervalo_segundos=60,
+        exigir_peso=True,
+        smtp_host="smtp",
+        smtp_porta=465,
+        smtp_usuario="conta@gmail.com",
+        smtp_senha="senha",
+        smtp_remetente="",
+        imap_host="imap",
+        imap_porta=993,
+        service_account_json=tmp / "service_account.json",
+        banco=tmp / "cotador.sqlite3",
+    )
+
+
+class BasePainel(unittest.TestCase):
+    def setUp(self):
+        from painel.app import criar_app
+        from painel.servico_agente import ServicoAgente
+
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        tmp = Path(self._tmp.name)
+        self.cfg = cfg_de_teste(tmp)
+        self.banco = Banco(self.cfg.banco)
+        self.tarifas = TarifasFake([tarifa_exemplo()])
+        self.agente_fake = AgenteFake()
+        self.servico = ServicoAgente(lambda: self.agente_fake, intervalo_segundos=60)
+        self.addCleanup(self.servico.desligar)
+        self.caixa = CaixaDevolvedoraFake()
+        self.estado = {"modo": "rascunho"}
+        # Indireta para um teste poder trocar a caixa (ou faze-la explodir).
+        self.app = criar_app(
+            self.cfg, self.banco, self.tarifas, self.servico,
+            lambda: self.caixa, self.estado,
+        )
+        self.app.config["TESTING"] = True
+        self.token = self.app.config["CSRF_TOKEN"]
+        self.cliente = self.app.test_client()
+
+    def postar(self, url, data=None, **kw):
+        """POST com o token anti-CSRF que o formulario do painel enviaria."""
+        dados = dict(data or {})
+        dados.setdefault("_token", self.token)
+        return self.cliente.post(url, data=dados, **kw)
+
+
+class TestVisaoGeral(BasePainel):
+    def test_pagina_mostra_contadores_e_tabela(self):
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="cliente@acme.com",
+            assunto="Cotacao SP-Campinas", desfecho="cotado",
+            origem="Sao Paulo/SP", destino="Campinas/SP",
+            valor_frete=252.5, label="cotador-processado",
+        )
+        resposta = self.cliente.get("/")
+        corpo = resposta.get_data(as_text=True)
+        self.assertEqual(resposta.status_code, 200)
+        self.assertIn("Visão geral", corpo)
+        self.assertIn("cliente@acme.com", corpo)
+        self.assertIn("252,50", corpo)
+
+    def test_api_status_devolve_contadores_e_estado(self):
+        resposta = self.cliente.get("/api/status")
+        self.assertEqual(resposta.status_code, 200)
+        dados = resposta.get_json()
+        self.assertIn("contadores", dados)
+        self.assertFalse(dados["rodando"])
+        self.assertEqual(dados["modo"], "rascunho")
+
+    def test_banco_vazio_mostra_a_linha_de_tabela_vazia(self):
+        corpo = self.cliente.get("/").get_data(as_text=True)
+        self.assertIn("Nenhum email processado ainda.", corpo)
+
+    def test_frete_ausente_vira_travessao_na_tabela(self):
+        # Desfecho sem cotacao (sem_rota) nao tem valor_frete: a celula precisa
+        # de um placeholder, nao do "None" cru.
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="cliente@acme.com",
+            assunto="Cotacao", desfecho="sem_rota",
+            origem="Manaus/AM", destino="Campinas/SP",
+            label="cotador-processado",
+        )
+        corpo = self.cliente.get("/").get_data(as_text=True)
+        self.assertNotIn("None", corpo)
+        self.assertIn("<td>—</td>", corpo)
+
+    def test_assunto_com_html_sai_escapado(self):
+        # O assunto vem de email de terceiro: nada de |safe no template.
+        self.banco.registrar(
+            id_email="a", thread_id="t", remetente="cliente@acme.com",
+            assunto="<script>alert(1)</script>", desfecho="cotado",
+            label="cotador-processado",
+        )
+        corpo = self.cliente.get("/").get_data(as_text=True)
+        self.assertNotIn("<script>alert(1)</script>", corpo)
+        self.assertIn("&lt;script&gt;", corpo)
+
+
+class TestRevisao(BasePainel):
+    def registrar_para_revisar(self, id_email="r1", thread_id="thr-r"):
+        self.banco.registrar(
+            id_email=id_email, thread_id=thread_id, remetente="cliente@acme.com",
+            assunto="Cotacao urgente", desfecho="erro", label="cotador-revisar",
+            erro="confianca 0.20 abaixo de 0.35",
+            extracao={"e_cotacao": True, "confianca": 0.2},
+        )
+
+    def test_lista_o_que_esta_em_revisao_com_motivo(self):
+        self.registrar_para_revisar()
+        corpo = self.cliente.get("/revisao").get_data(as_text=True)
+        self.assertIn("cliente@acme.com", corpo)
+        self.assertIn("confianca 0.20", corpo)
+        self.assertIn("Devolver à fila", corpo)
+
+    def test_devolver_apaga_do_banco_e_aciona_o_imap(self):
+        self.registrar_para_revisar(id_email="r1", thread_id="thr-r")
+        self.registrar_para_revisar(id_email="r2", thread_id="thr-r")
+
+        resposta = self.postar(
+            "/revisao/devolver", data={"thread_id": "thr-r"}, follow_redirects=True
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertEqual(sorted(self.caixa.devolvidos), ["r1", "r2"])
+        self.assertFalse(self.banco.ja_processado("r1"))
+        self.assertFalse(self.banco.ja_processado("r2"))
+
+    def test_email_que_o_imap_recusa_continua_na_revisao(self):
+        # Apagar do banco o que o Gmail nao devolveu perderia o email de vez:
+        # sem registro e sem voltar para 'is:unread', ninguem mais o veria.
+        self.registrar_para_revisar(id_email="r1", thread_id="thr-r")
+        self.registrar_para_revisar(id_email="r2", thread_id="thr-r")
+        self.caixa.falham = {"r2"}
+
+        resposta = self.postar(
+            "/revisao/devolver", data={"thread_id": "thr-r"}, follow_redirects=True
+        )
+        corpo = resposta.get_data(as_text=True)
+
+        self.assertFalse(self.banco.ja_processado("r1"))  # devolvido, pode sair
+        self.assertTrue(self.banco.ja_processado("r2"))   # ficou, segue listado
+        self.assertIn("1 de 2", corpo)
+        self.assertIn("permanecem na revisão", corpo)
+
+    def test_devolver_nao_toca_no_que_nao_esta_em_revisao(self):
+        # Thread mista: devolver o email ja cotado o deixaria nao lido sem a
+        # linha de idempotencia — resposta duplicada para a cliente.
+        self.registrar_para_revisar(id_email="r1", thread_id="thr-r")
+        self.banco.registrar(
+            id_email="ok1", thread_id="thr-r", remetente="cliente@acme.com",
+            assunto="Cotacao urgente", desfecho="cotado",
+            label="cotador-processado",
+        )
+
+        self.postar(
+            "/revisao/devolver", data={"thread_id": "thr-r"}, follow_redirects=True
+        )
+
+        self.assertEqual(self.caixa.devolvidos, ["r1"])
+        self.assertFalse(self.banco.ja_processado("r1"))
+        self.assertTrue(self.banco.ja_processado("ok1"))  # intocado
+
+    def test_devolver_duas_vezes_nao_abre_imap_a_toa(self):
+        self.registrar_para_revisar(id_email="r1", thread_id="thr-r")
+        dados = {"thread_id": "thr-r"}
+
+        self.postar("/revisao/devolver", data=dados, follow_redirects=True)
+        segunda = self.postar("/revisao/devolver", data=dados, follow_redirects=True)
+
+        self.assertIn("já saiu da revisão", segunda.get_data(as_text=True))
+        self.assertEqual(self.caixa.devolvidos, ["r1"])  # nao devolveu de novo
+
+    def test_falha_ao_abrir_a_caixa_nao_apaga_nada(self):
+        # Credencial recusada na hora de conectar: o registro TEM que sobreviver.
+        from cotador.integracoes.caixa_imap import CredencialInvalida
+
+        self.registrar_para_revisar(id_email="r1", thread_id="thr-r")
+        # A fabrica do app le self.caixa a cada acao, entao basta trocar aqui.
+        self.caixa = CaixaQueNaoConecta(CredencialInvalida("senha ruim"))
+
+        with self.assertLogs("painel.app", "ERROR"):  # a causa fica no log
+            resposta = self.postar(
+                "/revisao/devolver", data={"thread_id": "thr-r"}, follow_redirects=True
+            )
+        corpo = resposta.get_data(as_text=True)
+
+        self.assertEqual(resposta.status_code, 200)  # nada de 500 na cara do usuario
+        self.assertTrue(self.banco.ja_processado("r1"))
+        self.assertIn("Nada foi devolvido", corpo)
+
+
+class TestDinheiroPtBR(unittest.TestCase):
+    """'8.000,50' e '8.000' vem de teclado brasileiro; float() cru os destroi
+    silenciosamente (8.0), cotando a nota errada por 3 ordens de grandeza."""
+
+    def test_formatos_aceitos(self):
+        from painel.app import _para_float_ptbr
+
+        casos = {
+            "8.000": 8000.0,      # ponto de milhar, sem decimais
+            "8.000,50": 8000.5,   # pt-BR completo
+            "8000.50": 8000.5,    # ponto decimal (teclado numerico)
+            "300": 300.0,
+            "1.234.567,89": 1234567.89,
+            " 8000 ": 8000.0,
+            "0,50": 0.5,
+            "-100": -100.0,       # negativo passa; quem valida e a rota
+        }
+        for texto, esperado in casos.items():
+            with self.subTest(texto=texto):
+                self.assertEqual(_para_float_ptbr(texto), esperado)
+
+    def test_texto_sem_numero_estoura_para_a_rota_tratar(self):
+        from painel.app import _para_float_ptbr
+
+        with self.assertRaises(ValueError):
+            _para_float_ptbr("oito mil")
+
+
+class TestCotar(BasePainel):
+    def test_cotacao_reproduz_o_exemplo_da_planilha(self):
+        resposta = self.postar("/cotar", data={
+            "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
+            "qtd_volumes": "10", "valor_nf": "8000", "peso_kg": "300",
+            "modal": "",
+        })
+        corpo = resposta.get_data(as_text=True)
+        self.assertIn("252,50", corpo)   # total da aba EXEMPLO_CALCULO
+        self.assertIn("R00001", corpo)   # rota aplicada
+
+    def test_valor_nf_em_formato_ptbr_cota_igual(self):
+        resposta = self.postar("/cotar", data={
+            "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
+            "qtd_volumes": "10", "valor_nf": "8.000,00", "peso_kg": "300",
+            "modal": "",
+        })
+        self.assertIn("252,50", resposta.get_data(as_text=True))
+
+    def test_tarifas_carregam_uma_vez_por_processo(self):
+        # Recarregar a planilha a cada cotacao gasta quota do Sheets e trava a
+        # tela; a tabela ja vive em memoria depois do primeiro uso.
+        dados = {
+            "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
+            "qtd_volumes": "10", "valor_nf": "8000", "peso_kg": "300",
+            "modal": "",
+        }
+        self.postar("/cotar", data=dados)
+        self.postar("/cotar", data=dados)
+
+        self.assertEqual(self.tarifas.carregamentos, 1)
+
+    def test_rota_inexistente_avisa_sem_cotar(self):
+        resposta = self.postar("/cotar", data={
+            "origem": "Manaus/AM", "destino": "Campinas/SP",
+            "qtd_volumes": "10", "valor_nf": "8000", "peso_kg": "300",
+            "modal": "",
+        })
+        corpo = resposta.get_data(as_text=True)
+        self.assertIn("Rota não atendida", corpo)
+        self.assertNotIn("252,50", corpo)
+
+    def test_entrada_invalida_nao_estoura(self):
+        resposta = self.postar("/cotar", data={
+            "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
+            "qtd_volumes": "abc", "valor_nf": "8000", "peso_kg": "",
+            "modal": "",
+        })
+        self.assertEqual(resposta.status_code, 200)
+        self.assertIn("Não foi possível cotar", resposta.get_data(as_text=True))
+
+    def test_valor_nf_nao_positivo_nao_cota(self):
+        # GRIS/advalorem sobre NF negativa devolveria um "frete" menor que o
+        # minimo — numero sem sentido para mandar a cliente.
+        for valor in ("-100", "0"):
+            with self.subTest(valor_nf=valor):
+                resposta = self.postar("/cotar", data={
+                    "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
+                    "qtd_volumes": "10", "valor_nf": valor, "peso_kg": "300",
+                    "modal": "",
+                })
+                corpo = resposta.get_data(as_text=True)
+                self.assertIn("Não foi possível cotar", corpo)
+                # "R$ " so aparece via filtro reais; o rotulo do form e "(R$)".
+                self.assertNotIn("R$ ", corpo)
+
+    def test_peso_negativo_nao_cota(self):
+        resposta = self.postar("/cotar", data={
+            "origem": "Sao Paulo/SP", "destino": "Campinas/SP",
+            "qtd_volumes": "10", "valor_nf": "8000", "peso_kg": "-5",
+            "modal": "",
+        })
+        corpo = resposta.get_data(as_text=True)
+        self.assertIn("Não foi possível cotar", corpo)
+        self.assertNotIn("R$ ", corpo)
+
+    def test_get_mostra_o_formulario(self):
+        corpo = self.cliente.get("/cotar").get_data(as_text=True)
+        self.assertIn("Origem", corpo)
+        self.assertIn("Valor da NF", corpo)
+
+
+class TestPaginaAgente(BasePainel):
+    def test_ligar_e_desligar_o_loop(self):
+        self.postar("/agente/acao", data={"acao": "ligar"})
+        self.assertTrue(self.servico.rodando)
+        self.postar("/agente/acao", data={"acao": "desligar"})
+        self.assertFalse(self.servico.rodando)
+
+    def test_ciclo_agora_roda_um_ciclo(self):
+        self.postar("/agente/acao", data={"acao": "ciclo"}, follow_redirects=True)
+        self.assertEqual(self.agente_fake.ciclos, 1)
+        self.assertEqual(self.servico.ultimo_resumo, {"cotado": 1})
+
+    def test_config_muda_modo_e_intervalo(self):
+        self.postar("/agente/acao", data={
+            "acao": "config", "intervalo": "300", "modo": "enviar",
+        })
+        self.assertEqual(self.estado["modo"], "enviar")
+        self.assertEqual(self.servico.intervalo_segundos, 300)
+
+    def test_intervalo_tem_piso_de_30_segundos(self):
+        resposta = self.postar("/agente/acao", data={
+            "acao": "config", "intervalo": "1", "modo": "rascunho",
+        }, follow_redirects=True)
+
+        self.assertEqual(self.servico.intervalo_segundos, 30)
+        # Dizer so "aplicada" esconderia que 1s virou 30s.
+        self.assertIn("aplicado 30s", resposta.get_data(as_text=True))
+
+    def test_intervalo_nao_numerico_avisa_sem_derrubar(self):
+        resposta = self.postar("/agente/acao", data={
+            "acao": "config", "intervalo": "abc", "modo": "enviar",
+        }, follow_redirects=True)
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertIn("Intervalo inválido", resposta.get_data(as_text=True))
+        self.assertEqual(self.servico.intervalo_segundos, 60)  # intacto
+        self.assertEqual(self.estado["modo"], "rascunho")      # nada aplicado
+
+    def test_alerta_de_credencial_aparece_na_pagina(self):
+        arquivo = self.cfg.service_account_json.parent / "ALERTA_CREDENCIAL.txt"
+        arquivo.write_text("AGENTE PARADO - CREDENCIAL RECUSADA", encoding="utf-8")
+        corpo = self.cliente.get("/agente").get_data(as_text=True)
+        self.assertIn("CREDENCIAL RECUSADA", corpo)
+
+    def test_erro_num_ciclo_nao_derruba_a_rota(self):
+        self.agente_fake.excecao = RuntimeError("planilha fora do ar")
+        resposta = self.postar(
+            "/agente/acao", data={"acao": "ciclo"}, follow_redirects=True
+        )
+        self.assertEqual(resposta.status_code, 200)
+        self.assertIn("planilha fora do ar", self.servico.ultimo_erro)
+
+    def _ligar_com_ciclo_travado(self):
+        """Deixa o loop preso dentro de um ciclo, para exercitar 'desligando'."""
+        travado = AgenteTravado()
+        self.agente_fake = travado  # a fabrica le o atributo a cada ciclo
+        self.addCleanup(travado.liberar.set)
+        self.servico.intervalo_segundos = 0.01
+        self.servico.timeout_desligar = 0.05
+        self.postar("/agente/acao", data={"acao": "ligar"})
+        self.assertTrue(travado.entrou.wait(timeout=5))
+        return travado
+
+    def test_desligar_com_ciclo_em_andamento_avisa_que_a_parada_e_assincrona(self):
+        # "Loop desligado." seria mentira: a thread ainda esta viva.
+        self._ligar_com_ciclo_travado()
+
+        with self.assertLogs("painel.servico_agente", "WARNING"):
+            resposta = self.postar(
+                "/agente/acao", data={"acao": "desligar"}, follow_redirects=True
+            )
+
+        self.assertIn("Parada solicitada", resposta.get_data(as_text=True))
+        self.assertTrue(self.servico.desligando)
+
+    def test_sidebar_mostra_desligando_enquanto_o_ciclo_termina(self):
+        self._ligar_com_ciclo_travado()
+        with self.assertLogs("painel.servico_agente", "WARNING"):
+            self.servico.desligar()
+
+        # A visao geral so mostra o estado pela sidebar do base.html.
+        corpo = self.cliente.get("/").get_data(as_text=True)
+
+        self.assertIn("desligando", corpo)
+        self.assertNotIn("● rodando", corpo)
+
+
+class TestTokenAntiCSRF(BasePainel):
+    """O painel nao tem login: sem token, qualquer aba aberta no navegador
+    poderia postar /agente/acao ou /revisao/devolver via form escondido."""
+
+    def test_post_sem_token_e_recusado(self):
+        resposta = self.cliente.post("/agente/acao", data={"acao": "ligar"})
+
+        self.assertEqual(resposta.status_code, 403)
+        self.assertFalse(self.servico.rodando)  # a acao nao rodou
+
+    def test_post_com_token_errado_e_recusado(self):
+        resposta = self.cliente.post(
+            "/agente/acao", data={"acao": "ligar", "_token": "x" * 32}
+        )
+
+        self.assertEqual(resposta.status_code, 403)
+        self.assertFalse(self.servico.rodando)
+
+    def test_todo_formulario_carrega_o_token(self):
+        self.banco.registrar(
+            id_email="r1", thread_id="thr-r", remetente="cliente@acme.com",
+            assunto="s", desfecho="erro", label="cotador-revisar",
+        )
+        esperado = f'value="{self.token}"'
+        for url, formularios in (("/revisao", 1), ("/cotar", 1), ("/agente", 2)):
+            with self.subTest(url=url):
+                corpo = self.cliente.get(url).get_data(as_text=True)
+                self.assertEqual(corpo.count('<form'), formularios)
+                self.assertEqual(corpo.count(esperado), formularios)
+
+    def test_token_nao_ascii_e_recusado_sem_estourar(self):
+        # compare_digest com str exige ASCII: sem encode, um 'á' viraria
+        # TypeError (500) em vez do 403 uniforme.
+        resposta = self.cliente.post(
+            "/agente/acao", data={"acao": "ligar", "_token": "á"}
+        )
+
+        self.assertEqual(resposta.status_code, 403)
+        self.assertFalse(self.servico.rodando)
+
+    def test_get_nao_exige_token(self):
+        self.assertEqual(self.cliente.get("/").status_code, 200)
+        self.assertEqual(self.cliente.get("/api/status").status_code, 200)
+
+
+class TestCLIPainel(unittest.TestCase):
+    """A flag so existe de verdade se o argparse do main.py a conhecer.
+
+    O --help e o unico caminho que exercita a CLI sem .env nem planilha:
+    argparse imprime e sai antes de Config.carregar().
+    """
+
+    def test_help_anuncia_painel_e_porta(self):
+        raiz = Path(__file__).resolve().parents[2]
+
+        r = subprocess.run(
+            [sys.executable, "main.py", "--help"],
+            capture_output=True,
+            text=True,
+            cwd=raiz,
+            timeout=60,
+        )
+
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("--painel", r.stdout)
+        self.assertIn("--porta", r.stdout)
+
+
+if __name__ == "__main__":
+    unittest.main()

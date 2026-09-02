@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block conteudo %}
+<h2>Revisão humana</h2>
+<p class="subtitulo">Threads com o label <code>cotador-revisar</code>. Devolver à fila apaga o registro e o agente tenta de novo no próximo ciclo.</p>
+
+{% for item in itens %}
+<div class="cartao-detalhe">
+  <strong>{{ item.remetente or "—" }}</strong> · {{ item.assunto or "(sem assunto)" }}
+  <span style="float:right;color:var(--texto-fraco)">{{ item.quando }}</span>
+  {% if item.erro %}<p class="motivo">Motivo: {{ item.erro }}</p>{% endif %}
+  {% if item.extracao %}
+  <details>
+    <summary>Extração do LLM</summary>
+    <pre>{{ item.extracao }}</pre>
+  </details>
+  {% endif %}
+  <form method="post" action="{{ url_for('revisao_devolver') }}"
+        onsubmit="return confirm('Devolver à fila os emails desta thread que estão em revisão?')">
+    <input type="hidden" name="_token" value="{{ csrf_token }}">
+    <input type="hidden" name="thread_id" value="{{ item.thread_id }}">
+    <button class="perigo" type="submit">Devolver à fila</button>
+  </form>
+</div>
+{% else %}
+<p>Nada aguardando revisão. 🎉</p>
+{% endfor %}
+{% endblock %}

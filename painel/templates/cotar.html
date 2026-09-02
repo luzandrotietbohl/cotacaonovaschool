@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block conteudo %}
+<h2>Cotação manual</h2>
+<p class="subtitulo">Usa a mesma tabela de tarifas do agente. Não consome a Claude API.</p>
+
+<form method="post" class="linha">
+  <input type="hidden" name="_token" value="{{ csrf_token }}">
+  <label>Origem
+    <input name="origem" required placeholder="Sao Paulo/SP" value="{{ form.get('origem', '') }}">
+  </label>
+  <label>Destino
+    <input name="destino" required placeholder="Campinas/SP" value="{{ form.get('destino', '') }}">
+  </label>
+  <label>Volumes
+    <input name="qtd_volumes" required type="number" min="1" value="{{ form.get('qtd_volumes', '') }}">
+  </label>
+  <label>Valor da NF (R$)
+    <input name="valor_nf" required value="{{ form.get('valor_nf', '') }}">
+  </label>
+  <label>Peso total (kg)
+    <input name="peso_kg" value="{{ form.get('peso_kg', '') }}">
+  </label>
+  <label>Modal
+    <select name="modal">
+      <option value="" {{ 'selected' if not form.get('modal') }}>automático</option>
+      <option value="RODOVIARIO" {{ 'selected' if form.get('modal') == 'RODOVIARIO' }}>rodoviário</option>
+      <option value="AEREO" {{ 'selected' if form.get('modal') == 'AEREO' }}>aéreo</option>
+    </select>
+  </label>
+  <button type="submit">Cotar</button>
+</form>
+
+{% if erro %}<div class="alerta" style="margin-top:18px">{{ erro }}</div>{% endif %}
+
+{% if resultado %}
+<div class="cartao-detalhe" style="margin-top:18px">
+  <h3>Rota {{ resultado.tarifa.id_rota }} [{{ resultado.tarifa.modal }}]
+    · {{ resultado.tarifa.chave_origem }} → {{ resultado.tarifa.chave_destino }}</h3>
+  <table>
+    <tr><td>Frete por volume ({{ resultado.qtd_volumes }} vol.)</td><td>{{ resultado.frete_volumes | reais }}</td></tr>
+    {% if resultado.usou_frete_minimo %}
+    <tr><td>Frete mínimo aplicado</td><td>{{ resultado.frete_aplicado | reais }}</td></tr>
+    {% endif %}
+    <tr><td>GRIS + Advalorem</td><td>{{ resultado.gris_advalorem | reais }}</td></tr>
+    {% if resultado.taxa_entrega_dificil %}
+    <tr><td>Taxa entrega difícil</td><td>{{ resultado.taxa_entrega_dificil | reais }}</td></tr>
+    {% endif %}
+    <tr><th>Total</th><th>{{ resultado.total | reais }}</th></tr>
+    {% if resultado.prazo_dias %}
+    <tr><td>Prazo</td><td>{{ resultado.prazo_dias }} dia(s) úteis</td></tr>
+    {% endif %}
+  </table>
+  {% if resultado.alerta_peso %}
+  <div class="alerta" style="margin-top:12px">⚠ {{ resultado.alerta_peso }} — por email o agente NÃO responderia este caso.</div>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}
