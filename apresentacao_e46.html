@@ -627,7 +627,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 
   <!-- ============ 04 · BLOCO 3.1 + 3.2 ============ -->
   <section class="slide dense" data-title="3.1/3.2 · Autoria e adequação" data-core="1">
-    <div class="eyebrow"><b>Bloco 3.1 · 3.2</b><span class="q">quem afirma, que informação a ação exige, em que grão?</span></div>
+    <div class="eyebrow"><b>Bloco 3.1 · 3.2</b><span class="q">quem afirma, que informação a ação exige, com que detalhe?</span></div>
     <h2>Das quatro informações que a ação exige, os dados disponíveis contêm duas.</h2>
     <div class="body">
       <div class="cols c3">
@@ -657,17 +657,17 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           </table>
         </div>
         <div>
-          <div class="lbl">3.2 · o grão nos quatro eixos</div>
+          <div class="lbl">3.2 · granularidade: o que uma linha representa</div>
           <ul class="tight">
             <li><strong>Temporal:</strong> o dado é por evento; a decisão é em t0, um instante. <strong>Latência:</strong> as 14 features em t0, o rótulo <strong>10,2 dias</strong> depois.</li>
-            <li class="no"><strong>Espacial:</strong> cliente pelo centroide do <em>prefixo de CEP</em>, filial pelo da <em>cidade</em>. Grãos distintos, e a distância herda o menos fino. Sem distância: 2,41%.</li>
+            <li class="no"><strong>Espacial:</strong> cliente pelo centroide do <em>prefixo de CEP</em>, filial pelo da <em>cidade</em>. Granularidades distintas, e a distância herda a menos fina. Sem distância: 2,41%.</li>
             <li><strong>De entidade:</strong> a linha é o pedido e a ação executa-se por pedido. Coincidem, evitando concluir por um agregado o que se decide por pedido.</li>
-            <li class="no"><strong>De atributo:</strong> <code>motivo_atraso</code> não existe. Grão fino não registrado não se recupera depois.</li>
+            <li class="no"><strong>De atributo:</strong> <code>motivo_atraso</code> não existe. Detalhe que não foi registrado fino não se recupera depois.</li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">ADEQUAÇÃO AO USO</span><span>Qualidade de dados é adequação ao uso, e não propriedade absoluta do dado; declarar o grão precede a escolha de qualquer métrica. Daí a ordem: o 3.2 só admite resposta depois de o bloco 2 nomear a ação.</span></div>
+    <div class="claim"><span class="k">ADEQUAÇÃO AO USO</span><span>Qualidade de dados é adequação ao uso, e não propriedade absoluta do dado; declarar o que uma linha representa precede a escolha de qualquer métrica. Daí a ordem: o 3.2 só admite resposta depois de o bloco 2 nomear a ação.</span></div>
     <div class="pagenum">04</div>
   </section>
 
@@ -781,7 +781,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">LIMITAÇÃO</span><span>Esta é a curadoria do bloco 3. O modelo do bloco 4 opera ainda sobre o funil anterior, que <em>excluía</em> 2 961 registros e R$ 65 655 de frete, e sobre o grão de embarque, ausente na <code>v1</code>. A repontagem constitui trabalho não realizado.</span></div>
+    <div class="claim"><span class="k">LIMITAÇÃO</span><span>Esta é a curadoria do bloco 3. O modelo do bloco 4 opera ainda sobre o funil anterior, que <em>excluía</em> 2 961 registros e R$ 65 655 de frete, e no nível do embarque, ausente na <code>v1</code>. A repontagem constitui trabalho não realizado.</span></div>
     <div class="pagenum">07</div>
   </section>
 
@@ -1237,7 +1237,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         <div>
           <div class="lbl">O desenho</div>
           <ul class="tight">
-            <li>Grão: <code>order_id + seller_id</code> — um embarque com uma origem, um destino e uma ou mais unidades. Alvo: a soma de <code>freight_value</code>.</li>
+            <li>Uma linha = <code>order_id + seller_id</code>: um embarque com uma origem, um destino e uma ou mais unidades. Alvo: a soma de <code>freight_value</code>.</li>
             <li>Features: distância, peso total, quantidade, valor declarado, mês, as duas UFs, rota, mesma-UF e perfil capital/interior.</li>
             <li><strong>Três CatBoosts quantílicos</strong> estimam P25, P50 e P75; <strong>o P50 é o valor enviado.</strong> Um único modelo de média produziria estimativa pontual sem intervalo, e sem intervalo não há critério para suspender a decisão.</li>
             <li>Um <strong>IsolationForest sem a variável preço</strong> detecta carga fora do domínio. Nesses casos o agente não emite valor e encaminha para revisão humana.</li>
