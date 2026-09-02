@@ -1,0 +1,105 @@
+==============================================================================
+CURADORIA DOS DADOS OLIST -> dados_curados/v1/
+==============================================================================
+  lido  olist_orders_dataset.csv                    99,441 linhas
+  lido  olist_order_items_dataset.csv              112,650 linhas
+  lido  olist_customers_dataset.csv                 99,441 linhas
+  lido  olist_sellers_dataset.csv                    3,095 linhas
+  lido  olist_products_dataset.csv                  32,951 linhas
+  lido  olist_order_payments_dataset.csv           103,886 linhas
+  lido  olist_geolocation_dataset.csv            1,000,163 linhas
+  lido  olist_order_reviews_dataset.csv             99,224 linhas
+
+------------------------------------------------------------------------------
+1) CONSISTENCIA — mapa canonico de cidades
+------------------------------------------------------------------------------
+  8,126 grafias distintas -> 6,066 cidades canonicas (6,427 pares UF+cidade)
+  regrafias estruturais (alias, sufixo de UF, espacos): 31
+  so formatacao (acento e caixa restaurados): 8,585
+  Sao Paulo (capital): 9 grafias colapsadas em 'São Paulo', 176,965 linhas
+      'sao paulo'                  152,033  formatacao (nenhuma)
+      'são paulo'                   24,917  formatacao (acento)
+      'sp'                               7  estrutural (nenhuma)
+      'sao paulo - sp'                   3  estrutural (sufixo-uf)
+      'sao paulo / sao paulo'            1  estrutural (sufixo-uf)
+      'são paulo'                       1  formatacao (NFC|acento)
+      'sp / sp'                          1  estrutural (sufixo-uf)
+      'sao paulo sp'                     1  estrutural (sufixo-uf)
+      'sao  paulo'                       1  formatacao (espacos)
+
+  Erros de digitacao nao colapsam por regra — sugeridos para revisao, nao unidos:
+    73 pares suspeitos em cidades_suspeitas.csv
+      SP · 'Sao Paulop' (1) ~ 'São Paulo' (176,965)  d=1
+      SP · 'Sao Pauo' (1) ~ 'São Paulo' (176,965)  d=1
+      SP · 'Sa£o Paulo' (1) ~ 'São Paulo' (176,965)  d=1
+      SP · 'Sãopaulo' (2) ~ 'São Paulo' (176,965)  d=1
+      MG · 'Belo Horizont' (1) ~ 'Belo Horizonte' (30,645)  d=1
+      MG · 'Belo Horizonta' (1) ~ 'Belo Horizonte' (30,645)  d=1
+
+------------------------------------------------------------------------------
+2) UNICIDADE — geolocation deduplicado e um centroide por CEP
+------------------------------------------------------------------------------
+  duplicados exatos removidos: 261,831 de 1,000,163 (26.2%)
+  coordenadas fora dos limites do Brasil: 38 pontos em 23 prefixos de CEP
+    lat entre -34.0 e 5.3 · lng entre -74.0 e -34.8 — excluidas do centroide, mantidas em geolocation_fora_br.csv
+  prefixos de CEP com centroide: 19,010
+  prefixos afetados por duplicacao: 15,295 (80.5%)
+  erro do centroide corrigido: mediana 35.5 m | p99 2823.9 m | max 4,002,693 m
+  quase-duplicados em order_items: 17,313 linhas em 6,968 pedidos — MARCADOS, nao removidos
+    (duas unidades do mesmo item ou lancamento em duplicado? o ficheiro nao diz;
+     a decisao e de negocio, entao a flag fica e a linha permanece)
+
+------------------------------------------------------------------------------
+3) TABELA DE ENTREGAS — completude, validade, exatidao, proveniencia
+------------------------------------------------------------------------------
+  UF incoerente com o CEP: 35 vendedores -> 581 pedidos (0.58%)
+    e 0 clientes -> 0 pedidos
+    a filial NAO foi sobrescrita; a UF do CEP fica em filial_uf_cep para decisao
+       SP declarada, CEP diz  SC:   162 pedidos
+       SP declarada, CEP diz  MG:   155 pedidos
+       SP declarada, CEP diz  RJ:   143 pedidos
+       SP declarada, CEP diz  PR:   100 pedidos
+       PA declarada, CEP diz  PR:     8 pedidos
+  pedidos na tabela curada: 99,441 (entrada: 99,441 — nenhuma linha perdida)
+  filial 'SEM_FILIAL' criada para 775 pedidos orfaos
+
+  Flags de qualidade, por pedido:
+    quase_duplicado                6,968  ( 7.01%)
+    sem_dt_entrega                 2,965  ( 2.98%)
+    sem_dt_coleta                  1,783  ( 1.79%)
+    cauda_incompleta               1,503  ( 1.51%)
+    lag_despacho_negativo          1,359  ( 1.37%)
+    sem_peso                         791  ( 0.80%)
+    sem_item                         775  ( 0.78%)
+    uf_filial_incoerente             581  ( 0.58%)
+    frete_zero                       338  ( 0.34%)
+    cep_sem_geo                      279  ( 0.28%)
+    cidade_regrafada                 267  ( 0.27%)
+    pagamento_divergente             249  ( 0.25%)
+    sem_dt_aprovacao                 160  ( 0.16%)
+    frete_desproporcional             78  ( 0.08%)
+    lead_implausivel                  64  ( 0.06%)
+    entrega_antes_coleta              23  ( 0.02%)
+    peso_invalido                      6  ( 0.01%)
+    pagamento_invalido                 3  ( 0.00%)
+    canal_indefinido                   3  ( 0.00%)
+    peso_implausivel                   3  ( 0.00%)
+
+  pedidos sem nenhuma flag: 85,398 (85.9%)
+  pedidos em quarentena (violacao dura): 1,391 (1.40%)
+
+  SLA, os dois denominadores lado a lado (pedidos ativos):
+    reportado (so quem tem data): 8.11%  sobre 96,470 pedidos
+    honesto  (todos os ativos):   10.29%  sobre 98,816 pedidos
+    diferenca: 2,346 pedidos vencidos sem registo entram na conta
+
+------------------------------------------------------------------------------
+4) GRAVACAO — dados_curados/v1/
+------------------------------------------------------------------------------
+  entregas_curado.csv            99,441 linhas x  56 colunas      52.9 MB
+  geolocation_cep_curado.csv     19,010 linhas x  11 colunas       2.1 MB
+  geolocation_fora_br.csv            38 linhas x   6 colunas       0.0 MB
+  cidades_mapa.csv                8,617 linhas x   7 colunas       0.6 MB
+  cidades_suspeitas.csv              73 linhas x   7 colunas       0.0 MB
+  quarentena.csv                  1,391 linhas x  57 colunas       0.8 MB
+  MANIFEST.json                gravado
