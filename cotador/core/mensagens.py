@@ -1,16 +1,28 @@
 """Templates dos emails de resposta.
 
->>> AJUSTAR: validade da cotacao e telefone de contato, se houver <<<
+>>> AJUSTAR: validade da cotacao, PRAZO_REVISAO_HUMANA e telefone <<<
 """
 from __future__ import annotations
 
 from cotador.core.modelos import Cotacao, PedidoCotacao
 
+# Todo email do agente termina dizendo que e automatico e como chegar a uma
+# pessoa. E o recurso de quem recebe: sem estas duas linhas o cliente nao
+# sabe que foi atendido por um sistema, nem a quem recorrer se discordar.
 ASSINATURA = """
 Atenciosamente,
 Central de Cotacoes
 Nova School
+
+Mensagem enviada automaticamente pelo sistema de cotacoes.
+Para falar com uma pessoa, responda este email pedindo atendimento humano.
 """.rstrip()
+
+# Prazo prometido quando o caso vai para conferencia humana. E uma promessa
+# operacional, nao um detalhe de texto: quem muda este valor esta mudando o
+# que a empresa se compromete a cumprir. O comando --resumo-revisar existe
+# para que alguem consiga cumpri-lo.
+PRAZO_REVISAO_HUMANA = "1 dia util"
 
 _ROTULO = {
     "origem": "cidade e estado de origem (coleta)",
@@ -125,6 +137,30 @@ VALOR TOTAL DO FRETE: {_reais(cotacao.total)}
 {prazo}{obs}
 Cotacao valida por 7 dias, sujeita a conferencia de volumes, peso e medidas na coleta.
 Para seguir com a coleta, basta responder este email confirmando.
+{ASSINATURA}"""
+
+
+def aguardar_analise(pedido: PedidoCotacao, nome: str) -> str:
+    """Pedido valido que o agente nao pode cotar sozinho.
+
+    Nao diz por que. O motivo e interno — limite de peso da rota, tarifa em
+    quarentena pela curadoria — e nao ajuda quem le, alem de expor cadastro.
+    Diz o que importa ao cliente: recebemos, esta com uma pessoa, e quando
+    voltamos. O silencio era a pior das opcoes: ele esperava sem saber que
+    estava esperando.
+    """
+    trecho = (
+        f" para o trecho {pedido.origem} -> {pedido.destino}"
+        if pedido.origem and pedido.destino
+        else ""
+    )
+    return f"""Ola, {nome},
+
+Recebemos sua solicitacao de cotacao de frete{trecho}.
+
+Este caso precisa da conferencia de uma pessoa da nossa equipe comercial,
+por isso o valor nao segue nesta mensagem. Retornamos com a cotacao em ate
+{PRAZO_REVISAO_HUMANA}.
 {ASSINATURA}"""
 
 

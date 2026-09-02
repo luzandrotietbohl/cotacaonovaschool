@@ -7,6 +7,7 @@ Uso:
     python main.py --cotar "Sao Paulo/SP" "Campinas/SP" 10 8000
     python main.py --testar-imap             # valida a leitura da caixa
     python main.py --testar-smtp             # valida a senha de app, sem enviar
+    python main.py --resumo-revisar          # fila de revisao humana: quantos e ha quanto tempo
     python main.py --reprocessar-erros       # devolve para a fila os que falharam
     python main.py --once                    # um ciclo na caixa de entrada
     python main.py --loop                    # ciclos continuos
@@ -19,10 +20,10 @@ import argparse
 import logging
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
-from cotador.agente import Agente
+from cotador.agente import Agente, classificar_erro
 from cotador.config import Config
 from cotador.core import curadoria, precificacao
 from cotador.core.extracao import Extrator
@@ -113,6 +114,63 @@ def montar_enviador(cfg: Config) -> EnviadorSMTP:
     )
 
 
+def _idade(iso: str) -> str:
+    """Quanto tempo desde um carimbo ISO, em horas ou dias."""
+    try:
+        quando = datetime.fromisoformat(iso)
+    except (TypeError, ValueError):
+        return "data ilegivel"
+    if quando.tzinfo is None:
+        quando = quando.replace(tzinfo=timezone.utc)
+    horas = (datetime.now(timezone.utc) - quando).total_seconds() / 3600
+    return f"{horas:.0f} h" if horas < 48 else f"{horas / 24:.0f} dias"
+
+
+def resumo_revisar(cfg: Config) -> int:
+    """Fila de revisao humana: quantos, por motivo, e ha quanto tempo esperam.
+
+    Codigo de saida 1 quando ha qualquer item, para virar tarefa agendada. O
+    label cotador-revisar existe desde o inicio, mas nada avisava ninguem — e
+    fila que nao avisa e deposito.
+    """
+    banco = Banco(cfg.banco)
+    total = banco.contar_pendentes_revisao()
+    if not total:
+        print("Fila de revisao humana vazia.")
+        return 0
+
+    itens = banco.pendentes_revisao(50)
+    print(f"Fila de revisao humana: {total} email(s) | label {cfg.LABEL_REVISAR}")
+
+    contagem: dict[str, int] = {}
+    for item in itens:
+        rotulo = classificar_erro(item["erro"])
+        contagem[rotulo] = contagem.get(rotulo, 0) + 1
+
+    print()
+    print("POR MOTIVO")
+    for rotulo, quantos in sorted(contagem.items(), key=lambda par: -par[1]):
+        print(f"  {quantos:3d}  {rotulo}")
+
+    antigo = itens[0]
+    print()
+    print(f"mais antigo: {antigo['criado_em']} ({_idade(antigo['criado_em'])} de espera)")
+
+    print()
+    print("A FILA")
+    for item in itens[:20]:
+        trecho = f"{item['origem'] or '?'} -> {item['destino'] or '?'}"
+        print(f"  {item['criado_em'][:16]}  {(item['remetente'] or '-'):30.30}  {trecho}")
+        print(f"      {(item['erro'] or '')[:108]}")
+    if total > len(itens[:20]):
+        print(f"  ... e mais {total - len(itens[:20])}")
+
+    print()
+    print("Corrigido o que causou a falha, devolva a fila do agente:")
+    print("  python main.py --reprocessar-erros")
+    return 1
+
+
 def auditar_planilha(cfg: Config, tabela: TabelaTarifas) -> int:
     """Curadoria da tabela: limites duros, quarentena e o que mudou desde ontem.
 
@@ -200,6 +258,11 @@ def _executar() -> int:
         help="valida a conexao e a senha de app do SMTP sem enviar email",
     )
     grupo.add_argument(
+        "--resumo-revisar",
+        action="store_true",
+        help="mostra a fila de revisao humana: quantos, por motivo e ha quanto tempo",
+    )
+    grupo.add_argument(
         "--reprocessar-erros",
         action="store_true",
         help="limpa do banco os emails com desfecho erro para tentar de novo",
@@ -241,10 +304,17 @@ def _executar() -> int:
         limpar_alerta(cfg)
         return 0
 
+    if args.resumo_revisar:
+        return resumo_revisar(cfg)
+
     if args.reprocessar_erros:
         removidos = Banco(cfg.banco).limpar_erros()
         print(f"{removidos} email(s) com erro liberados para reprocessamento")
-        print("Remova tambem o label cotador-revisar no Gmail se quiser rever a thread.")
+        # O email de erro fica nao-lido de proposito, entao a busca
+        # `is:unread` o encontra de novo sem ninguem tocar no Gmail. Se alguem
+        # tiver aberto a thread na mao, ai sim precisa marcar como nao-lida.
+        print("Eles voltam no proximo ciclo. Se alguem abriu a thread no Gmail,")
+        print("marque-a como nao lida para que a busca a encontre.")
         return 0
 
     cred = google_sa.credenciais(cfg.service_account_json)

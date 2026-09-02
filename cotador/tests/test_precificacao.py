@@ -584,6 +584,9 @@ class TestCicloResiliente(unittest.TestCase):
         ag.caixa = mock.Mock()
         ag.caixa.buscar.return_value = ["1", "2", "3"]
         ag.banco = mock.Mock()
+        # O versionamento da tabela tem guarda propria e nao e o assunto aqui;
+        # deixa-lo rodar contra Mock so poluiria a saida com o traceback dele.
+        ag._versionar_tabela = mock.Mock()
         ag._processar = mock.Mock(side_effect=efeitos)
         return ag
 

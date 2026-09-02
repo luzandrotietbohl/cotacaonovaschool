@@ -23,6 +23,29 @@ log = logging.getLogger(__name__)
 CONFIANCA_PARA_COTAR = 0.6
 CONFIANCA_PARA_PEDIR_DADOS = 0.35
 
+# Categorias da fila de revisao humana. O texto gravado na coluna `erro` e
+# escrito neste arquivo, entao a leitura dele mora aqui tambem: quem mudar uma
+# mensagem ve o agrupamento na mesma tela. A ordem importa — a mensagem do
+# corte 0,60 tambem contem "confianca".
+MOTIVOS_REVISAO: tuple[tuple[str, str], ...] = (
+    ("quarentena pela curadoria", "tarifa em quarentena (curadoria)"),
+    ("sem tarifa vigente", "tarifa inativa ou vencida"),
+    ("peso medio", "peso acima do limite da rota"),
+    ("para emitir preco", "confianca insuficiente para emitir preco"),
+    ("confianca", "confianca baixa: nao sabemos o que o email pede"),
+)
+MOTIVO_DESCONHECIDO = "falha tecnica"
+
+
+def classificar_erro(texto: str | None) -> str:
+    """Agrupa o texto livre da coluna `erro` numa categoria da fila."""
+    alvo = (texto or "").lower()
+    for marca, rotulo in MOTIVOS_REVISAO:
+        if marca in alvo:
+            return rotulo
+    return MOTIVO_DESCONHECIDO
+
+
 # Remetentes que nunca devem receber resposta automatica (evita loop de robos).
 REMETENTES_IGNORADOS = ("noreply", "no-reply", "nao-responda", "mailer-daemon", "postmaster")
 
@@ -228,8 +251,13 @@ class Agente:
         )
 
         if cotacao.alerta_peso:
-            # Peso acima do limite por volume: nao respondemos automaticamente.
+            # Peso acima do limite por volume: o preco nao sai automaticamente,
+            # mas o cliente deu os dados certos e merece saber que o pedido
+            # chegou. O motivo interno nao vai na resposta.
             log.warning("Peso fora do limite: %s", cotacao.alerta_peso)
+            self._responder(
+                email, mensagens.aguardar_analise(pedido, email.primeiro_nome)
+            )
             return self._fechar(
                 email,
                 "erro",
@@ -279,6 +307,11 @@ class Agente:
                 "porem sem tarifa vigente (INATIVO ou vigencia expirada)"
             )
             log.warning("Tarifa indisponivel: %s", motivo)
+            # Falha nossa de cadastro. O cliente nao pode nem ouvir "nao
+            # atendemos" nem ficar em silencio: avisamos que esta em analise.
+            self._responder(
+                email, mensagens.aguardar_analise(pedido, email.primeiro_nome)
+            )
             return self._fechar(
                 email,
                 "erro",
@@ -326,5 +359,13 @@ class Agente:
             desfecho=desfecho,
             **extra,
         )
-        self.caixa.aplicar_labels(email.uid, [label])
+        # Erro fica nao-lido de proposito. A busca do agente e `is:unread`:
+        # marcar como lido tirava o email da caixa e da fila ao mesmo tempo, e
+        # `--reprocessar-erros` apagava a linha do banco sem que a busca
+        # voltasse a encontra-lo. Nao-lido, ele fica visivel para a pessoa e
+        # volta a fila quando o registro e limpo. A dedupe por X-GM-MSGID e que
+        # impede o reprocessamento em loop enquanto o registro existe.
+        self.caixa.aplicar_labels(
+            email.uid, [label], remover_unread=desfecho != "erro"
+        )
         return desfecho

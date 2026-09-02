@@ -105,6 +105,28 @@ class Banco:
             linha = cur.fetchone()
         return json.loads(linha[0]) if linha else None
 
+    # ---------------- fila de revisao humana ----------------
+    def contar_pendentes_revisao(self) -> int:
+        with closing(self._conectar()) as con:
+            cur = con.execute("SELECT COUNT(*) FROM processados WHERE desfecho = 'erro'")
+            return cur.fetchone()[0]
+
+    def pendentes_revisao(self, limite: int = 50) -> list[dict]:
+        """Emails que pararam em erro e esperam uma pessoa, do mais antigo.
+
+        Do mais antigo porque a pergunta operacional e "quem esta esperando
+        ha mais tempo?", nao "o que chegou agora".
+        """
+        campos = ("criado_em", "remetente", "assunto", "origem", "destino", "erro")
+        with closing(self._conectar()) as con:
+            linhas = con.execute(
+                f"""SELECT {','.join(campos)} FROM processados
+                    WHERE desfecho = 'erro'
+                    ORDER BY criado_em ASC LIMIT ?""",
+                (limite,),
+            ).fetchall()
+        return [dict(zip(campos, linha)) for linha in linhas]
+
     def limpar_erros(self) -> int:
         """Esquece os emails com desfecho 'erro' para que voltem para a fila."""
         with closing(self._conectar()) as con:

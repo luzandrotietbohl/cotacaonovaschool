@@ -115,11 +115,11 @@ IMAP (nao lidos)
       -> nao e cotacao ............ label cotador-processado, nada e enviado
       -> confianca < 0.35 ......... label cotador-revisar (revisao humana)
       -> rota fora da planilha .... responde "nao atendemos", label cotador-sem-rota
-      -> rota sem tarifa vigente .. label cotador-revisar, nada e enviado
-      -> rota em quarentena ....... label cotador-revisar, com o motivo
+      -> rota sem tarifa vigente .. responde "em analise", label cotador-revisar
+      -> rota em quarentena ....... responde "em analise", label + motivo
       -> faltam dados ............. responde pedindo, label cotador-aguardando-dados
       -> completo, confianca < 0.6  label cotador-revisar (nao emite preco)
-      -> peso acima do limite ..... label cotador-revisar, nada e enviado
+      -> peso acima do limite ..... responde "em analise", label cotador-revisar
       -> completo ................. calcula e responde com a composicao + prazo
    -> registra tudo em SQLite (idempotencia + auditoria)
 ```
@@ -194,10 +194,33 @@ python main.py --once
 python main.py --loop
 ```
 
-Se algum email falhar por erro tecnico (label `cotador-revisar`), devolva-o a fila:
+## A fila de revisao humana
+
+Todo desfecho `erro` recebe o label `cotador-revisar` e uma linha no SQLite com o
+motivo. **O email fica nao-lido de proposito**: a busca do agente e `is:unread`,
+entao marcar como lido tirava o email da caixa e da fila ao mesmo tempo — e
+`--reprocessar-erros` apagava o registro sem que a busca voltasse a encontra-lo.
+A dedupe por `X-GM-MSGID` e que impede o reprocessamento em loop.
+
+O cliente **e avisado** quando a falha nao e dele — peso acima do limite da rota,
+tarifa em quarentena ou sem vigencia: recebe uma mensagem dizendo que o pedido
+esta em analise humana, sem o motivo interno. Abaixo de 0,35 de confianca o
+agente **nao responde**: nesse ponto ele nao sabe o que o email pede, e mandar um
+formulario de cotacao para uma reclamacao e pior que o silencio.
 
 ```bash
-python main.py --reprocessar-erros
+python main.py --resumo-revisar
+```
+
+Quantos esperam, agrupados por motivo, ha quanto tempo, e os 20 mais antigos.
+Sai com codigo 1 quando ha qualquer item, para virar tarefa agendada — o label
+existia desde o inicio, mas nada avisava ninguem, e fila que nao avisa e
+deposito.
+
+Corrigido o que causou a falha, devolva os emails a fila do agente:
+
+```bash
+python main.py --resumo-revisar
 ```
 
 Codigos de saida: `0` ok, `1` falha de dados, `2` credencial recusada. No codigo 2 o
@@ -210,9 +233,9 @@ credencial ruim, e girar em silencio esconde o problema.
 python -m unittest discover -s cotador/tests -t . -v
 ```
 
-107 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de thread,
-os templates de email, a busca de rota, a curadoria da tabela e as regressoes
-conhecidas.
+127 testes, sem rede e sem credenciais. Cobrem o calculo, a mesclagem de thread,
+os templates de email, a busca de rota, a curadoria da tabela, a fila de revisao
+humana e as regressoes conhecidas.
 
 `TestExemploCalculoDaPlanilha` reproduz a aba EXEMPLO_CALCULO: 10 volumes, NF
 R$ 8.000, rota R00001 -> total R$ 252,50.
@@ -225,6 +248,9 @@ R$ 8.000, rota R00001 -> total R$ 252,50.
 - Cada email so e processado uma vez (`X-GM-MSGID` como chave no SQLite + label).
 - O historico citado e cortado antes de ir ao LLM, para nao cotar dados antigos.
 - Um email problematico nao derruba o ciclo: falha isolada, os demais seguem.
+- Todo email do agente diz que foi enviado automaticamente e como falar com uma
+  pessoa. E o recurso de quem recebe: sem isso o cliente nao sabe que foi
+  atendido por um sistema, nem a quem recorrer.
 - `.env` e `service_account.json` estao no `.gitignore`. Nunca versione os dois.
 
 ## Estrutura
