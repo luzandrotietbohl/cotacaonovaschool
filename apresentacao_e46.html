@@ -583,12 +583,12 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <p><em>Prazo vencido sem registro conta como atraso até prova em contrário.</em></p>
           <ul class="tight">
             <li><strong>Define a regra e assina:</strong> Diretor de Operações, que responde na reunião mensal de resultados. <strong>Audita o denominador:</strong> Controladoria, no fechamento do mês. <strong>Calcula e publica:</strong> TI, que executa e não decide.</li>
-            <li class="no"><strong>Medidos pelo indicador:</strong> os gerentes de filial — e é por isso que não o definem (Ridgway 1956).</li>
+            <li class="no"><strong>Medidos pelo indicador:</strong> os gerentes de filial — e é por isso que não o definem.</li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">CRITÉRIO</span><span>A acurácia é inadequada em problemas desequilibrados (Fawcett 2006; He &amp; Garcia 2009): prever «nunca atrasa» acerta 93,5% dos casos sem sinalizar um único atraso. Adotam-se recall e precisão, com o custo em reais de cada tipo de erro.</span></div>
+    <div class="claim"><span class="k">CRITÉRIO</span><span>A acurácia é inadequada em problemas desequilibrados: prever «nunca atrasa» acerta 93,5% dos casos sem sinalizar um único atraso. Adotam-se recall e precisão, com o custo em reais de cada tipo de erro.</span></div>
     <div class="pagenum">02</div>
   </section>
 
@@ -621,7 +621,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">PRESTAÇÃO DE CONTAS</span><span>Prestar contas é ter a obrigação de justificar a conduta perante um fórum que a pode questionar, com consequências (Bovens 2007). Uma ação que exija autoridade, orçamento ou integração inexistentes é registrada à parte, com a condição que a tornaria executável.</span></div>
+    <div class="claim"><span class="k">PRESTAÇÃO DE CONTAS</span><span>Prestar contas é ter a obrigação de justificar a conduta perante um fórum que a pode questionar, com consequências. Uma ação que exija autoridade, orçamento ou integração inexistentes é registrada à parte, com a condição que a tornaria executável.</span></div>
     <div class="pagenum">03</div>
   </section>
 
@@ -660,14 +660,14 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <div class="lbl">3.2 · o grão nos quatro eixos</div>
           <ul class="tight">
             <li><strong>Temporal:</strong> o dado é por evento; a decisão é em t0, um instante. <strong>Latência:</strong> as 14 features em t0, o rótulo <strong>10,2 dias</strong> depois.</li>
-            <li class="no"><strong>Espacial:</strong> cliente pelo centroide do <em>prefixo de CEP</em>, filial pelo da <em>cidade</em>. Grãos distintos, e a distância herda o menos fino — problema da unidade de área modificável (Openshaw 1984). Sem distância: 2,41%.</li>
-            <li><strong>De entidade:</strong> a linha é o pedido e a ação executa-se por pedido. Coincidem, evitando a falácia ecológica (Robinson 1950).</li>
+            <li class="no"><strong>Espacial:</strong> cliente pelo centroide do <em>prefixo de CEP</em>, filial pelo da <em>cidade</em>. Grãos distintos, e a distância herda o menos fino. Sem distância: 2,41%.</li>
+            <li><strong>De entidade:</strong> a linha é o pedido e a ação executa-se por pedido. Coincidem, evitando concluir por um agregado o que se decide por pedido.</li>
             <li class="no"><strong>De atributo:</strong> <code>motivo_atraso</code> não existe. Grão fino não registrado não se recupera depois.</li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">ADEQUAÇÃO AO USO</span><span>Qualidade de dados é adequação ao uso, e não propriedade absoluta do dado (Wang &amp; Strong 1996); declarar o grão precede a escolha de qualquer métrica (Kimball &amp; Ross 2013). Daí a ordem: o 3.2 só admite resposta depois de o bloco 2 nomear a ação.</span></div>
+    <div class="claim"><span class="k">ADEQUAÇÃO AO USO</span><span>Qualidade de dados é adequação ao uso, e não propriedade absoluta do dado; declarar o grão precede a escolha de qualquer métrica. Daí a ordem: o 3.2 só admite resposta depois de o bloco 2 nomear a ação.</span></div>
     <div class="pagenum">04</div>
   </section>
 
@@ -693,8 +693,8 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </div>
         <div>
           <div class="lbl">Justificação da curadoria</div>
-          <p>O defeito nº 1 não é aleatório: <strong>100% dos 2 346 pedidos sem data de entrega tinham prazo vencido</strong>. A ausência depende do valor omitido — o mecanismo MNAR de Rubin (1976).</p>
-          <p>Consequência: <strong>a filial que não registra a entrega ascende no ranking de SLA</strong>, porque o atraso só é contável quando a data existe. Bônus e renovação passam a premiar o pior registro (Ridgway 1956).</p>
+          <p>O defeito nº 1 não é aleatório: <strong>100% dos 2 346 pedidos sem data de entrega tinham prazo vencido</strong>. A ausência depende do próprio valor omitido: é o caso MNAR.</p>
+          <p>Consequência: <strong>a filial que não registra a entrega ascende no ranking de SLA</strong>, porque o atraso só é contável quando a data existe. Bônus e renovação passam a premiar o pior registro.</p>
           <div class="lbl" style="margin-top:1.2cqw">Evidência de dependência da origem</div>
           <table>
             <thead><tr><th>Pedidos do vendedor</th><th class="num">sem entrega</th><th class="num">sem coleta</th></tr></thead>
@@ -742,7 +742,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">AUDITABILIDADE</span><span>Proveniência é o registro da origem de um dado e do percurso que ele fez (Buneman, Khanna &amp; Tan 2001; W3C PROV-DM 2013). A descrição em prosa não a substitui: é o hash que estabelece qual base produziu qual número. Janela fixa: 2016-09-04 a 2018-10-17.</span></div>
+    <div class="claim"><span class="k">AUDITABILIDADE</span><span>Proveniência é o registro da origem de um dado e do percurso que ele fez. A descrição em prosa não a substitui: é o hash que estabelece qual base produziu qual número. Janela fixa: 2016-09-04 a 2018-10-17.</span></div>
     <div class="pagenum">06</div>
   </section>
 
@@ -909,7 +909,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
             <li class="no"><strong>Cluster como variável explicativa:</strong> depende de <code>lead_dias</code>, indisponível em t0. Constituiria fuga de dados.</li>
             <li class="no"><strong>Rede neural:</strong> 97 mil observações, 14 variáveis tabulares. Sem ganho documentado sobre árvores impulsionadas neste regime, e com custo de interpretação superior.</li>
             <li class="no"><strong>CatBoost / XGBoost:</strong> desempenho equivalente ao HistGB em dados tabulares desta dimensão, com uma dependência adicional em produção.</li>
-            <li class="no"><strong>SMOTE / reamostragem:</strong> o desequilíbrio de 6,5% trata-se por deslocamento do <em>limiar</em> segundo a matriz de custo (Elkan 2001), decisão de gestão explícita, e não por distorção da distribuição de treino, que a torna implícita.</li>
+            <li class="no"><strong>SMOTE / reamostragem:</strong> o desequilíbrio de 6,5% trata-se por deslocamento do <em>limiar</em> segundo a matriz de custo, decisão de gestão explícita, e não por distorção da distribuição de treino, que a torna implícita.</li>
           </ul>
         </div>
       </div>
@@ -949,11 +949,11 @@ svg{display:block;width:100%;height:auto;overflow:visible}
               <tr class="hi"><td>+ <code>lead_dias</code></td><td class="num">0,9928</td><td class="num">+26,8</td></tr>
             </tbody>
           </table>
-          <p style="margin-top:1.1cqw">As três últimas configurações produzem resultados <strong>não apresentáveis como desempenho</strong>. Constam aqui para dimensionar o desempenho aparente obtido por fuga de dados (Kaufman et al. 2012; Kapoor &amp; Narayanan 2023): AUC de 0,99 com uma variável que só existe após a entrega.</p>
+          <p style="margin-top:1.1cqw">As três últimas configurações produzem resultados <strong>não apresentáveis como desempenho</strong>. Constam aqui para dimensionar o desempenho aparente obtido por fuga de dados: AUC de 0,99 com uma variável que só existe após a entrega.</p>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">VALIDADE EXTERNA</span><span>O AUC de 0,72 descreve uma alteração de regime, não uma relação estável — o caso de deriva de conceito descrito por Gama et al. (2014). Um modelo colocado em produção em maio de 2018 teria sido avaliado pela mudança da política de prazo, e não pelo seu poder preditivo.</span></div>
+    <div class="claim"><span class="k">VALIDADE EXTERNA</span><span>O AUC de 0,72 descreve uma alteração de regime, não uma relação estável: é deriva de conceito. Um modelo colocado em produção em maio de 2018 teria sido avaliado pela mudança da política de prazo, e não pelo seu poder preditivo.</span></div>
     <div class="pagenum">11</div>
   </section>
 
@@ -990,7 +990,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">ANÁLISE DE SENSIBILIDADE</span><span>A conclusão depende inteiramente dos parâmetros R$ 45 e R$ 8. Sob um custo de R$ 200 por atraso não sinalizado, o limiar ótimo desce e o sistema torna-se viável. A fixação desses valores é decisão de gestão, e é ela que deve ser submetida à diretoria (Elkan 2001).</span></div>
+    <div class="claim"><span class="k">ANÁLISE DE SENSIBILIDADE</span><span>A conclusão depende inteiramente dos parâmetros R$ 45 e R$ 8. Sob um custo de R$ 200 por atraso não sinalizado, o limiar ótimo desce e o sistema torna-se viável. A fixação desses valores é decisão de gestão, e é ela que deve ser submetida à diretoria.</span></div>
     <div class="pagenum">12</div>
   </section>
 
@@ -1029,7 +1029,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">CONDIÇÃO DE DESISTÊNCIA</span><span>Portões de decisão fixados antes do piloto são requisito de gestão de projeto (Cooper 1990). A condição de desligamento está escrita, e o valor apurado — R$ 9 827/ano — já a viola.</span></div>
+    <div class="claim"><span class="k">CONDIÇÃO DE DESISTÊNCIA</span><span>Portões de decisão fixados antes do piloto são requisito de gestão de projeto. A condição de desligamento está escrita, e o valor apurado — R$ 9 827/ano — já a viola.</span></div>
     <div class="pagenum">13</div>
   </section>
 
@@ -1080,7 +1080,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">ENQUADRAMENTO</span><span>Avaliar o modelo isoladamente não avalia o sistema sociotécnico de que ele faz parte — a armadilha do enquadramento (Selbst et al. 2019). O critério aplicável é se a explicação do sistema seria aceitável para quem carrega o risco; neste momento não é.</span></div>
+    <div class="claim"><span class="k">ENQUADRAMENTO</span><span>Avaliar o modelo isoladamente não avalia o sistema sociotécnico de que ele faz parte: é a armadilha do enquadramento. O critério aplicável é se a explicação do sistema seria aceitável para quem carrega o risco; neste momento não é.</span></div>
     <div class="pagenum">14</div>
   </section>
 
@@ -1112,12 +1112,12 @@ svg{display:block;width:100%;height:auto;overflow:visible}
           <ul class="tight">
             <li>O score é automático por ser interno e reversível até o despacho.</li>
             <li>A publicação do SLA <strong>nunca</strong> é automática: a escolha do denominador determina a atribuição de responsabilidade, e exige autor identificado.</li>
-            <li class="yes">Correção imediata: submeter o aviso ao cliente a um decisor humano com informação, prazo e autoridade para recusar. Sem as três condições, a supervisão é nominal (Bainbridge 1983; Skitka, Mosier &amp; Burdick 1999).</li>
+            <li class="yes">Correção imediata: submeter o aviso ao cliente a um decisor humano com informação, prazo e autoridade para recusar. Sem as três condições, a supervisão é apenas nominal.</li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">AGENTE DE IA</span><span>Não há agente de IA neste sistema, nem na acepção clássica de Russell &amp; Norvig (2021) nem no uso corrente de mercado: há um classificador e cinco fronteiras de decisão. A designação não acrescentaria informação ao desenho.</span></div>
+    <div class="claim"><span class="k">AGENTE DE IA</span><span>Não há agente de IA neste sistema, nem na acepção clássica nem no uso corrente de mercado: há um classificador e cinco fronteiras de decisão. A designação não acrescentaria informação ao desenho.</span></div>
     <div class="pagenum">15</div>
   </section>
 
@@ -1224,7 +1224,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
         </div>
       </div>
     </div>
-    <div class="claim"><span class="k">CUSTO ASSIMÉTRICO</span><span>É o princípio da matriz de custo do bloco 4.1 aplicado a um limiar de extração por LLM em vez de a um classificador: o ponto de corte determina-se pela consequência do erro, não pela métrica (Elkan 2001).</span></div>
+    <div class="claim"><span class="k">CUSTO ASSIMÉTRICO</span><span>É o princípio da matriz de custo do bloco 4.1 aplicado a um limiar de extração por LLM em vez de a um classificador: o ponto de corte determina-se pela consequência do erro, não pela métrica.</span></div>
     <div class="pagenum">19</div>
   </section>
 
