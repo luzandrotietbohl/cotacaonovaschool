@@ -1,0 +1,668 @@
+{
+  "versao": "v1",
+  "gerado_em_curadoria": "2026-09-02T18:21:50+00:00",
+  "parametros_declarados": {
+    "custo_fn_reais": 45.0,
+    "custo_fp_reais": 8.0,
+    "dias_teste": 90
+  },
+  "recortes": [
+    {
+      "recorte": "todos os pedidos",
+      "pedidos": 99441
+    },
+    {
+      "recorte": "ativos (exclui cancelado)",
+      "pedidos": 98816
+    },
+    {
+      "recorte": "fora da cauda incompleta",
+      "pedidos": 97358
+    },
+    {
+      "recorte": "com dt_compra e dt_prazo",
+      "pedidos": 97358
+    }
+  ],
+  "geo": {
+    "distancia_ausente": 2345,
+    "pct_distancia_ausente": 2.409,
+    "grao_cliente": "centroide do prefixo de CEP (5 digitos)",
+    "grao_filial": "centroide da cidade"
+  },
+  "features": {
+    "numericas": [
+      "prazo_prometido_dias",
+      "folga_expedicao_dias",
+      "distancia_km",
+      "peso_g",
+      "valor_mercadoria",
+      "valor_frete",
+      "n_itens",
+      "mes",
+      "dia_semana",
+      "hora",
+      "mesma_uf"
+    ],
+    "categoricas": [
+      "filial",
+      "cliente_uf",
+      "canal_pagamento"
+    ],
+    "justificativa": {
+      "prazo_prometido_dias": "prometido ao cliente no checkout; conhecido em t0",
+      "folga_expedicao_dias": "shipping_limit_date do contrato com o vendedor; definido em t0",
+      "distancia_km": "derivada de CEP de origem e destino, ambos em t0",
+      "peso_g": "cadastro do produto; em t0 (nulo quando o cadastro falha)",
+      "valor_mercadoria": "preco no checkout; em t0",
+      "valor_frete": "frete cobrado no checkout; em t0",
+      "n_itens": "itens do carrinho; em t0",
+      "mes / dia_semana / hora": "timestamp da compra; em t0",
+      "mesma_uf": "derivada das duas UFs; em t0",
+      "filial / cliente_uf / canal_pagamento": "escolhidos no checkout; em t0"
+    },
+    "excluidas_pos_t0": [
+      "dt_aprovacao",
+      "dt_coleta",
+      "dt_entrega",
+      "lead_dias",
+      "dias_vs_prazo",
+      "atraso_mensuravel"
+    ],
+    "excluidas_qa": 23
+  },
+  "split": {
+    "corte": "2018-05-20",
+    "dias_teste": 90,
+    "n_treino": 78397,
+    "n_teste": 18961,
+    "prevalencia_treino_pct": 11.287,
+    "prevalencia_teste_pct": 6.461
+  },
+  "linha_de_base": [
+    {
+      "modelo": "B0 prevalencia do treino",
+      "auc": 0.5,
+      "pr_auc": 0.0646
+    },
+    {
+      "modelo": "B1 regra: prazo curto + interestadual",
+      "auc": 0.572,
+      "pr_auc": 0.0765
+    },
+    {
+      "modelo": "B2 taxa historica por rota UF>UF",
+      "auc": 0.4912,
+      "pr_auc": 0.0981
+    },
+    {
+      "modelo": "M  HistGradientBoosting em t0",
+      "auc": 0.7244,
+      "pr_auc": 0.1736
+    }
+  ],
+  "prevalencia_teste": 0.0646,
+  "b1_limite_prazo_p25_dias": 19.39,
+  "comparacao_modelos": [
+    {
+      "modelo": "nada (prever a prevalencia)",
+      "auc": 0.5,
+      "pr_auc": 0.0646,
+      "porque": "linha de base obrigatoria; nao avisa nenhum atraso"
+    },
+    {
+      "modelo": "regra de 1 corte: prazo < 15.2d",
+      "auc": 0.3227,
+      "pr_auc": 0.0532,
+      "porque": "e o que a operacao consegue executar sem modelo nenhum"
+    },
+    {
+      "modelo": "arvore de profundidade 3",
+      "auc": 0.4856,
+      "pr_auc": 0.0726,
+      "porque": "auditavel: cabe numa folha de papel e tem dono"
+    },
+    {
+      "modelo": "regressao logistica",
+      "auc": 0.7045,
+      "pr_auc": 0.1662,
+      "porque": "coeficiente por variavel; assume efeito linear e monotono"
+    },
+    {
+      "modelo": "random forest (300 arvores)",
+      "auc": 0.698,
+      "pr_auc": 0.1557,
+      "porque": "captura interacao; caro de explicar e de servir"
+    },
+    {
+      "modelo": "HistGB so com prazo_prometido_dias",
+      "auc": 0.6274,
+      "pr_auc": 0.1206,
+      "porque": "mede quanto do desempenho vem de UMA coluna"
+    },
+    {
+      "modelo": "HistGB com as 14 features (escolhido)",
+      "auc": 0.7244,
+      "pr_auc": 0.1736,
+      "porque": "trata nulo e categoria nativamente; sem dependencia extra"
+    }
+  ],
+  "regra_corte_prazo_dias": 15.16,
+  "arvore_texto": "|--- mesma_uf <= 0.5\n|   |--- prazo_prometido_dias <= 21.0\n|   |   |--- mes <= 3.5\n|   |   |   |--- class: 0\n|   |   |--- mes >  3.5\n|   |   |   |--- class: 0\n|   |--- prazo_prometido_dias >  21.0\n|   |   |--- mes <= 3.5\n|   |   |   |--- class: 0\n|   |   |--- mes >  3.5\n|   |   |   |--- class: 0\n|--- mesma_uf >  0.5\n|   |--- folga_expedicao_dias <= 12.0\n|   |   |--- prazo_prometido_dias <= 20.1\n|   |   |   |--- class: 0\n|   |   |--- prazo_prometido_dias >  20.1\n|   |   |   |--- class: 0\n|   |--- folga_expedicao_dias >  12.0\n|   |   |--- valor_mercadoria <= 78.5\n|   |   |   |--- class: 0\n|   |   |--- valor_mercadoria >  78.5\n|   |   |   |--- class: 0\n",
+  "descartados": {
+    "cluster do KMeans como feature": "os clusters da analise anterior usam lead_dias, que so existe DEPOIS da entrega. Cluster 1 tem 59,1% de atraso porque e feito de entregas lentas: e descricao, nao previsao. Usa-lo em t0 seria fuga.",
+    "rede neural": "97 mil linhas, 14 colunas tabulares. Nao ha ganho documentado sobre arvores impulsionadas neste regime, e o custo de explicar sobe.",
+    "CatBoost / XGBoost": "empatam com o HistGB do sklearn em tabular deste tamanho e acrescentam uma dependencia para servir em producao.",
+    "SMOTE / reamostragem da classe": "o desequilibrio (6,5%) trata-se movendo o LIMIAR com a matriz de custo, que e uma decisao de gestao visivel, e nao distorcendo a distribuicao de treino, que a esconde."
+  },
+  "custo_erro": {
+    "curva": [
+      {
+        "limiar": 0.05,
+        "avisados": 12818,
+        "vp": 1122,
+        "fp": 11696,
+        "fn": 103,
+        "recall": 0.9159,
+        "precisao": 0.0875,
+        "custo_reais": 98203.0
+      },
+      {
+        "limiar": 0.08,
+        "avisados": 7434,
+        "vp": 863,
+        "fp": 6571,
+        "fn": 362,
+        "recall": 0.7045,
+        "precisao": 0.1161,
+        "custo_reais": 68858.0
+      },
+      {
+        "limiar": 0.1,
+        "avisados": 5263,
+        "vp": 688,
+        "fp": 4575,
+        "fn": 537,
+        "recall": 0.5616,
+        "precisao": 0.1307,
+        "custo_reais": 60765.0
+      },
+      {
+        "limiar": 0.12,
+        "avisados": 3742,
+        "vp": 533,
+        "fp": 3209,
+        "fn": 692,
+        "recall": 0.4351,
+        "precisao": 0.1424,
+        "custo_reais": 56812.0
+      },
+      {
+        "limiar": 0.15,
+        "avisados": 2229,
+        "vp": 354,
+        "fp": 1875,
+        "fn": 871,
+        "recall": 0.289,
+        "precisao": 0.1588,
+        "custo_reais": 54195.0
+      },
+      {
+        "limiar": 0.2,
+        "avisados": 1063,
+        "vp": 195,
+        "fp": 868,
+        "fn": 1030,
+        "recall": 0.1592,
+        "precisao": 0.1834,
+        "custo_reais": 53294.0
+      },
+      {
+        "limiar": 0.25,
+        "avisados": 622,
+        "vp": 135,
+        "fp": 487,
+        "fn": 1090,
+        "recall": 0.1102,
+        "precisao": 0.217,
+        "custo_reais": 52946.0
+      },
+      {
+        "limiar": 0.3,
+        "avisados": 300,
+        "vp": 91,
+        "fp": 209,
+        "fn": 1134,
+        "recall": 0.0743,
+        "precisao": 0.3033,
+        "custo_reais": 52702.0
+      },
+      {
+        "limiar": 0.4,
+        "avisados": 89,
+        "vp": 44,
+        "fp": 45,
+        "fn": 1181,
+        "recall": 0.0359,
+        "precisao": 0.4944,
+        "custo_reais": 53505.0
+      },
+      {
+        "limiar": 0.5,
+        "avisados": 44,
+        "vp": 33,
+        "fp": 11,
+        "fn": 1192,
+        "recall": 0.0269,
+        "precisao": 0.75,
+        "custo_reais": 53728.0
+      }
+    ],
+    "melhor": {
+      "limiar": 0.3,
+      "avisados": 300,
+      "vp": 91,
+      "fp": 209,
+      "fn": 1134,
+      "recall": 0.0743,
+      "precisao": 0.3033,
+      "custo_reais": 52702.0
+    },
+    "custo_nao_fazer_nada": 55125.0,
+    "poupanca_reais_janela_teste": 2423.0,
+    "poupanca_anualizada": 9826.61
+  },
+  "fuga": {
+    "auc_temporal_t0": 0.7244,
+    "auc_split_aleatorio": 0.7762,
+    "auc_com_lead_dias": 0.9928,
+    "auc_com_flag_tautologica": 0.8066
+  },
+  "sinal_apareceu": {
+    "quintis": [
+      {
+        "quintil": "q1 mais curto",
+        "prazo_p50_dias": 14.1,
+        "treino_pct": 9.796,
+        "n_treino": 15680,
+        "teste_pct": 11.73,
+        "n_teste": 7681,
+        "delta_pp": 1.934
+      },
+      {
+        "quintil": "q2",
+        "prazo_p50_dias": 20.4,
+        "treino_pct": 13.107,
+        "n_treino": 15679,
+        "teste_pct": 4.754,
+        "n_teste": 2545,
+        "delta_pp": -8.352
+      },
+      {
+        "quintil": "q3",
+        "prazo_p50_dias": 23.5,
+        "treino_pct": 11.959,
+        "n_treino": 15679,
+        "teste_pct": 3.293,
+        "n_teste": 2217,
+        "delta_pp": -8.666
+      },
+      {
+        "quintil": "q4",
+        "prazo_p50_dias": 27.4,
+        "treino_pct": 11.646,
+        "n_treino": 15679,
+        "teste_pct": 2.985,
+        "n_teste": 2412,
+        "delta_pp": -8.661
+      },
+      {
+        "quintil": "q5 mais longo",
+        "prazo_p50_dias": 34.3,
+        "treino_pct": 9.93,
+        "n_treino": 15680,
+        "teste_pct": 1.413,
+        "n_teste": 4106,
+        "delta_pp": -8.517
+      }
+    ],
+    "spearman_treino": -0.0052,
+    "spearman_teste": -0.2184,
+    "fracao_q1_treino_pct": 20.0,
+    "fracao_q1_teste_pct": 40.51,
+    "leitura": "o sinal nao foi aprendido no treino; apareceu no teste com a mudanca da politica de prazo, e por isso os modelos ajustados no treino dao AUC abaixo de 0,50"
+  },
+  "decomposicao_alvo": {
+    "vencido_sem_registo_min_pct_pos_2017_05": 0.862,
+    "vencido_sem_registo_max_pct_pos_2017_05": 3.432,
+    "vencido_max_pct_antes_2017_05": 11.667,
+    "pico_atrasado_2018_03_pct": 20.821
+  },
+  "deriva": {
+    "por_mes": [
+      {
+        "mes": "2016-10",
+        "pedidos": 300,
+        "atraso_pct": 12.667
+      },
+      {
+        "mes": "2017-01",
+        "pedidos": 797,
+        "atraso_pct": 8.783
+      },
+      {
+        "mes": "2017-02",
+        "pedidos": 1763,
+        "atraso_pct": 9.246
+      },
+      {
+        "mes": "2017-03",
+        "pedidos": 2649,
+        "atraso_pct": 9.249
+      },
+      {
+        "mes": "2017-04",
+        "pedidos": 2386,
+        "atraso_pct": 11.065
+      },
+      {
+        "mes": "2017-05",
+        "pedidos": 3671,
+        "atraso_pct": 6.919
+      },
+      {
+        "mes": "2017-06",
+        "pedidos": 3229,
+        "atraso_pct": 6.658
+      },
+      {
+        "mes": "2017-07",
+        "pedidos": 3998,
+        "atraso_pct": 6.478
+      },
+      {
+        "mes": "2017-08",
+        "pedidos": 4304,
+        "atraso_pct": 5.809
+      },
+      {
+        "mes": "2017-09",
+        "pedidos": 4265,
+        "atraso_pct": 7.761
+      },
+      {
+        "mes": "2017-10",
+        "pedidos": 4605,
+        "atraso_pct": 7.904
+      },
+      {
+        "mes": "2017-11",
+        "pedidos": 7507,
+        "atraso_pct": 16.811
+      },
+      {
+        "mes": "2017-12",
+        "pedidos": 5662,
+        "atraso_pct": 10.791
+      },
+      {
+        "mes": "2018-01",
+        "pedidos": 7235,
+        "atraso_pct": 8.708
+      },
+      {
+        "mes": "2018-02",
+        "pedidos": 6655,
+        "atraso_pct": 17.25
+      },
+      {
+        "mes": "2018-03",
+        "pedidos": 7185,
+        "atraso_pct": 23.354
+      },
+      {
+        "mes": "2018-04",
+        "pedidos": 6924,
+        "atraso_pct": 7.034
+      },
+      {
+        "mes": "2018-05",
+        "pedidos": 6849,
+        "atraso_pct": 9.578
+      },
+      {
+        "mes": "2018-06",
+        "pedidos": 6149,
+        "atraso_pct": 2.212
+      },
+      {
+        "mes": "2018-07",
+        "pedidos": 6251,
+        "atraso_pct": 5.935
+      },
+      {
+        "mes": "2018-08",
+        "pedidos": 4971,
+        "atraso_pct": 12.875
+      }
+    ],
+    "amplitude_pp": 21.142
+  },
+  "auc_por_mes_no_teste": [
+    {
+      "mes": "2018-05",
+      "n": 1590,
+      "auc": 0.8422,
+      "atraso_pct": 4.906
+    },
+    {
+      "mes": "2018-06",
+      "n": 6149,
+      "auc": 0.7316,
+      "atraso_pct": 2.212
+    },
+    {
+      "mes": "2018-07",
+      "n": 6251,
+      "auc": 0.6943,
+      "atraso_pct": 5.935
+    },
+    {
+      "mes": "2018-08",
+      "n": 4971,
+      "auc": 0.5995,
+      "atraso_pct": 12.875
+    }
+  ],
+  "etica_regiao": [
+    {
+      "regiao": "CO",
+      "pedidos": 1098,
+      "atraso_pct": 5.1,
+      "avisados": 9,
+      "recall": 0.0893,
+      "precisao": 0.5556
+    },
+    {
+      "regiao": "N",
+      "pedidos": 317,
+      "atraso_pct": 2.839,
+      "avisados": 3,
+      "recall": 0.0,
+      "precisao": 0.0
+    },
+    {
+      "regiao": "NE",
+      "pedidos": 1755,
+      "atraso_pct": 7.066,
+      "avisados": 185,
+      "recall": 0.2581,
+      "precisao": 0.173
+    },
+    {
+      "regiao": "S",
+      "pedidos": 2507,
+      "atraso_pct": 3.47,
+      "avisados": 14,
+      "recall": 0.069,
+      "precisao": 0.4286
+    },
+    {
+      "regiao": "SE",
+      "pedidos": 13284,
+      "atraso_pct": 7.144,
+      "avisados": 89,
+      "recall": 0.0506,
+      "precisao": 0.5393
+    }
+  ],
+  "etica_distancia": [
+    {
+      "decil": 1,
+      "km_p50": 12.1,
+      "pedidos": 1859,
+      "atraso_pct": 12.641,
+      "recall": 0.0043
+    },
+    {
+      "decil": 2,
+      "km_p50": 51.9,
+      "pedidos": 1856,
+      "atraso_pct": 11.53,
+      "recall": 0.014
+    },
+    {
+      "decil": 3,
+      "km_p50": 132.8,
+      "pedidos": 1857,
+      "atraso_pct": 7.754,
+      "recall": 0.0208
+    },
+    {
+      "decil": 4,
+      "km_p50": 293.3,
+      "pedidos": 1857,
+      "atraso_pct": 4.47,
+      "recall": 0.012
+    },
+    {
+      "decil": 5,
+      "km_p50": 355.1,
+      "pedidos": 1857,
+      "atraso_pct": 3.716,
+      "recall": 0.0
+    },
+    {
+      "decil": 6,
+      "km_p50": 457.2,
+      "pedidos": 1857,
+      "atraso_pct": 3.77,
+      "recall": 0.0143
+    },
+    {
+      "decil": 7,
+      "km_p50": 564.1,
+      "pedidos": 1857,
+      "atraso_pct": 4.47,
+      "recall": 0.0241
+    },
+    {
+      "decil": 8,
+      "km_p50": 781.1,
+      "pedidos": 1857,
+      "atraso_pct": 4.093,
+      "recall": 0.0395
+    },
+    {
+      "decil": 9,
+      "km_p50": 1050.0,
+      "pedidos": 1857,
+      "atraso_pct": 4.47,
+      "recall": 0.0964
+    },
+    {
+      "decil": 10,
+      "km_p50": 2085.4,
+      "pedidos": 1857,
+      "atraso_pct": 6.3,
+      "recall": 0.3162
+    }
+  ],
+  "etica_sem_geo": {
+    "pedidos": 390,
+    "atraso_pct": 13.077,
+    "recall": 0.6275
+  },
+  "importancia_permutacao": [
+    {
+      "feature": "prazo_prometido_dias",
+      "auc_permutado": 0.4896,
+      "queda_pp": 23.475
+    },
+    {
+      "feature": "folga_expedicao_dias",
+      "auc_permutado": 0.7136,
+      "queda_pp": 1.074
+    },
+    {
+      "feature": "cliente_uf",
+      "auc_permutado": 0.7152,
+      "queda_pp": 0.916
+    },
+    {
+      "feature": "filial",
+      "auc_permutado": 0.7163,
+      "queda_pp": 0.806
+    },
+    {
+      "feature": "mes",
+      "auc_permutado": 0.7188,
+      "queda_pp": 0.553
+    },
+    {
+      "feature": "n_itens",
+      "auc_permutado": 0.7194,
+      "queda_pp": 0.493
+    },
+    {
+      "feature": "mesma_uf",
+      "auc_permutado": 0.7198,
+      "queda_pp": 0.453
+    },
+    {
+      "feature": "canal_pagamento",
+      "auc_permutado": 0.722,
+      "queda_pp": 0.233
+    },
+    {
+      "feature": "dia_semana",
+      "auc_permutado": 0.7232,
+      "queda_pp": 0.121
+    },
+    {
+      "feature": "hora",
+      "auc_permutado": 0.7247,
+      "queda_pp": -0.037
+    },
+    {
+      "feature": "peso_g",
+      "auc_permutado": 0.7253,
+      "queda_pp": -0.096
+    },
+    {
+      "feature": "valor_mercadoria",
+      "auc_permutado": 0.7294,
+      "queda_pp": -0.506
+    },
+    {
+      "feature": "distancia_km",
+      "auc_permutado": 0.7326,
+      "queda_pp": -0.824
+    },
+    {
+      "feature": "valor_frete",
+      "auc_permutado": 0.7336,
+      "queda_pp": -0.922
+    }
+  ]
+}
