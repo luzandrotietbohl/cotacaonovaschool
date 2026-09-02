@@ -1,0 +1,1224 @@
+<meta charset="utf-8">
+<title>O Denominador Errado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+/* ============================================================
+   E1.2 — Cartão de Pontuação de Qualidade dos Dados
+   Mesmo sistema visual de apresentacao.html (Cotador de frete).
+   ============================================================ */
+
+:root{
+  --paper:#f4f2ed;
+  --surface:#fbfaf7;
+  --surface-2:#efece4;
+  --ink:#191712;
+  --ink-2:#4a463d;
+  --muted:#807a6d;
+  --rule:#d9d3c6;
+  --rule-soft:#e8e4da;
+  --accent:#b16512;
+
+  --c1:#b16512;   /* ocre  */
+  --c2:#008f7d;   /* teal  */
+  --c3:#426bce;   /* índigo*/
+  --c4:#c14d66;   /* rosa  */
+
+  --ok:#008f7d;
+  --warn:#b16512;
+  --stop:#c14d66;
+
+  --ok-wash:#008f7d1a;
+  --warn-wash:#b165121a;
+  --stop-wash:#c14d661a;
+  --info-wash:#426bce1a;
+
+  --shadow:0 1px 2px #19171208, 0 12px 40px #19171214;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131210;
+    --surface:#1c1a16;
+    --surface-2:#24211b;
+    --ink:#f2efe6;
+    --ink-2:#c4bfb2;
+    --muted:#8f887a;
+    --rule:#3a362c;
+    --rule-soft:#2a2721;
+    --accent:#d08a2e;
+
+    --c1:#be7125;
+    --c2:#0f9b89;
+    --c3:#5c82da;
+    --c4:#cf5971;
+
+    --ok:#0f9b89;
+    --warn:#be7125;
+    --stop:#cf5971;
+
+    --ok-wash:#0f9b8924;
+    --warn-wash:#be712524;
+    --stop-wash:#cf597124;
+    --info-wash:#5c82da24;
+
+    --shadow:0 1px 2px #00000040, 0 12px 40px #00000055;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131210;
+  --surface:#1c1a16;
+  --surface-2:#24211b;
+  --ink:#f2efe6;
+  --ink-2:#c4bfb2;
+  --muted:#8f887a;
+  --rule:#3a362c;
+  --rule-soft:#2a2721;
+  --accent:#d08a2e;
+
+  --c1:#be7125;
+  --c2:#0f9b89;
+  --c3:#5c82da;
+  --c4:#cf5971;
+
+  --ok:#0f9b89;
+  --warn:#be7125;
+  --stop:#cf5971;
+
+  --ok-wash:#0f9b8924;
+  --warn-wash:#be712524;
+  --stop-wash:#cf597124;
+  --info-wash:#5c82da24;
+
+  --shadow:0 1px 2px #00000040, 0 12px 40px #00000055;
+}
+
+*{box-sizing:border-box}
+
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- chrome ---------- */
+
+.bar{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:10px 18px;
+  border-bottom:1px solid var(--rule);
+  background:var(--surface);
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--muted);
+  flex:0 0 auto;
+  position:sticky;
+  top:0;
+  z-index:20;
+}
+.bar strong{color:var(--ink);font-weight:600}
+.bar .spacer{flex:1}
+.bar button{
+  font:inherit;
+  letter-spacing:inherit;
+  text-transform:inherit;
+  color:var(--ink-2);
+  background:transparent;
+  border:1px solid var(--rule);
+  border-radius:2px;
+  padding:4px 9px;
+  cursor:pointer;
+}
+.bar button:hover{border-color:var(--accent);color:var(--accent)}
+.bar button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.counter{font-variant-numeric:tabular-nums;color:var(--ink)}
+
+.stage-wrap{
+  flex:1 1 auto;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  min-height:0;
+}
+
+.stage{
+  width:min(100%, calc((100vh - 130px) * 16 / 9));
+  aspect-ratio:16/9;
+  background:var(--surface);
+  border:1px solid var(--rule);
+  box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden;
+  container-type:size;
+  container-name:slide;
+}
+
+/* ---------- slide skeleton ---------- */
+
+.slide{
+  position:absolute;
+  inset:0;
+  display:none;
+  flex-direction:column;
+  padding:4.6cqw 5.2cqw 0;
+}
+.slide.on{display:flex}
+
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.32cqw;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  display:flex;
+  align-items:baseline;
+  gap:1.1cqw;
+  flex:0 0 auto;
+}
+.eyebrow b{color:var(--accent);font-weight:600}
+.eyebrow .q{
+  font-family:"Source Serif 4",serif;
+  font-size:1.42cqw;
+  letter-spacing:0;
+  text-transform:none;
+  font-style:italic;
+  color:var(--ink-2);
+}
+
+h2{
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;
+  font-weight:700;
+  font-size:3.2cqw;
+  line-height:1.05;
+  letter-spacing:-.022em;
+  margin:1.2cqw 0 0;
+  text-wrap:balance;
+  max-width:34ch;
+  flex:0 0 auto;
+}
+
+.body{
+  flex:1 1 auto;
+  min-height:0;
+  margin-top:1.8cqw;
+  overflow:hidden;
+  font-size:1.44cqw;
+  line-height:1.4;
+  color:var(--ink-2);
+}
+.body p{margin:0 0 .85em}
+.body p:last-child{margin-bottom:0}
+.body strong{color:var(--ink);font-weight:600}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.92em;color:var(--ink)}
+
+/* the claim strip — one defensible sentence per slide */
+.claim{
+  flex:0 0 auto;
+  margin-top:auto;
+  border-top:1px solid var(--rule);
+  padding:1.5cqw 0 1.9cqw;
+  display:flex;
+  gap:1.5cqw;
+  align-items:baseline;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.26cqw;
+  line-height:1.45;
+  color:var(--ink-2);
+}
+.claim .k{
+  color:var(--accent);
+  letter-spacing:.18em;
+  font-weight:600;
+  white-space:nowrap;
+}
+
+.pagenum{
+  position:absolute;
+  right:2.1cqw;
+  bottom:1.7cqw;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.1cqw;
+  color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- notas 1–5: o instrumento deste cartão ---------- */
+
+.nota{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1cqw;
+  letter-spacing:.1em;
+  font-weight:600;
+  padding:.26em .56em;
+  border:1px solid currentColor;
+  border-radius:2px;
+  white-space:nowrap;
+  display:inline-block;
+  vertical-align:.1em;
+  font-variant-numeric:tabular-nums;
+}
+.n1{color:var(--stop);background:var(--stop-wash)}
+.n2{color:var(--warn);background:var(--warn-wash)}
+.n3{color:var(--c3);background:var(--info-wash)}
+.n4,.n5{color:var(--ok);background:var(--ok-wash)}
+
+/* ---------- números grandes ---------- */
+
+.figs{display:grid;gap:2cqw;align-content:start}
+.big{
+  font-family:Archivo,sans-serif;
+  font-weight:800;
+  font-size:4.6cqw;
+  line-height:.92;
+  letter-spacing:-.035em;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+.big.stop{color:var(--stop)}
+.big.warn{color:var(--accent)}
+.big.sm{font-size:3.2cqw}
+.bigsub{font-size:1.16cqw;line-height:1.4;color:var(--muted);margin-top:.55cqw;max-width:30ch}
+.bigsub b{color:var(--ink-2);font-weight:600}
+
+/* ---------- generic layout helpers ---------- */
+
+.cols{display:grid;gap:3cqw}
+.c2{grid-template-columns:1fr 1fr}
+.c2w{grid-template-columns:1.15fr .85fr}
+.c2n{grid-template-columns:.86fr 1.14fr}
+.c2t{grid-template-columns:.62fr 1.38fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+
+.lbl{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.06cqw;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin:0 0 .8cqw;
+  display:flex;
+  gap:.7cqw;
+  align-items:center;
+}
+
+ul.tight{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.62cqw}
+ul.tight li{padding-left:1.4cqw;position:relative}
+ul.tight li::before{
+  content:"";
+  position:absolute;
+  left:0;top:.62em;
+  width:.5cqw;height:.5cqw;
+  background:var(--rule);
+  border-radius:50%;
+}
+ul.tight li.no::before{background:none;border:1px solid var(--stop);border-radius:0;transform:rotate(45deg);top:.55em}
+ul.tight li.yes::before{background:var(--ok)}
+
+/* ---------- tables (Wilke: sem réguas verticais) ---------- */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:1.24cqw;
+  line-height:1.32;
+}
+thead th{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.95cqw;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:500;
+  text-align:left;
+  padding:0 1.1cqw .7cqw 0;
+  border-bottom:1px solid var(--ink);
+  vertical-align:bottom;
+}
+tbody td{
+  padding:.72cqw 1.1cqw .72cqw 0;
+  border-bottom:1px solid var(--rule-soft);
+  vertical-align:top;
+  color:var(--ink-2);
+}
+tbody tr:last-child td{border-bottom:1px solid var(--rule)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;padding-right:0}
+td.who{color:var(--ink);font-weight:600}
+td.mono,th.mono{font-family:"IBM Plex Mono",monospace}
+tr.hi td{background:var(--stop-wash)}
+tfoot td{
+  padding:.7cqw 1.1cqw 0 0;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:1.06cqw;
+  color:var(--ink);
+  font-weight:600;
+  border-top:1px solid var(--ink);
+}
+
+/* slides com tabela longa: mesma hierarquia, um degrau abaixo */
+.slide.dense h2{font-size:2.6cqw;max-width:42ch}
+.slide.dense .body{margin-top:1.5cqw;font-size:1.34cqw}
+.slide.dense table{font-size:1.1cqw;line-height:1.28}
+.slide.dense thead th{font-size:.88cqw;padding-bottom:.55cqw}
+.slide.dense tbody td{padding:.48cqw 1cqw .48cqw 0}
+.slide.dense .claim{padding:1.1cqw 0 1.6cqw}
+.slide.dense .nota{font-size:.92cqw}
+
+/* ---------- figures ---------- */
+
+figure{margin:0}
+figcaption{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1cqw;
+  line-height:1.5;
+  color:var(--muted);
+  margin-top:1cqw;
+}
+.figtitle{
+  font-family:Archivo,sans-serif;
+  font-weight:600;
+  font-size:1.42cqw;
+  color:var(--ink);
+  letter-spacing:-.01em;
+  margin-bottom:.35cqw;
+}
+.figsub{
+  font-size:1.2cqw;
+  color:var(--muted);
+  margin-bottom:1.6cqw;
+  font-style:italic;
+}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.ax{font-family:"IBM Plex Mono",monospace;font-size:9px;fill:var(--muted)}
+.axl{font-family:"IBM Plex Mono",monospace;font-size:9.5px;fill:var(--ink-2)}
+.val{font-family:"IBM Plex Mono",monospace;font-size:10.5px;fill:var(--ink);font-weight:600}
+.grid{stroke:var(--rule-soft);stroke-width:1}
+.base{stroke:var(--ink);stroke-width:1}
+
+/* ---------- grafias: o defeito mostrado como bytes ---------- */
+
+.grafias{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:1.16cqw;
+  line-height:1.75;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:0 1.2cqw;
+  align-items:baseline;
+}
+.grafias .g{color:var(--ink);white-space:pre}
+.grafias .n{color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+.grafias .note{color:var(--stop);font-size:.98cqw;font-style:normal}
+.grafias .sep{grid-column:1/-1;height:1px;background:var(--rule-soft);margin:.4cqw 0}
+
+/* ---------- cover ---------- */
+
+.cover{justify-content:center;padding-bottom:5.2cqw}
+.cover h1{
+  font-family:Archivo,sans-serif;
+  font-weight:800;
+  font-size:6.4cqw;
+  line-height:.98;
+  letter-spacing:-.035em;
+  margin:.6cqw 0 0;
+  max-width:20ch;
+  text-wrap:balance;
+}
+.cover .kicker{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:1.24cqw;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.cover .rule{height:1px;background:var(--ink);margin:2.6cqw 0 2cqw;width:14cqw}
+.cover .meta{
+  display:flex;gap:3.4cqw;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:1.14cqw;
+  color:var(--ink-2);
+  line-height:1.6;
+}
+.cover .meta div span{display:block;color:var(--muted);font-size:.94cqw;letter-spacing:.13em;text-transform:uppercase}
+
+/* ---------- overview ---------- */
+
+.overview{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:40;
+  background:var(--paper);
+  overflow:auto;
+  padding:26px;
+}
+.overview.on{display:block}
+.ovgrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+  gap:14px;
+  max-width:1200px;
+  margin:0 auto;
+}
+.ovcard{
+  text-align:left;
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-radius:2px;
+  padding:12px 13px 13px;
+  cursor:pointer;
+  font-family:inherit;
+  color:var(--ink-2);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-height:96px;
+}
+.ovcard:hover{border-color:var(--accent)}
+.ovcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ovcard .n{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;
+  color:var(--muted);font-variant-numeric:tabular-nums;
+}
+.ovcard .t{
+  font-family:Archivo,sans-serif;font-weight:600;font-size:14px;line-height:1.2;color:var(--ink);
+}
+.ovcard.cur{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+
+.hint{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);text-align:center;padding:8px 0 18px;
+}
+
+/* ---------- click zones ---------- */
+.zone{position:absolute;top:0;bottom:0;width:14%;z-index:5;cursor:pointer;border:0;background:transparent}
+.zone.l{left:0}
+.zone.r{right:0}
+.zone:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+
+@media (prefers-reduced-motion:no-preference){
+  .slide.on{animation:fade .18s ease-out}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+}
+
+@media print{
+  .bar,.zone,.overview,.hint{display:none!important}
+  body{background:#fff}
+  .stage-wrap{padding:0;display:block}
+  .stage{width:100%;box-shadow:none;border:0;page-break-after:always;container-type:size}
+  .slide{display:flex!important;position:relative;page-break-after:always}
+}
+</style>
+
+<div class="bar">
+  <strong>E1.2 · Cartão de qualidade dos dados</strong>
+  <span>Dados e IA no Transporte</span>
+  <span class="spacer"></span>
+  <span class="counter"><span id="cur">1</span> / <span id="tot">14</span></span>
+  <button id="btn-ov" type="button">Índice · G</button>
+  <button id="btn-prev" type="button">←</button>
+  <button id="btn-next" type="button">→</button>
+</div>
+
+<div class="stage-wrap">
+<div class="stage" id="stage">
+  <button class="zone l" id="z-prev" type="button" aria-label="Slide anterior"></button>
+  <button class="zone r" id="z-next" type="button" aria-label="Próximo slide"></button>
+
+  <!-- ============ 01 · CAPA ============ -->
+  <section class="slide cover on" data-title="Capa">
+    <div class="kicker">E1.2 · Dia 1 · Cartão de pontuação de qualidade dos dados</div>
+    <h1>O denominador errado</h1>
+    <div class="rule"></div>
+    <div class="meta">
+      <div><span>Os dados</span>99 441 pedidos entregues,<br>2016-09 a 2018-10, dataset Olist.</div>
+      <div><span>A nota</span>2,0 de 5 na média<br>das sete dimensões.</div>
+      <div><span>O achado</span>A filial que aparece como a melhor<br>é a que não registra a entrega.</div>
+    </div>
+    <div class="pagenum">01</div>
+  </section>
+
+  <!-- ============ 02 · ESCOPO ============ -->
+  <section class="slide" data-title="Escopo e método">
+    <div class="eyebrow"><b>Antes de começar</b><span class="q">que ficheiro é este, e o que é uma linha?</span></div>
+    <h2>O ficheiro do enunciado não existe. Analisei os dados que existem.</h2>
+    <div class="body">
+      <div class="cols c2n">
+        <div>
+          <p>O enunciado pede <code>entregas.csv</code>, 23 175 linhas, com defeitos plantados de propósito. Esse ficheiro <strong>não está nesta máquina</strong>. Em vez de inventar um, corri o mesmo cartão sobre os dados reais da pasta: <code>archive_olist/</code>, nove CSV do e-commerce brasileiro Olist.</p>
+          <p>Os defeitos aqui <strong>não foram plantados por ninguém</strong> — é a diferença que importa. Ninguém escolheu onde eles doem.</p>
+        </div>
+        <div>
+          <div class="lbl">Como a tabela de entregas foi construída</div>
+          <table>
+            <tbody>
+              <tr><td class="who" style="width:30%">Uma linha</td><td>Um pedido = uma viagem. <strong>99 441 linhas</strong>, juntando <code>orders</code> + <code>order_items</code> + <code>sellers</code> + <code>customers</code> + <code>products</code>.</td></tr>
+              <tr><td class="who">Filial</td><td>UF do vendedor principal — a origem do envio. 22 filiais com pedido, mais uma <strong>sem UF nenhuma</strong>.</td></tr>
+              <tr><td class="who">Origem do registo</td><td>Porte do vendedor (quem dá baixa no despacho) e canal de pagamento.</td></tr>
+              <tr><td class="who">Atraso</td><td><code>data de entrega &gt; prazo estimado</code>. Guarde esta definição: ela é o assunto do slide 11.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Tudo neste deck sai de <code>scripts/analise_qualidade_e12.py</code>. Um comando reproduz cada número.</span></div>
+    <div class="pagenum">02</div>
+  </section>
+
+  <!-- ============ 03 · O CARTÃO ============ -->
+  <section class="slide dense" data-title="O cartão · 7 dimensões">
+    <div class="eyebrow"><b>O cartão</b> Sete dimensões <span class="q">quanto vale este ficheiro?</span></div>
+    <h2>Nota global 2,0 / 5 — e a pior nota não é a que se esperava</h2>
+    <div class="body">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:13%">Dimensão</th>
+            <th class="mono" style="width:7%">Nota</th>
+            <th>Evidência — contagem de linhas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="who">Completude</td><td><span class="nota n2">2/5</span></td>
+            <td>2 965 pedidos sem data de entrega — <strong>2 346 deles não estão cancelados</strong>. 1 783 sem data de coleta. 791 produtos sem peso. <strong>775 pedidos sem nenhum item</strong>: sem vendedor, sem frete, sem filial.</td>
+          </tr>
+          <tr>
+            <td class="who">Unicidade</td><td><span class="nota n2">2/5</span></td>
+            <td><strong>261 831 linhas duplicadas exatas em <code>geolocation</code></strong> — 26,2% do ficheiro. 17 313 quase-duplicados em <code>order_items</code>. 814 <code>review_id</code> repetidos. 3 345 clientes com mais de um id técnico.</td>
+          </tr>
+          <tr class="hi">
+            <td class="who">Consistência</td><td><span class="nota n1">1/5</span></td>
+            <td>8 011 grafias de cidade para 5 939 cidades. <strong>12 grafias só da capital São Paulo</strong>, em 176 971 linhas. 18 cidades com 3 ou mais grafias. 15 <code>seller_city</code> com a UF dentro do próprio campo.</td>
+          </tr>
+          <tr>
+            <td class="who">Validade</td><td><span class="nota n3">3/5</span></td>
+            <td>23 entregas ao cliente <strong>antes</strong> da coleta pela transportadora. 1 350 despachos antes da aprovação. 4 pesos ≤ 0 g. 9 pagamentos ≤ R$0. 278 CEP sem correspondência.</td>
+          </tr>
+          <tr>
+            <td class="who">Exatidão</td><td><span class="nota n2">2/5</span></td>
+            <td>Lead time até <strong>210 dias</strong> — mediana 10,2. 64 entregas acima de 100 dias. Um pacote de 40,4 kg. 73 pedidos com frete acima de 3× a mercadoria. 246 com pagamento ≠ mercadoria + frete.</td>
+          </tr>
+          <tr>
+            <td class="who">Atualidade</td><td><span class="nota n2">2/5</span></td>
+            <td>Compra→aprovação: mediana 18 min, <strong>máximo 188 dias</strong>. 1 350 lags negativos entre aprovação e despacho. Dataset com 2 876 dias de idade; 3,5% da cauda sem entrega registada.</td>
+          </tr>
+          <tr>
+            <td class="who">Proveniência</td><td><span class="nota n2">2/5</span></td>
+            <td><strong>Sim, varia — e de forma monotónica.</strong> Vendedor de 1–10 pedidos deixa 4,40% das entregas sem data; o de mais de 1 000 deixa 1,34%. Na data de coleta a diferença é de 39×.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Consistência tira 1/5 porque é o defeito que ninguém vê no Excel: as linhas estão todas lá, com o nome errado.</span></div>
+    <div class="pagenum">03</div>
+  </section>
+
+  <!-- ============ 04 · COMPLETUDE ============ -->
+  <section class="slide" data-title="Completude">
+    <div class="eyebrow"><b>Dimensão 1</b> Completude <span class="q">o que está vazio, e onde?</span></div>
+    <h2>2 346 entregas sem data — e todas com o prazo já vencido</h2>
+    <div class="body">
+      <div class="cols c2t">
+        <div class="figs">
+          <div>
+            <div class="big stop">2 346</div>
+            <div class="bigsub">pedidos <b>não cancelados</b> sem data de entrega. 2,37% da base.</div>
+          </div>
+          <div>
+            <div class="big sm">100%</div>
+            <div class="bigsub">desses 2 346 já tinham o <b>prazo estimado vencido</b> no fim da janela.</div>
+          </div>
+        </div>
+        <div>
+          <div class="lbl">Em que estado ficaram esses pedidos</div>
+          <table>
+            <thead><tr><th>Status no sistema</th><th class="num">Pedidos</th><th>O que isso significa na prática</th></tr></thead>
+            <tbody>
+              <tr><td class="who mono">shipped</td><td class="num">1 107</td><td>Saiu e nunca chegou — ou chegou e ninguém deu baixa</td></tr>
+              <tr><td class="who mono">unavailable</td><td class="num">609</td><td>Nunca houve entrega para registar</td></tr>
+              <tr><td class="who mono">invoiced</td><td class="num">314</td><td>Faturado, sem despacho registado</td></tr>
+              <tr><td class="who mono">processing</td><td class="num">301</td><td>Parado em processamento além do prazo</td></tr>
+              <tr><td class="who mono">delivered</td><td class="num">8</td><td>Marcado como entregue <strong>sem data de entrega</strong></td></tr>
+              <tr><td class="who mono">created / approved</td><td class="num">7</td><td>Registo aberto e abandonado</td></tr>
+            </tbody>
+            <tfoot><tr><td>Total</td><td class="num">2 346</td><td></td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Um campo vazio aqui não é «não sei se atrasou». É «atrasou e não vai aparecer em lugar nenhum».</span></div>
+    <div class="pagenum">04</div>
+  </section>
+
+  <!-- ============ 05 · UNICIDADE ============ -->
+  <section class="slide" data-title="Unicidade">
+    <div class="eyebrow"><b>Dimensão 2</b> Unicidade <span class="q">quantas vezes a mesma linha aparece?</span></div>
+    <h2>Um quarto do ficheiro de geolocalização é cópia exata</h2>
+    <div class="body">
+      <div class="cols c2w">
+        <figure>
+          <div class="figtitle">1 000 163 linhas em <code>olist_geolocation</code></div>
+          <div class="figsub">Duplicado exato = todas as cinco colunas idênticas, incluindo latitude e longitude.</div>
+          <svg viewBox="0 0 560 118" role="img" aria-label="Barra proporcional: de 1 000 163 linhas de geolocalização, 261 831 (26,2%) são duplicados exatos e 738 332 (73,8%) são linhas únicas.">
+            <rect x="0" y="14" width="413" height="46" fill="var(--c2)" opacity=".85"/>
+            <rect x="413" y="14" width="147" height="46" fill="var(--stop)" opacity=".9"/>
+            <text class="val" x="12" y="42" style="fill:#fff">738 332 únicas · 73,8%</text>
+            <text class="val" x="548" y="42" text-anchor="end" style="fill:#fff">26,2%</text>
+            <line class="base" x1="413" y1="60" x2="413" y2="76"/>
+            <text class="val" x="413" y="92" text-anchor="middle">261 831 linhas duplicadas exatas</text>
+            <text class="ax" x="0" y="110">Cada duplicado desloca o centroide do CEP para onde há mais cópias, não para onde há mais clientes.</text>
+          </svg>
+          <figcaption>O centroide de um CEP é a média das suas coordenadas. Se um ponto entra oito vezes e o vizinho uma, a média mente — e a distância que sai dela vira preço de frete.</figcaption>
+        </figure>
+        <div>
+          <div class="lbl">E os que não são cópia exata</div>
+          <table>
+            <tbody>
+              <tr><td class="who" style="width:34%">17 313 linhas<br>em <code>order_items</code></td><td>Mesmo pedido, mesmo produto, mesmo vendedor, mesmo preço, mesmo frete. Só o <code>order_item_id</code> difere. <strong>6 968 pedidos.</strong> São duas unidades do mesmo item — ou um lançamento em duplicado? O ficheiro não diz, e a contagem de itens depende da resposta.</td></tr>
+              <tr><td class="who">814 <code>review_id</code></td><td>Mesmo identificador de avaliação em mais de uma linha. 547 pedidos com mais de uma avaliação.</td></tr>
+              <tr><td class="who">3 345 clientes</td><td>Mesmo <code>customer_unique_id</code> com vários <code>customer_id</code>. Quem contar clientes pela chave técnica infla a carteira.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Duplicado exato é fácil de achar e barato de resolver. Quase-duplicado exige uma decisão de negócio, e ninguém a tomou.</span></div>
+    <div class="pagenum">05</div>
+  </section>
+
+  <!-- ============ 06 · CONSISTÊNCIA ============ -->
+  <section class="slide" data-title="Consistência · 12 grafias">
+    <div class="eyebrow"><b>Dimensão 3</b> Consistência <span class="q">a mesma cidade, escrita de quantas formas?</span></div>
+    <h2>Doze formas de escrever São Paulo — e duas delas são idênticas na tela</h2>
+    <div class="body">
+      <div class="cols c2n">
+        <div>
+          <div class="lbl">Todas as grafias da capital, com a contagem de linhas</div>
+          <div class="grafias">
+            <span class="g">sao paulo</span><span class="note"></span><span class="n">152 034</span>
+            <span class="g">são paulo</span><span class="note"></span><span class="n">24 918</span>
+            <span class="sep"></span>
+            <span class="g">sp</span><span class="note"></span><span class="n">7</span>
+            <span class="g">sao paulo - sp</span><span class="note"></span><span class="n">3</span>
+            <span class="g">sãopaulo</span><span class="note"></span><span class="n">2</span>
+            <span class="g">são paulo</span><span class="note">← mesmo texto, outros bytes</span><span class="n">1</span>
+            <span class="g">sao paulo / sao paulo</span><span class="note"></span><span class="n">1</span>
+            <span class="g">sao paulo sp</span><span class="note"></span><span class="n">1</span>
+            <span class="g">sp / sp</span><span class="note"></span><span class="n">1</span>
+            <span class="g">sao  paulo</span><span class="note">← dois espaços</span><span class="n">1</span>
+            <span class="g">sao paulop</span><span class="note"></span><span class="n">1</span>
+            <span class="g">sao pauo</span><span class="note"></span><span class="n">1</span>
+          </div>
+        </div>
+        <div>
+          <p>A sexta linha e a segunda desenham os mesmos oito caracteres. Uma guarda o «ã» como um caractere; a outra guarda «a» seguido de um til combinante. <strong>Nenhum <code>GROUP BY</code> junta as duas, e nenhuma revisão visual as separa.</strong></p>
+          <p>O resto do ficheiro tem o mesmo padrão: <strong>8 011 grafias para 5 939 cidades</strong>, 18 delas com três ou mais formas. <code>santa barbara d'oeste</code> aparece com quatro, incluindo uma com acento agudo no lugar do apóstrofo.</p>
+          <p>E em 15 registos de vendedor a UF invadiu o campo da cidade: <code>sbc/sp</code>, <code>sp / sp</code>, <code>santo andre/sao paulo</code>.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Duas linhas que a tela mostra iguais e o banco trata como cidades diferentes: é por isso que consistência leva 1/5.</span></div>
+    <div class="pagenum">06</div>
+  </section>
+
+  <!-- ============ 07 · VALIDADE E EXATIDÃO ============ -->
+  <section class="slide dense" data-title="Validade e exatidão">
+    <div class="eyebrow"><b>Dimensões 4 e 5</b> Validade e exatidão <span class="q">impossível, ou só improvável?</span></div>
+    <h2>Vinte e três entregas chegaram antes de sair</h2>
+    <div class="body">
+      <div class="cols c2">
+        <div>
+          <div class="lbl">Validade — fora do domínio possível <span class="nota n3">3/5</span></div>
+          <table>
+            <tbody>
+              <tr><td class="num who" style="width:12%">23</td><td>Entregas ao cliente <strong>antes</strong> da coleta pela transportadora. Fisicamente impossível.</td></tr>
+              <tr><td class="num who">1 350</td><td>Despachos registados <strong>antes</strong> da aprovação do pagamento.</td></tr>
+              <tr><td class="num who">4</td><td>Produtos com peso ≤ 0 g.</td></tr>
+              <tr><td class="num who">9</td><td>Pagamentos de R$0 ou menos. Mais 3 com <code>payment_type = not_defined</code>.</td></tr>
+              <tr><td class="num who">278</td><td>CEP de cliente sem nenhuma correspondência na tabela de geolocalização.</td></tr>
+              <tr><td class="num who">336</td><td>Pedidos entregues com frete R$0. Promoção legítima, ou registo em falta? Não há como distinguir.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="lbl">Exatidão — possível, mas implausível <span class="nota n2">2/5</span></div>
+          <table>
+            <tbody>
+              <tr><td class="num who" style="width:12%">210</td><td>Dias no lead time mais longo. A mediana é <strong>10,2</strong> e o percentil 99 é 46.</td></tr>
+              <tr><td class="num who">64</td><td>Entregas acima de 100 dias. Nenhuma foi marcada como exceção.</td></tr>
+              <tr><td class="num who">40,4 kg</td><td>Peso do produto mais pesado — num dataset de encomenda postal.</td></tr>
+              <tr><td class="num who">73</td><td>Pedidos em que o frete passa de 3× o valor da mercadoria.</td></tr>
+              <tr><td class="num who">246</td><td>Pedidos em que o pagamento não fecha com mercadoria + frete.</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:1.1cqw"><strong>A diferença entre as duas dimensões é quem consegue rejeitar o valor.</strong> Validade um <code>CHECK</code> resolve. Exatidão exige alguém que conheça a operação e diga «210 dias não é entrega, é processo perdido».</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Validade tem nota melhor porque os valores impossíveis são poucos — e porque nenhum sistema os estava impedindo.</span></div>
+    <div class="pagenum">07</div>
+  </section>
+
+  <!-- ============ 08 · ATUALIDADE ============ -->
+  <section class="slide" data-title="Atualidade">
+    <div class="eyebrow"><b>Dimensão 6</b> Atualidade <span class="q">quanto tempo o evento espera pelo registo?</span></div>
+    <h2>A mediana é dezoito minutos. O máximo é cento e oitenta e oito dias.</h2>
+    <div class="body">
+      <div class="cols c2w">
+        <figure>
+          <div class="figtitle">Atraso entre o evento e o registo, por transição</div>
+          <div class="figsub">Escala logarítmica em horas — a cauda não cabe numa escala linear.</div>
+          <svg viewBox="0 0 600 200" role="img" aria-label="Três transições com mediana, percentil 90 e máximo em horas, em escala logarítmica. Compra para aprovação: mediana 0,3 h, percentil 90 34,7 h, máximo 4 509 h. Aprovação para despacho: mediana 43,6 h, percentil 90 143,8 h, máximo 3 018 h. Avaliação para resposta: mediana 40,2 h, percentil 90 116,6 h, máximo 12 449 h.">
+            <line class="grid" x1="60" y1="20" x2="60" y2="150"/>
+            <line class="grid" x1="150" y1="20" x2="150" y2="150"/>
+            <line class="grid" x1="240" y1="20" x2="240" y2="150"/>
+            <line class="grid" x1="330" y1="20" x2="330" y2="150"/>
+            <line class="grid" x1="420" y1="20" x2="420" y2="150"/>
+            <line class="grid" x1="510" y1="20" x2="510" y2="150"/>
+
+            <text class="axl" x="600" y="34" text-anchor="end">compra → aprovação</text>
+            <line x1="103" y1="42" x2="479" y2="42" stroke="var(--rule)" stroke-width="1.6"/>
+            <circle cx="103" cy="42" r="3.4" fill="var(--c3)"/>
+            <circle cx="289" cy="42" r="3.4" fill="var(--c1)"/>
+            <circle cx="479" cy="42" r="4.2" fill="var(--stop)"/>
+            <text class="val" x="488" y="46">4 509 h</text>
+
+            <text class="axl" x="600" y="74" text-anchor="end">aprovação → despacho</text>
+            <line x1="298" y1="82" x2="463" y2="82" stroke="var(--rule)" stroke-width="1.6"/>
+            <circle cx="298" cy="82" r="3.4" fill="var(--c3)"/>
+            <circle cx="344" cy="82" r="3.4" fill="var(--c1)"/>
+            <circle cx="463" cy="82" r="4.2" fill="var(--stop)"/>
+            <text class="val" x="472" y="86">3 018 h</text>
+
+            <text class="axl" x="600" y="114" text-anchor="end">avaliação → resposta</text>
+            <line x1="294" y1="122" x2="519" y2="122" stroke="var(--rule)" stroke-width="1.6"/>
+            <circle cx="294" cy="122" r="3.4" fill="var(--c3)"/>
+            <circle cx="336" cy="122" r="3.4" fill="var(--c1)"/>
+            <circle cx="519" cy="122" r="4.2" fill="var(--stop)"/>
+            <text class="val" x="528" y="126">12 449 h</text>
+
+            <line class="base" x1="60" y1="150" x2="528" y2="150"/>
+            <text class="ax" x="60" y="164" text-anchor="middle">0,1 h</text>
+            <text class="ax" x="150" y="164" text-anchor="middle">1 h</text>
+            <text class="ax" x="240" y="164" text-anchor="middle">10 h</text>
+            <text class="ax" x="330" y="164" text-anchor="middle">100 h</text>
+            <text class="ax" x="420" y="164" text-anchor="middle">1 000 h</text>
+            <text class="ax" x="510" y="164" text-anchor="middle">10 000 h</text>
+
+            <circle cx="62" cy="186" r="3.4" fill="var(--c3)"/><text class="ax" x="71" y="189">mediana</text>
+            <circle cx="138" cy="186" r="3.4" fill="var(--c1)"/><text class="ax" x="147" y="189">percentil 90</text>
+            <circle cx="230" cy="186" r="4.2" fill="var(--stop)"/><text class="ax" x="240" y="189">máximo</text>
+          </svg>
+          <figcaption>A aprovação é quase instantânea na mediana; o despacho leva quase dois dias. O que não fecha é a cauda: um pedido esperou 188 dias entre a compra e a aprovação, e ninguém o tratou como exceção.</figcaption>
+        </figure>
+        <div>
+          <div class="figs">
+            <div>
+              <div class="big warn sm">1 350</div>
+              <div class="bigsub">despachos com lag <b>negativo</b>: registados antes da aprovação que os autoriza. O relógio da operação e o do sistema não são o mesmo.</div>
+            </div>
+            <div>
+              <div class="big sm">2 876</div>
+              <div class="bigsub">dias de idade do dataset. Último pedido: <b>17 de outubro de 2018</b>. Qualquer SLA calculado aqui descreve uma operação que já não existe.</div>
+            </div>
+            <div>
+              <div class="big sm">3,5%</div>
+              <div class="bigsub">dos pedidos dos últimos 60 dias da janela ainda estão sem entrega registada — a <b>cauda de corte</b> de todo extrato. Ler os dias finais como piora de desempenho é o erro clássico.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Lag negativo não é ruído de relógio: é a prova de que o registo é feito depois, de memória, em lote.</span></div>
+    <div class="pagenum">08</div>
+  </section>
+
+  <!-- ============ 09 · PROVENIÊNCIA ============ -->
+  <section class="slide" data-title="Proveniência">
+    <div class="eyebrow"><b>Dimensão 7</b> Proveniência <span class="q">a qualidade varia por origem do registo?</span></div>
+    <h2>Sim — e varia com o tamanho de quem registra, não com o desempenho</h2>
+    <div class="body">
+      <div class="cols c2w">
+        <figure>
+          <div class="figtitle">Ausência de registo por porte do vendedor</div>
+          <div class="figsub">Base: 98 205 pedidos não cancelados, agrupados pelo volume total do vendedor.</div>
+          <svg viewBox="0 0 580 236" role="img" aria-label="Barras por porte do vendedor. Vendedores de 1 a 10 pedidos: 4,40% sem data de entrega e 3,55% sem data de coleta. De 11 a 100 pedidos: 1,76% e 0,63%. De 101 a 1000: 1,51% e 0,37%. Mais de 1000 pedidos: 1,34% e 0,09%.">
+            <line class="grid" x1="198" y1="24" x2="198" y2="210"/>
+            <line class="grid" x1="278" y1="24" x2="278" y2="210"/>
+            <line class="grid" x1="358" y1="24" x2="358" y2="210"/>
+            <line class="grid" x1="438" y1="24" x2="438" y2="210"/>
+            <line class="grid" x1="518" y1="24" x2="518" y2="210"/>
+
+            <text class="axl" x="110" y="47" text-anchor="end">1–10 pedidos</text>
+            <rect x="118" y="34" width="352" height="14" fill="var(--stop)" opacity=".9"/>
+            <text class="val" x="478" y="45">4,40%</text>
+            <rect x="118" y="51" width="284" height="14" fill="var(--c1)" opacity=".85"/>
+            <text class="val" x="410" y="62">3,55%</text>
+
+            <text class="axl" x="110" y="91" text-anchor="end">11–100</text>
+            <rect x="118" y="78" width="141" height="14" fill="var(--stop)" opacity=".9"/>
+            <text class="val" x="267" y="89">1,76%</text>
+            <rect x="118" y="95" width="50" height="14" fill="var(--c1)" opacity=".85"/>
+            <text class="val" x="176" y="106">0,63%</text>
+
+            <text class="axl" x="110" y="135" text-anchor="end">101–1 000</text>
+            <rect x="118" y="122" width="121" height="14" fill="var(--stop)" opacity=".9"/>
+            <text class="val" x="247" y="133">1,51%</text>
+            <rect x="118" y="139" width="30" height="14" fill="var(--c1)" opacity=".85"/>
+            <text class="val" x="156" y="150">0,37%</text>
+
+            <text class="axl" x="110" y="179" text-anchor="end">mais de 1 000</text>
+            <rect x="118" y="166" width="107" height="14" fill="var(--stop)" opacity=".9"/>
+            <text class="val" x="233" y="177">1,34%</text>
+            <rect x="118" y="183" width="7" height="14" fill="var(--c1)" opacity=".85"/>
+            <text class="val" x="133" y="194">0,09%</text>
+
+            <line class="base" x1="118" y1="210" x2="518" y2="210"/>
+            <text class="ax" x="118" y="224" text-anchor="middle">0</text>
+            <text class="ax" x="198" y="224" text-anchor="middle">1%</text>
+            <text class="ax" x="278" y="224" text-anchor="middle">2%</text>
+            <text class="ax" x="358" y="224" text-anchor="middle">3%</text>
+            <text class="ax" x="438" y="224" text-anchor="middle">4%</text>
+            <text class="ax" x="518" y="224" text-anchor="middle">5%</text>
+
+            <rect x="118" y="0" width="9" height="9" fill="var(--stop)" opacity=".9"/><text class="ax" x="132" y="8">sem data de entrega</text>
+            <rect x="258" y="0" width="9" height="9" fill="var(--c1)" opacity=".85"/><text class="ax" x="272" y="8">sem data de coleta</text>
+          </svg>
+          <figcaption>A escada é monotónica nas duas séries. Na data de coleta a distância entre a ponta pequena e a grande é de 39× — não é ruído de amostra, é diferença de processo de registo.</figcaption>
+        </figure>
+        <div>
+          <p>Quem registra pior é sempre o vendedor pequeno. Isso não diz nada sobre a pontualidade dele: diz que <strong>ninguém lhe cobrou a baixa no sistema</strong>.</p>
+          <p>A consequência é direta. Uma filial concentrada em vendedores pequenos vai parecer <strong>pior em completude e melhor em atraso</strong> — porque atraso só conta onde a data existe. Uma filial de grandes vendedores parece o contrário, pelo mesmo motivo.</p>
+          <div class="lbl" style="margin-top:1.6cqw">O canal também difere</div>
+          <table>
+            <thead><tr><th>Canal de pagamento</th><th class="num">Pedidos</th><th class="num">Sem entrega</th></tr></thead>
+            <tbody>
+              <tr><td class="who">boleto</td><td class="num">19 689</td><td class="num">2,53%</td></tr>
+              <tr><td class="who">voucher</td><td class="num">2 651</td><td class="num">2,60%</td></tr>
+              <tr><td class="who">cartão de crédito</td><td class="num">74 955</td><td class="num">2,32%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Se a qualidade do dado depende de quem o escreve, então o indicador mede o escriba, não a operação.</span></div>
+    <div class="pagenum">09</div>
+  </section>
+
+  <!-- ============ 10 · A PERGUNTA ============ -->
+  <section class="slide" data-title="A pergunta obrigatória">
+    <div class="eyebrow"><b>A pergunta obrigatória</b><span class="q">que filial parece a melhor?</span></div>
+    <h2>Pelo indicador de hoje, GO. Com o filtro de volume errado, PI.</h2>
+    <div class="body">
+      <div class="cols c2n">
+        <div class="figs">
+          <div>
+            <div class="lbl">Sem filtro de volume, o topo do ranking é</div>
+            <div class="big">PI · 0,00%</div>
+            <div class="bigsub">zero atrasos em <b>12 pedidos</b>. RO e SE empatam com 13 e 7. Isto não é desempenho, é o tamanho da amostra.</div>
+          </div>
+          <div>
+            <div class="lbl">Com pelo menos 200 pedidos</div>
+            <div class="big warn">GO · 3,99%</div>
+            <div class="bigsub">460 pedidos, 18 atrasos. É a resposta defensável — e ainda assim está errada.</div>
+          </div>
+        </div>
+        <div>
+          <div class="lbl">As doze filiais com 200 pedidos ou mais, pelo indicador de hoje</div>
+          <table>
+            <thead><tr><th>Filial</th><th class="num">Pedidos</th><th class="num">Com data</th><th class="num">% atraso</th></tr></thead>
+            <tbody>
+              <tr><td class="who">GO</td><td class="num">460</td><td class="num">451</td><td class="num">3,99</td></tr>
+              <tr><td class="who">RS</td><td class="num">1 970</td><td class="num">1 949</td><td class="num">4,31</td></tr>
+              <tr><td class="who">PE</td><td class="num">405</td><td class="num">403</td><td class="num">4,47</td></tr>
+              <tr><td class="who">MG</td><td class="num">7 794</td><td class="num">7 647</td><td class="num">5,64</td></tr>
+              <tr><td class="who">BA</td><td class="num">566</td><td class="num">549</td><td class="num">5,83</td></tr>
+              <tr><td class="who">SP</td><td class="num">69 636</td><td class="num">68 415</td><td class="num">8,77</td></tr>
+              <tr><td class="who">MA</td><td class="num">391</td><td class="num">388</td><td class="num">23,20</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:1.2cqw">Repare na terceira coluna. <strong>O denominador do indicador não é «pedidos» — é «pedidos com data de entrega».</strong> A diferença entre as duas colunas é exatamente o que desaparece da conta.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>A pergunta pede a melhor filial. A resposta honesta começa por olhar o denominador, não o numerador.</span></div>
+    <div class="pagenum">10</div>
+  </section>
+
+  <!-- ============ 11 · A RESPOSTA ============ -->
+  <section class="slide" data-title="Não, não acredito">
+    <div class="eyebrow"><b>A resposta</b> Não, não acredito <span class="q">e o teste é trocar o denominador</span></div>
+    <h2>Atraso só é contável quando a data existe</h2>
+    <div class="body">
+      <div class="cols c2w">
+        <figure>
+          <div class="figtitle">O mesmo ranking, com dois denominadores</div>
+          <div class="figsub">Reportado: atrasos ÷ pedidos com data. Honesto: (atrasos + prazos vencidos sem registo) ÷ todos os pedidos.</div>
+          <svg viewBox="0 0 560 296" role="img" aria-label="Gráfico de halteres com onze filiais. Para cada uma, a taxa de atraso reportada e a honesta. PE vai de 4,47 para 4,94 por cento. RS de 4,31 para 5,33. GO de 3,99 para 5,87. SC de 6,05 para 7,28. MG de 5,64 para 7,42. DF de 5,98 para 7,48. PR de 6,53 para 8,20. BA de 5,83 para 8,66. ES de 7,14 para 9,21. SP de 8,77 para 10,37. RJ de 8,46 para 10,70.">
+            <line class="grid" x1="64" y1="18" x2="64" y2="256"/>
+            <line class="grid" x1="179" y1="18" x2="179" y2="256"/>
+            <line class="grid" x1="294" y1="18" x2="294" y2="256"/>
+            <line class="grid" x1="409" y1="18" x2="409" y2="256"/>
+            <line class="grid" x1="524" y1="18" x2="524" y2="256"/>
+
+            <text class="axl" x="52" y="34" text-anchor="end">PE</text>
+            <line x1="235" y1="30" x2="253" y2="30" stroke="var(--rule)" stroke-width="1.6"/>
+            <circle cx="235" cy="30" r="3.2" fill="var(--c3)"/><circle cx="253" cy="30" r="3.6" fill="var(--stop)"/>
+            <text class="val" x="262" y="34">4,94</text>
+
+            <text class="axl" x="52" y="55" text-anchor="end">RS</text>
+            <line x1="229" y1="51" x2="268" y2="51" stroke="var(--rule)" stroke-width="1.6"/>
+            <circle cx="229" cy="51" r="3.2" fill="var(--c3)"/><circle cx="268" cy="51" r="3.6" fill="var(--stop)"/>
+            <text class="val" x="277" y="55">5,33</text>
+
+            <text class="axl" x="52" y="76" text-anchor="end">GO</text>
+            <line x1="217" y1="72" x2="289" y2="72" stroke="var(--stop)" stroke-width="1.6" opacity=".45"/>
+            <circle cx="217" cy="72" r="3.2" fill="var(--c3)"/><circle cx="289" cy="72" r="4.4" fill="var(--stop)"/>
+            <text class="val" x="298" y="76" style="fill:var(--stop)">5,87</text>
+
+            <text class="axl" x="52" y="97" text-anchor="end">SC</text>
+            <line x1="296" y1="93" x2="343" y2="93" stroke="var(--rule)" stroke-width="1.6"/>
+            <circle cx="296" cy="93" r="3.2" fill="var(--c3)"/><circle cx="343" cy="93" r="3.6" fill="var(--stop)"/>
+            <text class="val" x="352" y="97">7,28</text>
+
+            <text class="axl" x="52" y="118" text-anchor="end">MG</text>
+            <line x1="280" y1="114" x2="348" y2="114" stroke="var(--rule)" stroke-width="1.6"/>
+            <circle cx="280" cy="114" r="3.2" fill="var(--c3)"/><circle cx="348" cy="114" r="3.6" fill="var(--stop)"/>
+            <text class="val" x="357" y="118">7,42</text>
+
+            <text class="axl" x="52" y="139" text-anchor="end">DF</text>
+            <line x1="293" y1="135" x2="351" y2="135" stroke="var(--rule)" stroke-width="1.6"/>
+            <circle cx="293" cy="135" r="3.2" fill="var(--c3)"/><circle cx="351" cy="135" r="3.6" fill="var(--stop)"/>
+            <text class="val" x="360" y="139">7,48</text>
+
+            <text class="axl" x="52" y="160" text-anchor="end">PR</text>
+            <line x1="314" y1="156" x2="378" y2="156" stroke="var(--rule)" stroke-width="1.6"/>
+            <circle cx="314" cy="156" r="3.2" fill="var(--c3)"/><circle cx="378" cy="156" r="3.6" fill="var(--stop)"/>
+            <text class="val" x="387" y="160">8,20</text>
+
+            <text class="axl" x="52" y="181" text-anchor="end">BA</text>
+            <line x1="287" y1="177" x2="396" y2="177" stroke="var(--stop)" stroke-width="1.6" opacity=".45"/>
+            <circle cx="287" cy="177" r="3.2" fill="var(--c3)"/><circle cx="396" cy="177" r="4.4" fill="var(--stop)"/>
+            <text class="val" x="405" y="181" style="fill:var(--stop)">8,66</text>
+
+            <text class="axl" x="52" y="202" text-anchor="end">ES</text>
+            <line x1="338" y1="198" x2="417" y2="198" stroke="var(--rule)" stroke-width="1.6"/>
+            <circle cx="338" cy="198" r="3.2" fill="var(--c3)"/><circle cx="417" cy="198" r="3.6" fill="var(--stop)"/>
+            <text class="val" x="426" y="202">9,21</text>
+
+            <text class="axl" x="52" y="223" text-anchor="end">SP</text>
+            <line x1="400" y1="219" x2="461" y2="219" stroke="var(--rule)" stroke-width="1.6"/>
+            <circle cx="400" cy="219" r="3.2" fill="var(--c3)"/><circle cx="461" cy="219" r="3.6" fill="var(--stop)"/>
+            <text class="val" x="470" y="223">10,37</text>
+
+            <text class="axl" x="52" y="244" text-anchor="end">RJ</text>
+            <line x1="388" y1="240" x2="474" y2="240" stroke="var(--stop)" stroke-width="1.6" opacity=".45"/>
+            <circle cx="388" cy="240" r="3.2" fill="var(--c3)"/><circle cx="474" cy="240" r="4.4" fill="var(--stop)"/>
+            <text class="val" x="483" y="244" style="fill:var(--stop)">10,70</text>
+
+            <line class="base" x1="64" y1="256" x2="524" y2="256"/>
+            <text class="ax" x="64" y="270" text-anchor="middle">0</text>
+            <text class="ax" x="179" y="270" text-anchor="middle">3%</text>
+            <text class="ax" x="294" y="270" text-anchor="middle">6%</text>
+            <text class="ax" x="409" y="270" text-anchor="middle">9%</text>
+            <text class="ax" x="524" y="270" text-anchor="middle">12%</text>
+
+            <circle cx="66" cy="288" r="3.2" fill="var(--c3)"/><text class="ax" x="75" y="291">% atraso reportado</text>
+            <circle cx="200" cy="288" r="3.6" fill="var(--stop)"/><text class="ax" x="210" y="291">% atraso honesto</text>
+            <text class="ax" x="524" y="291" text-anchor="end">MA fica fora da escala: 23,20% → 23,79%</text>
+          </svg>
+          <figcaption>Ordenado pela métrica honesta. GO era o primeiro lugar; com o denominador correto cai para terceiro e PE assume. BA e RJ, as filiais com mais buracos, são as que mais sobem.</figcaption>
+        </figure>
+        <div>
+          <div class="lbl">Quanto cada filial sobe ao trocar o denominador</div>
+          <table>
+            <thead><tr><th>Filial</th><th class="num">Sem registo</th><th class="num">Salto</th></tr></thead>
+            <tbody>
+              <tr><td class="who">BA</td><td class="num">17</td><td class="num">+2,83 pp</td></tr>
+              <tr><td class="who">RJ</td><td class="num">105</td><td class="num">+2,24 pp</td></tr>
+              <tr><td class="who">ES</td><td class="num">7</td><td class="num">+2,07 pp</td></tr>
+              <tr><td class="who">GO</td><td class="num">9</td><td class="num">+1,88 pp</td></tr>
+              <tr><td class="who">MG</td><td class="num">147</td><td class="num">+1,78 pp</td></tr>
+              <tr><td class="who">PE</td><td class="num">2</td><td class="num">+0,47 pp</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:1.2cqw">O salto é grande exatamente onde há buracos. <strong>Não é coincidência: é a definição da métrica.</strong></p>
+          <p>A correlação entre o indicador reportado e a taxa de ausência é <strong>−0,09</strong> nas filiais com 50 pedidos ou mais. Negativa e fraca — o suficiente para dizer que quem registra menos não aparece pior, e nunca melhor.</p>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>O ranking premia o registo, não a pontualidade. GO não é a melhor filial; é a que teve 9 pedidos removidos da própria conta.</span></div>
+    <div class="pagenum">11</div>
+  </section>
+
+  <!-- ============ 12 · A FILIAL FANTASMA ============ -->
+  <section class="slide" data-title="A filial fantasma">
+    <div class="eyebrow"><b>O terceiro motivo</b><span class="q">e a filial que não está no ranking?</span></div>
+    <h2>Setecentos e setenta e cinco pedidos sem filial nenhuma</h2>
+    <div class="body">
+      <div class="cols c2t">
+        <div class="figs">
+          <div>
+            <div class="big stop">775</div>
+            <div class="bigsub">pedidos <b>sem nenhum item registado</b>: sem produto, sem vendedor, sem frete — e portanto sem filial.</div>
+          </div>
+          <div>
+            <div class="big sm stop">100%</div>
+            <div class="bigsub">deles sem data de entrega. Atraso honesto de <b>100%</b>.</div>
+          </div>
+        </div>
+        <div>
+          <p>Estes 775 pedidos não estão em nenhuma linha da tabela do slide 10. Não têm UF de vendedor, então o <code>GROUP BY filial</code> descarta-os em silêncio. <strong>Nem premiados, nem punidos: invisíveis.</strong></p>
+          <p>São 0,78% da base — pouco em volume, decisivo em interpretação. É a pior «filial» do conjunto de dados, e ela não aparece no relatório que decide bónus.</p>
+          <div class="lbl" style="margin-top:1.8cqw">Três razões para não acreditar no ranking — em resumo</div>
+          <table>
+            <tbody>
+              <tr><td class="who" style="width:24%">O denominador</td><td>2 346 pedidos vencidos saem da conta por não terem data. Trocando o denominador, GO cai de 1.º para 3.º.</td></tr>
+              <tr><td class="who">A filial fantasma</td><td>775 pedidos sem UF não entram em nenhuma linha do ranking.</td></tr>
+              <tr><td class="who">O escriba</td><td>A ausência de registo escala com o porte do vendedor: 4,40% nos pequenos, 1,34% nos grandes. O indicador mede quem escreve.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>Toda linha descartada em silêncio por um <code>GROUP BY</code> é uma decisão que alguém tomou sem saber que estava a tomar.</span></div>
+    <div class="pagenum">12</div>
+  </section>
+
+  <!-- ============ 13 · OS TRÊS DEFEITOS ============ -->
+  <section class="slide dense" data-title="Os três defeitos mais graves">
+    <div class="eyebrow"><b>O custo</b> Os três defeitos mais graves <span class="q">quanto isto custa por ano?</span></div>
+    <h2>R$ 208 mil por ano — e o pressuposto está declarado em cada linha</h2>
+    <div class="body">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:4%">#</th>
+            <th style="width:20%">Defeito</th>
+            <th class="num" style="width:9%">Linhas</th>
+            <th style="width:27%">Que decisão isto estraga</th>
+            <th class="num" style="width:11%">Custo / ano</th>
+            <th>Pressuposto usado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num who">1</td>
+            <td class="who">Data de entrega ausente em pedido com prazo vencido</td>
+            <td class="num">2 346</td>
+            <td>Ranking de filiais e apuração de SLA. Atraso só conta quando a data existe — <strong>bónus e renovação de contrato premiam o pior registo</strong>.</td>
+            <td class="num" style="color:var(--stop);font-weight:600">R$ 200 320</td>
+            <td>Cada prazo vencido sem registo é um atraso real: multa de 3,5% do frete mais R$180 de reentrega.</td>
+          </tr>
+          <tr>
+            <td class="num who">2</td>
+            <td class="who">Duplicação em <code>geolocation</code> e em <code>order_items</code></td>
+            <td class="num">279 144</td>
+            <td>Cálculo de frete e custo por rota. O centroide de CEP é a média de linhas repetidas e a contagem de itens fica inflada — <strong>tabela de preço e faturação erradas</strong>.</td>
+            <td class="num">R$ 1 980</td>
+            <td>Uma reemissão de frete por pedido afetado (6 968), ao valor da multa de 3,5%.</td>
+          </tr>
+          <tr>
+            <td class="num who">3</td>
+            <td class="who">Doze grafias da mesma cidade; 18 cidades com 3 ou mais</td>
+            <td class="num">176 971</td>
+            <td>Agrupamento por praça, escolha de hub e roteirização. <strong>São Paulo vira vários mercados</strong> e o volume real fica escondido.</td>
+            <td class="num">R$ 6 148</td>
+            <td>Quatro entregas por ano mal roteadas em cada cidade com grafia ambígua.</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr><td></td><td>Total</td><td class="num">—</td><td></td><td class="num">R$ 208 447</td><td>Faixa do enunciado: multa de 2–5% do frete. Usei 3,5%, o meio. Frete mediano R$17,17. Janela de 772 dias, anualizada por 0,47×.</td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="claim"><span class="k">A FRASE</span><span>O defeito mais caro não é o mais numeroso. 2 346 linhas custam cem vezes mais que 279 mil, porque cada uma quebra uma decisão.</span></div>
+    <div class="pagenum">13</div>
+  </section>
+
+  <!-- ============ 14 · FECHO ============ -->
+  <section class="slide cover" data-title="Fecho">
+    <div class="kicker">O que fazer antes de premiar qualquer filial</div>
+    <h1 style="font-size:4.4cqw;max-width:28ch">Estes dados mostram tendência.<br>Não fecham contrato de SLA.</h1>
+    <div class="rule"></div>
+    <div class="meta" style="font-size:1.2cqw">
+      <div><span>Primeiro</span>Fechar o registo dos 2 346 pedidos<br>com prazo vencido e sem data.</div>
+      <div><span>Depois</span>Atribuir os 775 pedidos órfãos<br>a uma filial responsável.</div>
+      <div><span>Então</span>Reportar SLA sobre <em>todos</em> os pedidos,<br>tratando «sem registo» como falha<br>até prova em contrário.</div>
+    </div>
+    <div class="pagenum">14</div>
+  </section>
+</div>
+</div>
+
+<div class="hint">← → navegam · G abre o índice · Esc fecha</div>
+
+<div class="overview" id="ov">
+  <div class="hint" style="padding-top:0;padding-bottom:20px">Índice — clique para ir ao slide · Esc fecha</div>
+  <div class="ovgrid" id="ovgrid"></div>
+</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var i = 0;
+  var cur = document.getElementById('cur');
+  var tot = document.getElementById('tot');
+  var ov  = document.getElementById('ov');
+  var ovgrid = document.getElementById('ovgrid');
+  tot.textContent = slides.length;
+
+  slides.forEach(function(s, n){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ovcard';
+    b.innerHTML = '<span class="n">' + String(n+1).padStart(2,'0') + '</span>' +
+                  '<span class="t"></span>';
+    b.querySelector('.t').textContent = s.dataset.title || ('Slide ' + (n+1));
+    b.addEventListener('click', function(){ go(n); closeOv(); });
+    ovgrid.appendChild(b);
+  });
+  var cards = Array.prototype.slice.call(ovgrid.children);
+
+  function go(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function(s, k){ s.classList.toggle('on', k === i); });
+    cards.forEach(function(c, k){ c.classList.toggle('cur', k === i); });
+    cur.textContent = i + 1;
+    try { location.hash = String(i + 1); } catch(e){}
+  }
+  function openOv(){ ov.classList.add('on'); }
+  function closeOv(){ ov.classList.remove('on'); }
+
+  document.getElementById('btn-next').addEventListener('click', function(){ go(i+1); });
+  document.getElementById('btn-prev').addEventListener('click', function(){ go(i-1); });
+  document.getElementById('z-next').addEventListener('click', function(){ go(i+1); });
+  document.getElementById('z-prev').addEventListener('click', function(){ go(i-1); });
+  document.getElementById('btn-ov').addEventListener('click', function(){
+    ov.classList.contains('on') ? closeOv() : openOv();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { go(i+1); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { go(i-1); e.preventDefault(); }
+    else if (e.key === 'Home') { go(0); }
+    else if (e.key === 'End') { go(slides.length-1); }
+    else if (e.key === 'g' || e.key === 'G') { ov.classList.contains('on') ? closeOv() : openOv(); }
+    else if (e.key === 'Escape') { closeOv(); }
+  });
+
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  go(isNaN(start) ? 0 : start - 1);
+})();
+</script>
