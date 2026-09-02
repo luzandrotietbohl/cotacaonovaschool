@@ -1,0 +1,128 @@
+{
+  "versao": "v1",
+  "gerado_em": "2026-09-02T18:21:50+00:00",
+  "gerado_por": "scripts/curar_dados.py",
+  "diagnostico": "docs/E1-2_cartao_qualidade.md",
+  "janela_dos_dados": {
+    "inicio": "2016-09-04",
+    "fim": "2018-10-17"
+  },
+  "fontes": {
+    "olist_orders_dataset.csv": {
+      "sha256": "8df58ef3d2d7e9944010f7beecd9b75367f5588ec6e3c91cec19ae3345ef9ecf",
+      "linhas": 99441
+    },
+    "olist_order_items_dataset.csv": {
+      "sha256": "0bc4d068c4fe38cbb01bd90e8746e3c613fe7b4baef75fab7b0e329701c3e279",
+      "linhas": 112650
+    },
+    "olist_customers_dataset.csv": {
+      "sha256": "983a422239e1712ded753b3bf9ecf47dc73f144d306029dcfa99e70a226883d2",
+      "linhas": 99441
+    },
+    "olist_sellers_dataset.csv": {
+      "sha256": "1f643d2b950373b85735e7794b20986f528d7a000432e7c6f9bcbb44d0846a0e",
+      "linhas": 3095
+    },
+    "olist_products_dataset.csv": {
+      "sha256": "3e6569628a17fbc75fd206ee357b59e20364b9afa90f5b6cd5b4d624c58aa9cc",
+      "linhas": 32951
+    },
+    "olist_order_payments_dataset.csv": {
+      "sha256": "4f713964f2815dbbaa40b9488268c55aac3627bfce5aa96cf58d1f3616de3cc0",
+      "linhas": 103886
+    },
+    "olist_geolocation_dataset.csv": {
+      "sha256": "b514f6fc991b9566aeba02aa5d67e2c3630f034b60a0e05aa0d082a3b66d88d6",
+      "linhas": 1000163
+    },
+    "olist_order_reviews_dataset.csv": {
+      "sha256": "012b61c7593e34f51fa614efdf802b9c7056ce6aae5307ddb93236e7cfc797d7",
+      "linhas": 99224
+    }
+  },
+  "saidas": {
+    "entregas_curado.csv": {
+      "linhas": 99441,
+      "colunas": 56,
+      "bytes": 52852877,
+      "sha256": "1b4a4f4ca8949b4a0716ef0c91ca4499a1f288420b1900451af9ef04bcc3beb9"
+    },
+    "geolocation_cep_curado.csv": {
+      "linhas": 19010,
+      "colunas": 11,
+      "bytes": 2135558,
+      "sha256": "1a4a7e1079c382f063a31360cd09fb7aee89871e3386f9811f712893bfd70c43"
+    },
+    "geolocation_fora_br.csv": {
+      "linhas": 38,
+      "colunas": 6,
+      "bytes": 3132,
+      "sha256": "9b31390b79c1f6a3fffdbd285bc511a0198834ece54c418f40f4b02e0635b8bd"
+    },
+    "cidades_mapa.csv": {
+      "linhas": 8617,
+      "colunas": 7,
+      "bytes": 563044,
+      "sha256": "85cfc8bdb4017ebd8bbd65075134e8d87f21c9d5ebf6181242ab81aff71a252a"
+    },
+    "cidades_suspeitas.csv": {
+      "linhas": 73,
+      "colunas": 7,
+      "bytes": 5500,
+      "sha256": "1adbc223d95abbd552841718b8868ca8674f60e26cf4d64210ac47ad173bbf39"
+    },
+    "quarentena.csv": {
+      "linhas": 1391,
+      "colunas": 57,
+      "bytes": 769898,
+      "sha256": "5a08204c337624da6c29ce45a9469b78b96654032fd42deb392120869b7ecae3"
+    }
+  },
+  "parametros": {
+    "lead_max_dias": 100,
+    "peso_max_g": 30000,
+    "frete_sobre_mercadoria": 3,
+    "dif_pagamento_reais": 1.0,
+    "cauda_dias": 60,
+    "aliases_cidade": {
+      "sp|SP": "sao paulo",
+      "sbc|SP": "sao bernardo do campo",
+      "sbcampo|SP": "sao bernardo do campo",
+      "rj|RJ": "rio de janeiro",
+      "bh|MG": "belo horizonte"
+    },
+    "separador": ";",
+    "codificacao": "utf-8-sig"
+  },
+  "regras": [
+    "Nenhuma linha e removida da tabela principal; a quarentena e um extrato.",
+    "Peso <= 0 vira nulo; o valor original fica em peso_g_original.",
+    "Grafias de cidade colapsadas por chave NFC + sem acento + sem sufixo de UF; a canonica e a acentuada mais frequente do grupo.",
+    "Duplicados exatos de geolocation removidos antes de calcular o centroide do CEP.",
+    "Coordenadas fora dos limites do Brasil excluidas do centroide e preservadas em geolocation_fora_br.csv.",
+    "Erro de digitacao em nome de cidade NAO e unido automaticamente: vai para cidades_suspeitas.csv com a sugestao e a distancia de edicao.",
+    "Quase-duplicados de order_items marcados, nunca removidos: a decisao e de negocio.",
+    "Pedidos sem vendedor recebem filial 'SEM_FILIAL' para nao sumirem no GROUP BY.",
+    "atraso_honesto usa TODOS os pedidos ativos como denominador; prazo vencido sem registo conta como atraso ate prova em contrario.",
+    "UF declarada e conferida contra a UF do prefixo de CEP; divergencia vai para filial_uf_cep / cliente_uf_cep com flag, sem sobrescrever a filial.",
+    "Implausibilidade (exatidao) e sempre marcada e nunca corrigida."
+  ],
+  "contagens": {
+    "pedidos_entrada": 99441,
+    "pedidos_saida": 99441,
+    "pedidos_sem_flag": 85398,
+    "pedidos_quarentena": 1391,
+    "geolocation_linhas_brutas": 1000163,
+    "geolocation_duplicados_removidos": 261831,
+    "geolocation_pontos_fora_br": 38,
+    "cidades_grafias_entrada": 8126,
+    "cidades_canonicas_saida": 6066,
+    "cidades_regrafias_estruturais": 31,
+    "cidades_pares_suspeitos": 73,
+    "vendedores_uf_incoerente": 35,
+    "pedidos_uf_filial_incoerente": 581,
+    "sla_reportado_pct": 8.1124,
+    "sla_honesto_pct": 10.2939
+  }
+}

@@ -1,0 +1,1061 @@
+<meta charset="utf-8">
+<title>Nada Sai em Silêncio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+/* ============================================================
+   Registo de decisoes da curadoria — dados_curados/v1
+   Mesmos tokens de apresentacao.html e apresentacao_e12.html.
+   ============================================================ */
+
+:root{
+  --paper:#f4f2ed;
+  --surface:#fbfaf7;
+  --surface-2:#efece4;
+  --ink:#191712;
+  --ink-2:#4a463d;
+  --muted:#807a6d;
+  --rule:#d9d3c6;
+  --rule-soft:#e8e4da;
+  --accent:#b16512;
+
+  --c2:#008f7d;
+  --c3:#426bce;
+
+  --ok:#008f7d;
+  --warn:#b16512;
+  --stop:#c14d66;
+
+  --ok-wash:#008f7d14;
+  --warn-wash:#b1651214;
+  --stop-wash:#c14d6614;
+  --info-wash:#426bce14;
+
+  --shadow:0 1px 2px #19171208, 0 8px 28px #1917120f;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131210;
+    --surface:#1c1a16;
+    --surface-2:#24211b;
+    --ink:#f2efe6;
+    --ink-2:#c4bfb2;
+    --muted:#8f887a;
+    --rule:#3a362c;
+    --rule-soft:#2a2721;
+    --accent:#d08a2e;
+
+    --c2:#0f9b89;
+    --c3:#5c82da;
+
+    --ok:#0f9b89;
+    --warn:#be7125;
+    --stop:#cf5971;
+
+    --ok-wash:#0f9b891f;
+    --warn-wash:#be71251f;
+    --stop-wash:#cf59711f;
+    --info-wash:#5c82da1f;
+
+    --shadow:0 1px 2px #00000040, 0 8px 28px #00000047;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131210;
+  --surface:#1c1a16;
+  --surface-2:#24211b;
+  --ink:#f2efe6;
+  --ink-2:#c4bfb2;
+  --muted:#8f887a;
+  --rule:#3a362c;
+  --rule-soft:#2a2721;
+  --accent:#d08a2e;
+
+  --c2:#0f9b89;
+  --c3:#5c82da;
+
+  --ok:#0f9b89;
+  --warn:#be7125;
+  --stop:#cf5971;
+
+  --ok-wash:#0f9b891f;
+  --warn-wash:#be71251f;
+  --stop-wash:#cf59711f;
+  --info-wash:#5c82da1f;
+
+  --shadow:0 1px 2px #00000040, 0 8px 28px #00000047;
+}
+
+*{box-sizing:border-box}
+
+body{
+  background:var(--paper);
+  color:var(--ink-2);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  font-size:17px;
+  line-height:1.62;
+  margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+
+.wrap{
+  max-width:52rem;
+  margin:0 auto;
+  padding:0 1.6rem 6rem;
+}
+
+code{
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.86em;
+  color:var(--ink);
+  background:var(--surface-2);
+  padding:.1em .34em;
+  border-radius:2px;
+}
+strong{color:var(--ink);font-weight:600}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+/* ---------------------------------------------------------- cabecalho ---- */
+
+header{
+  border-bottom:1px solid var(--ink);
+  padding:4.5rem 0 1.6rem;
+  margin-bottom:2.4rem;
+}
+.kicker{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.72rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:1.1rem;
+}
+h1{
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;
+  font-weight:800;
+  font-size:clamp(2.3rem,6vw,3.5rem);
+  line-height:1.02;
+  letter-spacing:-.035em;
+  color:var(--ink);
+  margin:0 0 .9rem;
+  text-wrap:balance;
+}
+.dek{
+  font-size:1.16rem;
+  line-height:1.5;
+  max-width:40ch;
+  margin:0;
+  color:var(--ink-2);
+}
+.meta{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));
+  gap:1.1rem 1.6rem;
+  margin-top:2.2rem;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.78rem;
+  line-height:1.5;
+  color:var(--ink-2);
+}
+.meta b{
+  display:block;
+  color:var(--muted);
+  font-weight:500;
+  font-size:.68rem;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  margin-bottom:.3rem;
+}
+
+/* -------------------------------------------------------------- texto ---- */
+
+h2{
+  font-family:Archivo,sans-serif;
+  font-weight:700;
+  font-size:1.05rem;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin:3.6rem 0 1.4rem;
+  padding-bottom:.5rem;
+  border-bottom:1px solid var(--rule);
+  display:flex;
+  align-items:baseline;
+  gap:.7rem;
+}
+h2 .gr{
+  font-family:"IBM Plex Mono",monospace;
+  font-weight:500;
+  font-size:.78rem;
+  letter-spacing:.14em;
+  color:var(--accent);
+}
+h2 .qt{
+  margin-left:auto;
+  font-family:"IBM Plex Mono",monospace;
+  font-weight:400;
+  font-size:.72rem;
+  letter-spacing:.1em;
+  text-transform:none;
+  color:var(--muted);
+}
+p{margin:0 0 1.1rem}
+.lede{font-size:1.06rem}
+.lede:last-child{margin-bottom:0}
+
+/* ----------------------------------------------------------- decisoes ---- */
+
+.dec{
+  padding:0 0 1.9rem 1.5rem;
+  margin-bottom:1.9rem;
+  border-left:2px solid var(--rule);
+  border-bottom:1px solid var(--rule-soft);
+}
+.dec:last-child{border-bottom:0;padding-bottom:.4rem;margin-bottom:0}
+.dec.chave{border-left-color:var(--accent)}
+
+.dhead{
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:.6rem .8rem;
+  margin-bottom:.9rem;
+}
+.did{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.76rem;
+  font-weight:600;
+  letter-spacing:.1em;
+  color:var(--accent);
+  flex:0 0 auto;
+}
+.dtit{
+  font-family:Archivo,sans-serif;
+  font-weight:600;
+  font-size:1.14rem;
+  line-height:1.24;
+  letter-spacing:-.014em;
+  color:var(--ink);
+  flex:1 1 18rem;
+  text-wrap:balance;
+}
+
+/* o eixo que importa numa curadoria: a decisao descarta informacao? */
+.rev{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.64rem;
+  font-weight:600;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  padding:.3em .55em;
+  border:1px solid currentColor;
+  border-radius:2px;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+.r-marca{color:var(--ok);background:var(--ok-wash)}
+.r-rev{color:var(--warn);background:var(--warn-wash)}
+.r-irrev{color:var(--stop);background:var(--stop-wash)}
+.r-esq{color:var(--c3);background:var(--info-wash)}
+
+.dgrid{
+  display:grid;
+  grid-template-columns:5.6rem 1fr;
+  gap:.5rem 1.1rem;
+  font-size:.97rem;
+  line-height:1.55;
+}
+.dgrid dt{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.68rem;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:var(--muted);
+  padding-top:.28em;
+}
+.dgrid dd{margin:0}
+.dgrid dd.alt{color:var(--muted)}
+.dgrid dd.alt s{text-decoration-color:var(--stop);text-decoration-thickness:1px}
+
+@media (max-width:34rem){
+  .dgrid{grid-template-columns:1fr;gap:.15rem}
+  .dgrid dt{padding-top:.6rem}
+}
+
+/* ------------------------------------------------------------- legenda --- */
+
+.legenda{
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-radius:2px;
+  padding:1.4rem 1.5rem;
+  box-shadow:var(--shadow);
+  margin:2.2rem 0 0;
+}
+.legenda .lt{
+  font-family:Archivo,sans-serif;
+  font-weight:600;
+  font-size:1rem;
+  color:var(--ink);
+  margin-bottom:.3rem;
+}
+.legenda .ls{font-size:.95rem;margin-bottom:1.1rem}
+.legenda dl{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:.6rem .9rem;
+  margin:0;
+  font-size:.93rem;
+  line-height:1.45;
+}
+.legenda dt{padding-top:.1rem}
+.legenda dd{margin:0}
+
+/* --------------------------------------------------------------- caixa --- */
+
+.caixa{
+  border-left:2px solid var(--accent);
+  background:var(--warn-wash);
+  padding:1.1rem 1.3rem;
+  margin:0 0 1.9rem;
+  font-size:.97rem;
+}
+.caixa p:last-child{margin-bottom:0}
+.caixa .ct{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.7rem;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:var(--accent);
+  font-weight:600;
+  margin-bottom:.5rem;
+}
+
+/* -------------------------------------------------------------- tabela --- */
+
+.tw{overflow-x:auto;margin:0 0 1.9rem}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:.93rem;
+  line-height:1.4;
+}
+thead th{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.68rem;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:500;
+  text-align:left;
+  padding:0 1rem .55rem 0;
+  border-bottom:1px solid var(--ink);
+  vertical-align:bottom;
+  white-space:nowrap;
+}
+tbody td{
+  padding:.6rem 1rem .6rem 0;
+  border-bottom:1px solid var(--rule-soft);
+  vertical-align:top;
+}
+tbody tr:last-child td{border-bottom:1px solid var(--rule)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;padding-right:0;white-space:nowrap}
+td.k{color:var(--ink);font-weight:600}
+
+/* --------------------------------------------------------------- listas -- */
+
+ul{margin:0 0 1.9rem;padding:0;list-style:none;display:flex;flex-direction:column;gap:.85rem}
+ul li{padding-left:1.5rem;position:relative;font-size:.97rem;line-height:1.55}
+ul li::before{
+  content:"";
+  position:absolute;
+  left:.15rem;top:.62em;
+  width:.42rem;height:.42rem;
+  border:1px solid var(--stop);
+  transform:rotate(45deg);
+}
+ul.lim li::before{
+  border:0;
+  background:var(--muted);
+  border-radius:50%;
+  transform:none;
+  top:.68em;
+  width:.36rem;height:.36rem;
+}
+ul li b{color:var(--ink);font-weight:600}
+
+footer{
+  margin-top:4rem;
+  padding-top:1.4rem;
+  border-top:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.76rem;
+  line-height:1.65;
+  color:var(--muted);
+}
+footer b{color:var(--ink-2);font-weight:500}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="kicker">Registo de decisões · dados_curados/v1</div>
+  <h1>Nada sai em silêncio</h1>
+  <p class="dek">Vinte e duas decisões de curadoria da base Olist, o que cada uma
+  descarta e por que foi tomada assim.</p>
+  <div class="meta">
+    <div><b>Fonte</b>archive_olist/<br>8 ficheiros, 1 337 397 linhas</div>
+    <div><b>Saída</b>dados_curados/v1/<br>6 ficheiros + manifesto</div>
+    <div><b>Diagnóstico</b>docs/<br>E1-2_cartao_qualidade.md</div>
+    <div><b>Script</b>scripts/<br>curar_dados.py</div>
+    <div><b>Data</b>2 de setembro<br>de 2026</div>
+  </div>
+</header>
+
+<p class="lede">O cartão de qualidade E1.2 concluiu que o defeito mais caro da base
+— <strong>R$ 200 mil por ano</strong> — não era um valor errado. Era uma linha ausente:
+2 346 pedidos com o prazo vencido e sem data de entrega, que saíam da conta do SLA e
+faziam a pior filial parecer a melhor.</p>
+
+<p class="lede">Isso determina a forma da curadoria. Uma limpeza que filtra linhas
+sujas reproduz exatamente o defeito que o cartão diagnosticou, só com aparência de
+rigor. Daí o princípio que governa as 22 decisões abaixo: <strong>a curadoria não
+apaga em silêncio</strong>. Cada correcção deixa rastro, cada julgamento fica à vista
+e cada linha continua contável.</p>
+
+<div class="legenda">
+  <div class="lt">O eixo que classifica cada decisão</div>
+  <div class="ls">Numa curadoria o que importa não é se a decisão é certa — é se ela
+  pode ser desfeita depois que alguém discordar. Cada decisão abaixo leva um destes
+  quatro selos.</div>
+  <dl>
+    <dt><span class="rev r-marca">só marca</span></dt>
+    <dd>O dado não muda. Ganha uma coluna <code>qa_*</code> dizendo que alguém precisa
+    olhar. Nada se perde.</dd>
+    <dt><span class="rev r-rev">reversível</span></dt>
+    <dd>O valor muda, mas o original fica guardado numa coluna ao lado ou num ficheiro
+    à parte. Dá para voltar atrás sem reprocessar a fonte.</dd>
+    <dt><span class="rev r-irrev">irreversível</span></dt>
+    <dd>Informação é descartada da saída. Só uma decisão leva este selo, e só porque
+    a linha descartada era cópia exata de outra.</dd>
+    <dt><span class="rev r-esq">esquema</span></dt>
+    <dd>Não mexe em valor nenhum: muda a forma da tabela para que o cálculo correcto
+    seja o caminho fácil.</dd>
+  </dl>
+</div>
+
+<h2><span class="gr">Grupo A</span> Princípios estruturais <span class="qt">5 decisões</span></h2>
+
+<div class="dec chave">
+  <div class="dhead">
+    <span class="did">D1</span>
+    <span class="dtit">Nenhuma linha sai da tabela principal</span>
+    <span class="rev r-esq">esquema</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd><code>entregas_curado.csv</code> tem exatamente as 99 441 linhas
+    da entrada. O manifesto registra os dois números lado a lado para que a igualdade
+    seja verificável, não prometida.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Filtrar as linhas com defeito e entregar uma
+    base limpa de 85 398 pedidos.</s></dd>
+    <dt>Por quê</dt><dd>É a alternativa que causa o defeito nº 1. Uma base «limpa» de
+    85 mil pedidos tem o mesmo vício da métrica de SLA: <strong>o problema desaparece
+    junto com a evidência dele</strong>. Quem receber essa base não tem como saber que
+    14 mil pedidos foram removidos, nem quais.</dd>
+    <dt>Custo</dt><dd>Quem consome a tabela precisa filtrar por <code>qa_*</code>
+    conscientemente. É trabalho a mais — e é o ponto: a filtragem passa a ser uma
+    escolha registada, não um padrão herdado.</dd>
+  </dl>
+</div>
+
+<div class="dec chave">
+  <div class="dhead">
+    <span class="did">D2</span>
+    <span class="dtit">A fronteira entre corrigir e marcar é o domínio possível</span>
+    <span class="rev r-esq">esquema</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Valor <strong>impossível</strong> é corrigido, com o original
+    preservado e uma flag. Valor <strong>improvável</strong> é apenas marcado, e o valor
+    fica intacto.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Um único tratamento para tudo que parece
+    errado — corrigir ambos, ou marcar ambos.</s></dd>
+    <dt>Por quê</dt><dd>São erros de natureza diferente. Um peso de <code>0 g</code> não
+    é um pacote leve: é a ausência de medição escrita como número, e qualquer média que
+    o inclua mente. Um lead time de 210 dias, ao contrário, <strong>pode ser
+    verdade</strong> — e se for, é a informação mais valiosa da base. Corrigir o segundo
+    seria apagar o achado.</dd>
+    <dt>Custo</dt><dd>Duas convenções para o consumidor aprender em vez de uma.</dd>
+  </dl>
+</div>
+
+<div class="dec">
+  <div class="dhead">
+    <span class="did">D3</span>
+    <span class="dtit">A quarentena é um extrato, não um destino</span>
+    <span class="rev r-marca">só marca</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Os 1 391 pedidos com violação dura de domínio ficam na tabela
+    principal <em>e</em> saem copiados em <code>quarentena.csv</code>, com uma coluna
+    <code>motivo_quarentena</code> nomeando o defeito.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Mover as linhas para a quarentena e removê-las
+    da tabela principal, como faz um pipeline de ETL clássico.</s></dd>
+    <dt>Por quê</dt><dd>Quarentena que remove é filtro com outro nome, e cai em D1. O
+    ficheiro serve para <strong>alguém corrigir na origem</strong> — por isso traz o
+    motivo e as 56 colunas de contexto, não só a chave.</dd>
+    <dt>Custo</dt><dd>Duplicação de 1 391 linhas em disco. Irrelevante.</dd>
+  </dl>
+</div>
+
+<div class="dec">
+  <div class="dhead">
+    <span class="did">D4</span>
+    <span class="dtit">A versão é imutável e carrega o hash das suas fontes</span>
+    <span class="rev r-esq">esquema</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Uma pasta por versão. <code>MANIFEST.json</code> guarda o
+    <code>sha256</code> dos 8 ficheiros de entrada e dos 6 de saída, mais as contagens
+    antes e depois e os parâmetros usados. Corrigir uma regra gera <code>v2</code>,
+    nunca sobrescreve <code>v1</code>.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Uma pasta <code>curado/</code> regenerada a
+    cada execução.</s></dd>
+    <dt>Por quê</dt><dd>Um número num relatório precisa apontar para os bytes exatos
+    que o produziram. Com pasta sobrescrita, um relatório de ontem descreve uma base que
+    já não existe e <strong>nada avisa</strong>. O hash das entradas também detecta o
+    caso inverso: a fonte mudou e a curadoria não foi refeita.</dd>
+    <dt>Custo</dt><dd>Cada versão ocupa ~56 MB. O manifesto torna as saídas
+    reproduzíveis, então versões antigas podem ser apagadas sem perder rastreabilidade.</dd>
+  </dl>
+</div>
+
+<div class="dec">
+  <div class="dhead">
+    <span class="did">D5</span>
+    <span class="dtit">Separador <code>;</code> e UTF-8 com BOM</span>
+    <span class="rev r-esq">esquema</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Todos os CSV de saída usam ponto e vírgula e BOM.</dd>
+    <dt>Por quê</dt><dd>É o formato que o enunciado do exercício especifica, e a razão
+    dele é boa: abre no Excel português com dois cliques, sem passo de importação. A
+    curadoria só vale se as pessoas que precisam do dado conseguirem abri-lo — um
+    ficheiro tecnicamente correto que aparece embaralhado no Excel <strong>não foi
+    entregue</strong>.</dd>
+    <dt>Custo</dt><dd>O BOM incomoda alguns leitores programáticos. Em pandas,
+    <code>encoding="utf-8-sig"</code> resolve.</dd>
+  </dl>
+</div>
+
+<h2><span class="gr">Grupo B</span> Consistência — o nome das cidades <span class="qt">5 decisões</span></h2>
+
+<div class="caixa">
+  <div class="ct">O problema, em números</div>
+  <p>8 126 grafias distintas de cidade para 6 066 cidades reais. A capital de São Paulo
+  aparece escrita de <strong>12 formas</strong>, incluindo duas que desenham os mesmos
+  caracteres na tela e diferem só nos bytes: uma guarda <code>ã</code>, a outra guarda
+  <code>a</code> seguido de um til combinante. Nenhum <code>GROUP BY</code> junta as
+  duas; nenhuma revisão visual as separa.</p>
+</div>
+
+<div class="dec chave">
+  <div class="dhead">
+    <span class="did">D6</span>
+    <span class="dtit">A chave de agrupamento tem seis passos, nesta ordem</span>
+    <span class="rev r-rev">reversível</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>NFC → minúsculas → sem acento → pontuação vira espaço → espaços
+    colapsados → sufixo de UF removido. Só então o valor entra num grupo.</dd>
+    <dt>Por quê</dt><dd>Cada passo mata um defeito observado, e a ordem importa. <b>NFC
+    primeiro</b>, porque sem ele as duas grafias invisivelmente diferentes nunca chegam
+    ao mesmo grupo. <b>Sufixo de UF por último</b>, porque <code>sp / sp</code> só se
+    reduz a <code>sp</code> depois de a barra virar separador. O passo que remove acento
+    é para agrupar, nunca para exibir — ver D7.</dd>
+    <dt>Custo</dt><dd>Agrupa também dois nomes que só diferem por acento e são cidades
+    distintas. Não encontrei nenhum caso assim nos dados; num cadastro nacional
+    completo, encontraria.</dd>
+  </dl>
+</div>
+
+<div class="dec chave">
+  <div class="dhead">
+    <span class="did">D7</span>
+    <span class="dtit">A grafia canónica é a acentuada mais frequente — não a mais frequente</span>
+    <span class="rev r-rev">reversível</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Dentro de um grupo, escolher a grafia mais frequente
+    <strong>entre as que têm acento</strong>. Só se nenhuma tiver acento, usar a mais
+    frequente do grupo. Depois, capitalização de nome próprio com preposições em
+    minúscula.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Maioria simples: a grafia mais frequente
+    ganha.</s></dd>
+    <dt>Por quê</dt><dd>A maioria simples devolveria <code>sao paulo</code>, com 152 034
+    linhas contra 24 918 da forma acentuada. Mas <strong>maioria não é autoridade
+    ortográfica</strong>: o nome da cidade leva acento, e a frequência aqui mede apenas
+    quantos sistemas a montante perdem diacríticos. Deixar a base decidir a ortografia
+    seria promover o defeito a padrão.</dd>
+    <dt>Custo</dt><dd>Uma cidade cuja única grafia acentuada seja um erro de digitação
+    herda o erro. É por isso que <code>cidades_mapa.csv</code> registra as 8 617 linhas
+    do mapa, com a regra aplicada em cada uma — a escolha é auditável.</dd>
+  </dl>
+</div>
+
+<div class="dec">
+  <div class="dhead">
+    <span class="did">D8</span>
+    <span class="dtit">O agrupamento é por par (UF, chave), nunca por chave sozinha</span>
+    <span class="rev r-rev">reversível</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>6 427 pares UF + cidade em vez de 6 066 chaves.</dd>
+    <dt>Por quê</dt><dd><strong>«São Paulo das Missões» é no Rio Grande do Sul.</strong>
+    Existem também «São Paulo de Olivença» no Amazonas e «São Paulo do Potengi» no Rio
+    Grande do Norte. Um agrupamento sem UF as trataria como variações da capital e
+    somaria o volume de quatro mercados diferentes.</dd>
+    <dt>Custo</dt><dd>Uma cidade cuja UF esteja errada na origem cai no grupo errado —
+    exatamente o caso que D16 detecta.</dd>
+  </dl>
+</div>
+
+<div class="dec">
+  <div class="dhead">
+    <span class="did">D9</span>
+    <span class="dtit">Abreviações vêm de uma tabela de cinco entradas, condicionada à UF</span>
+    <span class="rev r-rev">reversível</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd><code>sp</code>, <code>sbc</code>, <code>sbcampo</code>,
+    <code>rj</code>, <code>bh</code> — cada uma mapeada explicitamente no topo do script
+    e aplicada <strong>somente</strong> quando a UF do registo confirma.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Detectar abreviações por regra geral, ou por
+    similaridade com nomes conhecidos.</s></dd>
+    <dt>Por quê</dt><dd>Um <code>sp</code> num registo de Pernambuco não é São Paulo, e
+    nenhuma regra geral sabe disso — só a UF sabe. Cinco entradas cobrem os casos que
+    realmente aparecem, e cada uma é <strong>uma decisão de negócio que alguém pode
+    contestar linha a linha</strong>. Uma regra geral seria mais curta e indefensável.</dd>
+    <dt>Custo</dt><dd>Abreviações não mapeadas continuam separadas. É o comportamento
+    correcto: silêncio é melhor que palpite.</dd>
+  </dl>
+</div>
+
+<div class="dec chave">
+  <div class="dhead">
+    <span class="did">D10</span>
+    <span class="dtit">Erro de digitação não é unido automaticamente</span>
+    <span class="rev r-marca">só marca</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Três das doze grafias de São Paulo são erros de digitação —
+    <code>Sao Pauo</code>, <code>Sao Paulop</code>, <code>Sãopaulo</code> — e
+    <strong>continuam como cidades separadas</strong>. Vão para
+    <code>cidades_suspeitas.csv</code> com a cidade provável, a contagem de linhas de
+    cada lado e a distância de edição. São 73 pares sugeridos.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Unir automaticamente tudo com distância de
+    edição ≤ 2 para o nome frequente mais próximo.</s></dd>
+    <dt>Por quê</dt><dd>Distância de edição pequena também separa cidades reais e
+    distintas. Uma fusão automática errada <strong>funde dois mercados e ninguém
+    percebe</strong>, porque o resultado parece mais limpo que antes. Um erro de
+    digitação não corrigido, ao contrário, aparece como uma cidade de 1 pedido — visível
+    e inofensivo. A assimetria de custo decide: sugerir, não unir.</dd>
+    <dt>Custo</dt><dd>Sobram 73 pares para alguém revisar à mão. O ficheiro está
+    ordenado por distância e por volume, então os 6 primeiros resolvem o essencial.</dd>
+  </dl>
+</div>
+
+<h2><span class="gr">Grupo C</span> Unicidade — as cópias <span class="qt">3 decisões</span></h2>
+
+<div class="dec">
+  <div class="dhead">
+    <span class="did">D11</span>
+    <span class="dtit">Duplicado exato de geolocalização é removido</span>
+    <span class="rev r-irrev">irreversível</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>261 831 das 1 000 163 linhas de <code>geolocation</code> — 26,2%
+    — são cópias exatas nas cinco colunas, incluindo latitude e longitude. Removidas
+    antes de calcular qualquer centroide.</dd>
+    <dt>Por quê</dt><dd><strong>É a única decisão do documento que descarta informação, e
+    só porque não há informação a descartar</strong>: a linha é idêntica a outra em todas
+    as colunas. O efeito de mantê-las é concreto — o centroide de um CEP é a média das
+    suas coordenadas, então um ponto que entra oito vezes puxa a média para si.
+    <b>80,5% dos prefixos de CEP tinham o centroide deslocado</b>; a correção tem mediana
+    de 35 m e chega a 2,8 km no percentil 99. Essa distância vira preço de frete.</dd>
+    <dt>Custo</dt><dd>Perde-se a contagem de quantas vezes cada ponto foi registado.
+    <code>geolocation_cep_curado.csv</code> preserva o número em
+    <code>duplicados_removidos</code> e o efeito em <code>correcao_centroide_m</code>,
+    por prefixo.</dd>
+  </dl>
+</div>
+
+<div class="dec chave">
+  <div class="dhead">
+    <span class="did">D12</span>
+    <span class="dtit">Quase-duplicado de item é marcado, não removido</span>
+    <span class="rev r-marca">só marca</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>17 313 linhas de <code>order_items</code>, em 6 968 pedidos, são
+    idênticas em pedido, produto, vendedor, preço e frete — diferindo apenas no
+    <code>order_item_id</code>. Todas ficam. Os pedidos ganham
+    <code>qa_quase_duplicado</code>.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Deduplicar ignorando o
+    <code>order_item_id</code>, como se fosse D11.</s></dd>
+    <dt>Por quê</dt><dd>São duas unidades do mesmo produto, ou o mesmo lançamento
+    registado duas vezes? <strong>O ficheiro não distingue os dois casos</strong>, e a
+    diferença muda a receita e a contagem de volume. Isso não é uma questão técnica com
+    resposta certa: é uma decisão de negócio com um dono, e esse dono não é o script.
+    Marcar preserva as duas leituras; deduplicar escolhe uma calado.</dd>
+    <dt>Custo</dt><dd>7,01% dos pedidos carregam uma ambiguidade não resolvida. Está
+    declarada, que é o máximo que a curadoria pode fazer sozinha.</dd>
+  </dl>
+</div>
+
+<div class="dec">
+  <div class="dhead">
+    <span class="did">D13</span>
+    <span class="dtit">O centroide é média aritmética, depois de excluir o que não é ponto</span>
+    <span class="rev r-rev">reversível</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Média simples das coordenadas restantes, com os duplicados (D11) e
+    as coordenadas fora do Brasil (D14) já fora do cálculo.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Mediana das coordenadas, que é robusta a
+    outliers sem precisar excluir nada.</s></dd>
+    <dt>Por quê</dt><dd>Preferi <strong>tratar a causa a esconder o sintoma</strong>. A
+    mediana daria um centroide estável e deixaria os pontos impossíveis na base,
+    silenciosos. Excluir explicitamente produz um número — <code>38 pontos</code> — e um
+    ficheiro para investigar. <b>Esta é uma decisão discutível e a assumo como tal:</b>
+    a mediana seria defensável, e talvez melhor, num pipeline que não tem quem investigue.</dd>
+    <dt>Custo</dt><dd>A média continua sensível a outliers dentro dos limites do Brasil.
+    <code>correcao_centroide_m</code> tem máximo de 4 002 km, o que mede o tamanho do
+    erro que existia — e sinaliza prefixos que merecem revisão.</dd>
+  </dl>
+</div>
+
+<h2><span class="gr">Grupo D</span> Validade — o impossível <span class="qt">3 decisões</span></h2>
+
+<div class="dec">
+  <div class="dhead">
+    <span class="did">D14</span>
+    <span class="dtit">Coordenada fora do Brasil sai do centroide e vai para um ficheiro</span>
+    <span class="rev r-rev">reversível</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Caixa de limites declarada no script: latitude entre −34,0 e 5,3;
+    longitude entre −74,0 e −34,8. Os 38 pontos fora dela, em 23 prefixos de CEP, saem do
+    cálculo e são preservados em <code>geolocation_fora_br.csv</code>.</dd>
+    <dt>Por quê</dt><dd>Um CEP brasileiro fora do Brasil não é imprecisão de GPS, é erro
+    de domínio — e arrasta o centroide por centenas de quilómetros. Preservar em ficheiro
+    à parte permite descobrir a causa: sinal trocado na longitude, campos invertidos,
+    geocodificação falhada.</dd>
+    <dt>Custo</dt><dd>Uma caixa retangular deixa passar pontos no oceano e em países
+    vizinhos que caiam dentro dela. É um filtro grosseiro, escolhido por ser
+    verificável a olho; um polígono do território seria mais preciso e menos legível.</dd>
+  </dl>
+</div>
+
+<div class="dec">
+  <div class="dhead">
+    <span class="did">D15</span>
+    <span class="dtit">Peso ≤ 0 vira nulo, com o original ao lado</span>
+    <span class="rev r-rev">reversível</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>6 pedidos afetados. <code>peso_g</code> fica nulo,
+    <code>peso_g_original</code> guarda o valor e <code>qa_peso_invalido</code> marca a
+    linha.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Deixar o zero como está — é o que a fonte
+    diz.</s></dd>
+    <dt>Por quê</dt><dd>Zero e nulo dizem coisas diferentes e só uma é verdade aqui.
+    <strong>Nulo diz «não sei»; zero afirma que o pacote não tem peso</strong> — e
+    participa de qualquer média puxando-a para baixo. Nulo é excluído das agregações por
+    padrão, que é o comportamento correcto para uma medição que não existe.</dd>
+    <dt>Custo</dt><dd>Nenhum relevante. Seis linhas, com o original recuperável.</dd>
+  </dl>
+</div>
+
+<div class="dec chave">
+  <div class="dhead">
+    <span class="did">D16</span>
+    <span class="dtit">A UF do vendedor não é sobrescrita, mesmo quando o CEP a contradiz</span>
+    <span class="rev r-marca">só marca</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Defeito não previsto no cartão E1.2, encontrado durante a
+    curadoria: <strong>35 vendedores declaram uma UF que o próprio CEP contradiz</strong>,
+    afetando 581 pedidos. O caso mais claro é o CEP 31570 — Belo Horizonte — declarado
+    como <code>SP</code>. A <code>filial</code> mantém a UF declarada; a UF derivada do
+    CEP entra em <code>filial_uf_cep</code>, com <code>qa_uf_filial_incoerente</code>.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Confiar no CEP, que é um código estruturado e
+    concorda com o nome da cidade, e reescrever a filial dos 581 pedidos.</s></dd>
+    <dt>Por quê</dt><dd>O CEP é de facto o sinal mais forte — e a decisão ainda assim não
+    é técnica. <strong><code>filial</code> é a chave de agrupamento que decide bónus e
+    renovação de contrato.</strong> Mover 581 pedidos entre filiais é mexer no resultado
+    de alguém, e isso tem um dono que não é o script. A coluna ao lado dá a informação
+    completa sem tomar a decisão.</dd>
+    <dt>Verificado</dt><dd>Refiz o ranking honesto por <code>filial_uf_cep</code> em vez
+    de <code>filial</code>: PE continua em primeiro com 4,94% e GO em terceiro com 5,87%;
+    só SC melhora, de 7,28% para 7,05%. <strong>O defeito é real e não derruba a
+    conclusão do cartão.</strong> Registei justamente por isso — foi conferido, não
+    presumido.</dd>
+  </dl>
+</div>
+
+<h2><span class="gr">Grupo E</span> Exatidão — o improvável <span class="qt">1 decisão</span></h2>
+
+<div class="dec">
+  <div class="dhead">
+    <span class="did">D17</span>
+    <span class="dtit">Os quatro limiares de implausibilidade ficam nomeados no topo do script</span>
+    <span class="rev r-marca">só marca</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Constantes maiúsculas nas primeiras linhas de
+    <code>curar_dados.py</code>, replicadas em <code>MANIFEST.json</code>. Nenhum valor
+    é corrigido; os quatro só produzem flags.</dd>
+  </dl>
+  <div class="tw" style="margin:1rem 0 0">
+    <table>
+      <thead><tr><th>Limiar</th><th class="n">Valor</th><th class="n">Pedidos</th><th>O raciocínio</th></tr></thead>
+      <tbody>
+        <tr><td class="k"><code>LEAD_MAX_DIAS</code></td><td class="n">100</td><td class="n">64</td>
+          <td>A mediana é 10,2 dias e o percentil 99 é 46. Acima de 100 não é entrega lenta, é processo perdido — mas o valor pode ser verdadeiro, então fica.</td></tr>
+        <tr><td class="k"><code>PESO_MAX_G</code></td><td class="n">30 000</td><td class="n">3</td>
+          <td>30 kg é o limite prático de encomenda postal. O máximo da base é 40,4 kg.</td></tr>
+        <tr><td class="k"><code>FRETE_SOBRE_MERCADORIA</code></td><td class="n">3</td><td class="n">78</td>
+          <td>Frete acima de 3× o valor da mercadoria acontece em item barato e volumoso, mas também em erro de tabela.</td></tr>
+        <tr><td class="k"><code>DIF_PAGAMENTO_REAIS</code></td><td class="n">1,00</td><td class="n">249</td>
+          <td>Tolerância de arredondamento entre o pagamento e mercadoria + frete. Acima disso, algo não fecha.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <dl class="dgrid" style="margin-top:1rem">
+    <dt>Por quê</dt><dd>Estes quatro números são <strong>julgamento, não
+    calibração</strong>. Não têm base empírica: nenhum deles foi derivado de custo de
+    erro ou de uma distribuição de referência. Escondê-los dentro de uma função os
+    faria parecer resultado de análise. No topo do ficheiro e no manifesto, quem
+    discordar sabe exatamente o que mudar — e a discordância é esperada.</dd>
+    <dt>Custo</dt><dd>Quatro decisões arbitrárias na base. Declaradas como arbitrárias,
+    o que é o melhor disponível sem um custo de erro medido.</dd>
+  </dl>
+</div>
+
+<h2><span class="gr">Grupo F</span> Completude, proveniência e atualidade <span class="qt">3 decisões</span></h2>
+
+<div class="dec chave">
+  <div class="dhead">
+    <span class="did">D18</span>
+    <span class="dtit">O pedido órfão ganha uma filial chamada <code>SEM_FILIAL</code></span>
+    <span class="rev r-rev">reversível</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>775 pedidos não têm nenhum item registado — sem produto, sem
+    vendedor, sem frete e portanto sem UF. Em vez de nulo, recebem a filial literal
+    <code>SEM_FILIAL</code>, com <code>qa_sem_item</code>.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Deixar nulo, que é o que a fonte diz.</s></dd>
+    <dt>Por quê</dt><dd>Este é o terceiro motivo para não acreditar no ranking de
+    filiais, e vem de um detalhe de SQL: <strong><code>GROUP BY</code> descarta nulo em
+    silêncio</strong>. Com a UF nula, esses 775 pedidos não aparecem em nenhuma linha do
+    relatório que decide bónus — nem premiados, nem punidos. Todos estão sem data de
+    entrega, o que lhes dá 100% de atraso honesto. É a pior «filial» da base, e era
+    invisível. Um rótulo literal força a aparecer.</dd>
+    <dt>Custo</dt><dd>Uma categoria que não é uma filial real ocupa uma linha nos
+    relatórios. É exatamente o efeito desejado.</dd>
+  </dl>
+</div>
+
+<div class="dec">
+  <div class="dhead">
+    <span class="did">D19</span>
+    <span class="dtit">A proveniência é o porte do vendedor que dá baixa no despacho</span>
+    <span class="rev r-esq">esquema</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Coluna <code>origem_registo</code> com quatro faixas de volume —
+    <code>1-10 pedidos</code>, <code>11-100</code>, <code>101-1000</code>,
+    <code>&gt;1000</code> — mais <code>SEM_VENDEDOR</code>.</dd>
+    <dt>Por quê</dt><dd>A base não tem campo de origem do registo, e a proveniência é uma
+    das sete dimensões do cartão. O porte do vendedor é o melhor procurador disponível, e
+    funciona: a ausência de data de entrega cai monotonicamente de <b>4,40%</b> na ponta
+    pequena para <b>1,34%</b> na grande, e na data de coleta a diferença é de <b>39×</b>.
+    Sem essa coluna, a conclusão mais importante sobre proveniência —
+    <strong>o indicador mede quem escreve, não quem entrega</strong> — não é reproduzível
+    a partir da tabela.</dd>
+    <dt>Custo</dt><dd>É um procurador, não a origem real. Os cortes de faixa são
+    convencionais e não foram otimizados.</dd>
+  </dl>
+</div>
+
+<div class="dec">
+  <div class="dhead">
+    <span class="did">D20</span>
+    <span class="dtit">Os últimos 60 dias da janela são marcados como coorte incompleta</span>
+    <span class="rev r-marca">só marca</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd><code>qa_cauda_incompleta</code> nos 1 503 pedidos comprados nos
+    60 dias finais.</dd>
+    <dt>Por quê</dt><dd>Nesses 60 dias, 3,5% dos pedidos ainda não tinham entrega
+    registada — não porque a operação piorou, mas porque <strong>o extrato foi tirado
+    antes de eles terminarem</strong>. Ler essa cauda como queda de desempenho é o erro
+    clássico de série temporal truncada, e ele acontece sempre que ninguém marca a
+    fronteira. Aqui a fronteira está numa coluna.</dd>
+    <dt>Custo</dt><dd>60 dias é convenção, não medida. Um valor derivado do percentil 99
+    do lead time (46 dias) seria mais justificável.</dd>
+  </dl>
+</div>
+
+<h2><span class="gr">Grupo G</span> A decisão central — o esquema do SLA <span class="qt">2 decisões</span></h2>
+
+<div class="caixa">
+  <div class="ct">Por que isto não é limpeza de dados</div>
+  <p>O defeito de R$ 200 mil por ano não se resolve corrigindo valor nenhum. Ele existe
+  porque o indicador divide os atrasos pelos <em>pedidos com data de entrega</em>, e não
+  por <em>todos os pedidos</em>. Nenhuma limpeza conserta uma escolha de denominador.
+  <strong>O que a curadoria pode fazer é mudar a forma da tabela para que a conta
+  honesta seja a mais fácil de escrever.</strong></p>
+</div>
+
+<div class="dec chave">
+  <div class="dhead">
+    <span class="did">D21</span>
+    <span class="dtit">Quatro colunas de SLA em vez de uma</span>
+    <span class="rev r-esq">esquema</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Onde havia um conceito de «atrasou», agora há quatro colunas
+    explícitas.</dd>
+  </dl>
+  <div class="tw" style="margin:1rem 0 0">
+    <table>
+      <thead><tr><th>Coluna</th><th>O que afirma</th></tr></thead>
+      <tbody>
+        <tr><td class="k"><code>atraso_mensuravel</code></td><td>Existe data de entrega? Torna o denominador de hoje visível como um facto da linha.</td></tr>
+        <tr><td class="k"><code>atrasado</code></td><td>Entregou depois do prazo. <strong>Nulo quando não há data</strong> — é o indicador reportado hoje, e o nulo é a sua confissão.</td></tr>
+        <tr><td class="k"><code>vencido_sem_registo</code></td><td>Pedido ativo, sem data e com prazo já vencido. São 2 346.</td></tr>
+        <tr><td class="k"><code>atraso_honesto</code></td><td><code>atrasado</code> quando há data; <code>vencido_sem_registo</code> quando não há. Denominador = todos os pedidos ativos.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <dl class="dgrid" style="margin-top:1rem">
+    <dt>Alternativa</dt><dd class="alt"><s>Uma coluna <code>atrasado</code> booleana, com
+    a regra honesta embutida.</s></dd>
+    <dt>Por quê</dt><dd>Uma coluna só obrigaria a escolher qual definição é «a»
+    definição, e esconderia a outra. As quatro deixam <strong>a diferença entre os dois
+    indicadores calculável dentro da própria tabela</strong>, sem voltar à fonte: 8,11%
+    sobre 96 470 pedidos contra 10,29% sobre 98 816. Quem quiser continuar reportando o
+    número antigo pode — mas agora tem de nomear a coluna que o produz.</dd>
+    <dt>Custo</dt><dd>Quatro colunas onde muita gente espera uma. O README explica; a
+    ambiguidade que elas removem vale a explicação.</dd>
+  </dl>
+</div>
+
+<div class="dec chave">
+  <div class="dhead">
+    <span class="did">D22</span>
+    <span class="dtit">Prazo vencido sem registo conta como atraso até prova em contrário</span>
+    <span class="rev r-esq">esquema</span>
+  </div>
+  <dl class="dgrid">
+    <dt>Decisão</dt><dd>Em <code>atraso_honesto</code>, os 2 346 pedidos ativos sem data
+    de entrega e com prazo vencido entram como atraso.</dd>
+    <dt>Alternativa</dt><dd class="alt"><s>Tratar como desconhecido e excluir — o que é
+    formalmente mais correcto, porque de facto não sabemos.</s></dd>
+    <dt>Por quê</dt><dd>É uma presunção, e assumo que é. A justificação é a assimetria do
+    custo de errar. <strong>Presumir entrega em dia num pedido que ninguém registou
+    fecha contrato de SLA sobre um número falso</strong> e premia a filial que registra
+    pior — o defeito nº 1, intacto. Presumir atraso num pedido que na verdade chegou
+    custa uma investigação. O erro conservador é barato e visível; o optimista é caro e
+    silencioso.</dd>
+    <dt>Reversível</dt><dd>Inteiramente. <code>vencido_sem_registo</code> isola os 2 346
+    pedidos, então quem preferir a outra convenção reconstrói o indicador com uma
+    subtração. <strong>A presunção está numa coluna, não escondida na fórmula.</strong></dd>
+  </dl>
+</div>
+
+<h2>O que deliberadamente não foi feito</h2>
+
+<p>Estas ausências são decisões, não esquecimentos. Cada uma foi considerada e
+recusada pelo mesmo motivo: <strong>tornaria a base mais bonita e menos verdadeira.</strong></p>
+
+<ul>
+  <li><b>Não imputei nenhuma data de entrega.</b> Estimar por mediana de lead time
+  preencheria 2 346 buracos e destruiria o único achado que valia R$ 200 mil.</li>
+  <li><b>Não uni cidades por similaridade.</b> 73 pares ficaram sugeridos em
+  <code>cidades_suspeitas.csv</code> — ver D10.</li>
+  <li><b>Não removi outliers de lead time.</b> Os 64 pedidos acima de 100 dias são
+  candidatos a serem os mais informativos da base.</li>
+  <li><b>Não deduplicei <code>order_items</code>.</b> 17 313 linhas marcadas com
+  <code>qa_quase_duplicado</code>, nenhuma removida — ver D12.</li>
+  <li><b>Não sobrescrevi nenhuma UF</b>, apesar de o CEP ser o sinal mais forte — ver D16.</li>
+  <li><b>Não corrigi os 279 CEP sem correspondência em <code>geolocation</code>.</b>
+  Interpolar pelo prefixo vizinho produziria coordenada plausível e errada; a flag
+  <code>qa_cep_sem_geo</code> diz a verdade.</li>
+  <li><b>Não normalizei as duas categorias de produto fora da tabela de domínio.</b>
+  <code>pc_gamer</code> e <code>portateis_cozinha_e_preparadores_de_alimentos</code>
+  não têm tradução oficial; inventar uma é decisão de catálogo, não de curadoria.</li>
+</ul>
+
+<h2>Limitações desta versão</h2>
+
+<ul class="lim">
+  <li><b>As avaliações não foram curadas.</b> <code>olist_order_reviews</code> entra no
+  manifesto com o seu <code>sha256</code> — para documentar o instantâneo da fonte — mas
+  os 814 <code>review_id</code> duplicados não foram tratados, porque nenhuma coluna de
+  avaliação entra na tabela de entregas. É uma lacuna assumida, não um descuido.</li>
+  <li><b>Os quatro limiares de D17 são arbitrários</b> e não foram derivados de custo de
+  erro. Um deles — os 60 dias de D20 — tem até um substituto melhor à mão: o percentil 99
+  do lead time, 46 dias.</li>
+  <li><b>O centroide usa média, não mediana</b> (D13). Continua sensível a outliers que
+  caiam dentro dos limites do Brasil.</li>
+  <li><b>A caixa de limites do Brasil é retangular</b> (D14) e deixa passar pontos no
+  oceano e em países vizinhos.</li>
+  <li><b><code>qa_cidade_regrafada</code> marca 267 pedidos, não todos.</b> Restaurar
+  acento e caixa (<code>sao paulo</code> → <code>São Paulo</code>) é formatação e não
+  levanta flag; só a mudança estrutural — alias, sufixo de UF, espaços — marca. Foi
+  escolha, e <code>cidades_mapa.csv</code> traz as duas categorias separadas na coluna
+  <code>mudanca</code>.</li>
+  <li><b>A cobertura de aliases é de cinco entradas</b> (D9). Existem outras abreviações
+  na base que continuam separadas.</li>
+</ul>
+
+<h2>O saldo</h2>
+
+<div class="tw">
+  <table>
+    <thead><tr><th>Medida</th><th class="n">Entrada</th><th class="n">Saída</th><th>Leitura</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Pedidos</td><td class="n">99 441</td><td class="n">99 441</td><td>Nenhuma linha perdida — D1</td></tr>
+      <tr><td class="k">Pedidos sem nenhuma flag</td><td class="n">—</td><td class="n">85 398</td><td>85,9% saem limpos</td></tr>
+      <tr><td class="k">Pedidos em quarentena</td><td class="n">—</td><td class="n">1 391</td><td>1,40%, copiados e não removidos — D3</td></tr>
+      <tr><td class="k">Grafias de cidade</td><td class="n">8 126</td><td class="n">6 066</td><td>2 060 colapsadas por regra — D6, D7</td></tr>
+      <tr><td class="k">Linhas de geolocalização</td><td class="n">1 000 163</td><td class="n">738 294</td><td>A única remoção do documento — D11</td></tr>
+      <tr><td class="k">Prefixos de CEP</td><td class="n">—</td><td class="n">19 010</td><td>80,5% tinham centroide deslocado</td></tr>
+      <tr><td class="k">% atraso reportado</td><td class="n">8,11%</td><td class="n">8,11%</td><td>Preservado, e agora nomeado — D21</td></tr>
+      <tr><td class="k">% atraso honesto</td><td class="n">—</td><td class="n">10,29%</td><td>+2,18 pp, sobre todos os ativos — D22</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Das 22 decisões, <strong>8 são reversíveis</strong> com o original preservado,
+<strong>7 mudam o esquema</strong> sem alterar dado algum, <strong>6 apenas
+marcam</strong> e não tocam em valor nenhum, e <strong>1 é irreversível</strong> — a
+remoção de cópias exatas, onde não havia informação a perder. Essa proporção é o resumo do
+documento: quase nada foi decidido de forma definitiva, porque quase nada precisava
+ser.</p>
+
+<footer>
+  <b>Reprodução</b> — <code>python scripts/curar_dados.py --versao v1</code><br>
+  <b>Verificação</b> — <code>MANIFEST.json</code> traz o <code>sha256</code> das 8 entradas e das 6 saídas<br>
+  <b>Diagnóstico que originou estas decisões</b> — <code>docs/E1-2_cartao_qualidade.md</code><br>
+  <b>Regras em forma de referência</b> — <code>dados_curados/README.md</code>
+</footer>
+
+</div>
