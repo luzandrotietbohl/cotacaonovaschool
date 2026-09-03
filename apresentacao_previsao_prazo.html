@@ -143,7 +143,7 @@ li{font-size:19px;line-height:1.4}
 /* fórmula / código */
 .formula{font-family:var(--mono);font-size:18px;line-height:1.55;color:#0E3D53;
   background:var(--accent-wash);border-left:3px solid var(--accent);border-radius:4px;padding:12px 17px}
-.formula.band{font-size:21px;text-align:center;border-left:0;border-top:1px solid #C9E1EC;border-bottom:1px solid #C9E1EC;border-radius:0}
+.formula.band{font-size:24px;text-align:center;border-left:0;border-top:1px solid #C9E1EC;border-bottom:1px solid #C9E1EC;border-radius:0}
 
 /* destaque */
 .callout{border:1px solid var(--rule);border-left:4px solid var(--accent);background:#F6FAFC;
@@ -239,21 +239,37 @@ tr.hl2 td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 .cm .t.grand{border-style:solid;background:#E5EFF4;border-color:#C6DEE9}
 
 /* faixas de risco */
-.risk{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;flex:1;min-height:0}
+.risk{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;flex:1;min-height:0;align-content:center}
 .risk .r{position:relative;background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;
-  padding:24px 23px;display:flex;flex-direction:column;gap:13px;justify-content:space-between}
-.risk .act{border-top:1px solid var(--rule-2);padding-top:14px;display:flex;flex-direction:column;gap:6px}
-.risk .act .k{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
-.risk .act .v{font-size:18px;line-height:1.35;color:var(--ink)}
+  padding:34px 28px;display:flex;flex-direction:column;gap:18px;justify-content:flex-start}
+.risk .act{border-top:1px solid var(--rule-2);padding-top:20px;display:flex;flex-direction:column;gap:7px;margin-top:2px}
+.risk .act .k{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+.risk .act .v{font-size:24px;line-height:1.33;color:var(--ink)}
 .risk .r::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:5px;border-radius:6px 6px 0 0}
 .risk .low::before{background:var(--good)}
 .risk .mod::before{background:#C9A227}
 .risk .high::before{background:#C8781F}
 .risk .crit::before{background:var(--bad)}
-.risk .rt{font-family:var(--display);font-size:31px;font-weight:500;color:var(--ink)}
-.risk .rr{font-family:var(--mono);font-size:16px;color:#334A57;background:#F0EDE6;
-  border:1px solid var(--rule-2);border-radius:4px;padding:10px 12px}
-.risk .rd{font-size:18px;line-height:1.4;color:var(--muted)}
+.risk .rt{font-family:var(--display);font-size:46px;font-weight:500;letter-spacing:-.02em;color:var(--ink)}
+.risk .rr{font-family:var(--mono);font-size:22px;color:#1F3B49;background:#F0EDE6;
+  border:1px solid var(--rule-2);border-radius:4px;padding:13px 14px;text-align:center}
+.risk .rd{font-size:25px;line-height:1.36;color:var(--ink-2)}
+
+/* escala contínua da folga */
+.scale{display:flex;flex-direction:column;gap:9px}
+.scale .strip{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr;height:44px;
+  border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.scale .strip div{display:flex;align-items:center;justify-content:center;color:#fff;
+  font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.scale .strip .z1{background:var(--bad)}
+.scale .strip .z2{background:#C8781F}
+.scale .strip .z3{background:#B99420}
+.scale .strip .z4{background:var(--good)}
+.scale .ticks{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr;
+  font-family:var(--mono);font-size:15px;font-weight:700;color:var(--ink)}
+.scale .ticks span{text-align:right;padding-right:2px;border-right:1px solid var(--rule);padding-top:2px}
+.scale .ticks span:last-child{border-right:0}
+.scale .ends{display:flex;justify-content:space-between;font-size:17px;color:var(--muted)}
 
 /* cadeia de decisão */
 .chain{display:flex;flex-direction:column;gap:12px}
@@ -724,7 +740,12 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
       <div class="r high"><div class="rt">Alto</div><div class="rr">0 &lt; Folga ≤ MAE</div><div class="rd">A promessa está dentro do erro típico do modelo.</div><div class="act"><div class="k">ação sugerida</div><div class="v">Priorizar expedição e avaliar alternativa de rota.</div></div></div>
       <div class="r crit"><div class="rt">Crítico</div><div class="rr">Folga ≤ 0</div><div class="rd">O próprio prazo previsto já ultrapassa a promessa.</div><div class="act"><div class="k">ação sugerida</div><div class="v">Acionar o responsável operacional imediatamente.</div></div></div>
     </div>
-    <div class="callout warn reveal d5"><b>Importante:</b> as faixas numéricas só são ativadas depois que um modelo passar no go/no-go. A primeira rodada ainda não aprovou nenhum ML.</div>
+    <div class="scale reveal d5">
+      <div class="strip"><div class="z4">Baixo</div><div class="z3">Moderado</div><div class="z2">Alto</div><div class="z1">Crítico</div></div>
+      <div class="ticks"><span>Folga = P90</span><span>Folga = MAE</span><span>Folga = 0</span><span></span></div>
+      <div class="ends"><span>mais margem</span><span>promessa já comprometida →</span></div>
+    </div>
+    <div class="callout warn reveal d6"><b>Importante:</b> as faixas numéricas só são ativadas depois que um modelo passar no go/no-go. A primeira rodada ainda não aprovou nenhum ML.</div>
   </div>
   <div class="foot"><span>Classificação explicável e calibrada pela incerteza real do modelo</span><span class="pg">10 / 14</span></div>
 </section>
