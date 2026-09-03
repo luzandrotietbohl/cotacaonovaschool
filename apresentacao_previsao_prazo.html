@@ -113,6 +113,7 @@ h2 em{font-style:normal;color:var(--accent);font-weight:700}
   align-items:baseline;border-top:1px solid var(--rule-2);padding-top:14px;
   font-family:var(--mono);font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
 .foot .pg{color:var(--ink);font-weight:700;letter-spacing:.1em}
+.foot strong{color:var(--ink);font-weight:700;letter-spacing:.2em}
 
 /* ===========================================================
    4. COMPONENTES
@@ -255,6 +256,40 @@ tr.hl2 td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
   border:1px solid var(--rule-2);border-radius:4px;padding:13px 14px;text-align:center}
 .risk .rd{font-size:25px;line-height:1.36;color:var(--ink-2)}
 
+/* glossario de metricas (ideia da outra versao) */
+.gloss{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;flex:1;min-height:0;align-content:center}
+.gloss .g{position:relative;background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;
+  padding:30px 26px;display:flex;flex-direction:column;gap:18px}
+.gloss .g::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:4px;
+  background:var(--accent);border-radius:6px 6px 0 0}
+.gloss .g.curation::before{background:var(--warn)}
+.gloss .sig{font-family:var(--display);font-size:66px;font-weight:500;line-height:1;letter-spacing:-.03em;color:var(--ink)}
+.gloss .pt{font-size:24px;line-height:1.28;color:var(--ink)}
+.gloss .en{font-family:var(--mono);font-size:16px;margin-top:4px;letter-spacing:.06em;color:var(--muted)}
+.gloss .fx{font-family:var(--mono);font-size:18px;line-height:1.5;color:#0E3D53;
+  background:var(--accent-wash);border-radius:4px;padding:11px 13px}
+.gloss .g.curation .fx{background:var(--warn-wash);color:#6E4A0C}
+.gloss .rd{font-family:var(--display);font-size:26px;line-height:1.3;color:var(--ink-2)}
+.gloss .use{margin-top:auto;border-top:1px solid var(--rule-2);padding-top:12px}
+.gloss .use .k{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:5px}
+.gloss .g.curation .use .k{color:var(--warn)}
+.gloss .use .v{font-size:19px;line-height:1.35;color:var(--muted)}
+
+/* painel escuro de sintese (ideia da outra versao) */
+.panel{background:var(--ink);border-radius:6px;padding:24px 28px;display:flex;align-items:center;gap:26px}
+.panel .big{font-family:var(--display);font-size:64px;font-weight:500;line-height:1;letter-spacing:-.04em;color:#fff}
+.panel .txt{color:#AFC2CE;font-size:20px;line-height:1.4}
+.panel .txt b{color:#fff}
+.panel .k{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--accent-2);display:block;margin-bottom:6px}
+
+/* cabecalho de tabela com direcao (ideia da outra versao) */
+.mn,.mx{font-family:var(--mono);font-weight:700;font-size:17px}
+.mn{color:var(--accent)}
+.mx{color:var(--good)}
+th .u{display:block;font-size:12px;font-weight:500;letter-spacing:.1em;color:var(--accent);margin-top:3px;text-transform:none}
+
 /* escala contínua da folga */
 .scale{display:flex;flex-direction:column;gap:9px}
 .scale .strip{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr;height:44px;
@@ -345,8 +380,11 @@ tr.hl2 td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 .slide.dense h2{font-size:56px}
 .slide.dense .card{padding:22px 26px;gap:10px}
 .slide.dense h3{font-size:29px}
-.slide.dense .body{gap:16px}
-.slide.dense .bars .row{height:36px;grid-template-columns:240px 1fr 92px}
+.slide.dense .body{gap:14px}
+.slide.dense .stat .n{font-size:46px}
+.slide.dense .stat .l{font-size:14px}
+.slide.dense .small{font-size:17px}
+.slide.dense .bars .row{height:31px;grid-template-columns:240px 1fr 92px}
 .slide.dense .bars .nm{font-size:18px}
 .slide.dense .bars .vl{font-size:18px}
 .slide.dense .callout{padding:12px 17px;font-size:19px}
@@ -402,7 +440,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
     <div class="sb"><div class="n">75.690</div><div class="l">treino final</div><div class="d">Divisão temporal, curadoria e MAD aplicados.</div></div>
     <div class="sb"><div class="n">18.872</div><div class="l">teste futuro</div><div class="d">Pedidos mais recentes, sem olhar o futuro durante o treino.</div></div>
   </div>
-  <div class="foot"><span>Módulo 1 · Dados e IA no transporte</span><span class="pg">01 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Módulo 1 · Dados e IA no transporte</span><span class="pg">01 / 17</span></div>
 </section>
 
 <!-- =========================================================
@@ -439,9 +477,40 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
       </div>
     </div>
   </div>
-  <div class="foot"><span>Objetivo operacional + ações executáveis</span><span class="pg">02 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Objetivo operacional + ações executáveis</span><span class="pg">02 / 17</span></div>
 </section>
 
+<!-- =========================================================
+     SLIDE · FONTE, PROVENIÊNCIA E LGPD
+     ========================================================= -->
+<section class="slide" data-notes="<b>Mensagem:</b> a base é pública e anonimizada, própria para prova de conceito. O que a fonte não documenta é registrado como lacuna, não preenchido por suposição.">
+  <div class="head">
+    <div><div class="kicker reveal d1">3.1–3.3 · Alegação, fonte e proveniência</div>
+    <h2 class="reveal d2">Dados públicos para uma <em>prova de conceito</em></h2></div>
+    <span class="tag reveal d2">Olist · Kaggle</span>
+  </div>
+  <div class="body" style="gap:20px">
+    <div class="grid3 reveal d3">
+      <div class="card stat"><div class="n">~100 mil</div><div class="l">pedidos de e-commerce brasileiro</div></div>
+      <div class="card stat"><div class="n">2016–2018</div><div class="l">período aproximado da fonte</div></div>
+      <div class="card stat"><div class="n">8</div><div class="l">tabelas conectadas</div><p class="small">Pedidos · itens · produtos · vendedores · clientes · pagamentos · avaliações · geolocalização.</p></div>
+    </div>
+    <div class="grid2 fill-row vcenter reveal d4">
+      <div class="card top-accent">
+        <h3>Fonte e proveniência</h3>
+        <p><b>Brazilian E-Commerce Public Dataset by Olist</b> — disponibilizado pela Olist no Kaggle.</p>
+        <p class="small">A fonte descreve os dados comerciais reais como anonimizados. A autoria real de cada campo e a cadeia de sistemas atravessados não estão integralmente documentadas.</p>
+      </div>
+      <div class="card">
+        <h3>Como a operação funciona</h3>
+        <p>A Olist conecta pequenos lojistas a marketplaces. Após a compra, o vendedor prepara o pedido e o envio ocorre pela rede logística e por parceiros.</p>
+        <p class="small">Por isso o prazo depende de carga, geografia e calendário — não de uma rota conhecida na criação.</p>
+      </div>
+    </div>
+    <div class="callout warn reveal d5"><b>LGPD — limites documentais:</b> a fonte não documenta base legal original, prazo de retenção, controles de acesso nem a cadeia completa de sistemas. Em produção, esses elementos precisariam ser formalizados antes de qualquer uso.</div>
+  </div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Fonte: Olist / Kaggle · uso restrito a prova de conceito</span><span class="pg">03 / 17</span></div>
+</section>
 <!-- =========================================================
      SLIDE 03 · FRONTEIRA TEMPORAL (LEAKAGE)
      ========================================================= -->
@@ -497,7 +566,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
       <div class="callout warn"><b>3.3 Proveniência:</b> sistemas atravessados, acessos, LGPD e retenção não estão documentados.</div>
     </div>
   </div>
-  <div class="foot"><span>O que não sabemos é registrado como lacuna — não inventado</span><span class="pg">03 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · O que não sabemos é registrado como lacuna — não inventado</span><span class="pg">04 / 17</span></div>
 </section>
 
 <!-- =========================================================
@@ -520,18 +589,18 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
       <div class="fstep last"><div class="fn">75.690</div><div class="ft"><div class="fb" style="--h:76.7%"></div></div><div class="fcap">treino final após MAD</div></div>
     </div>
     <div class="grid3 reveal d4">
-      <div class="card"><h3>Categoria</h3><p><b>&lt; 50 no treino:</b> exclui — decisão de negócio.</p><p><b>Ausente:</b> <span class="pill gray">SEM_CATEGORIA</span></p></div>
-      <div class="card"><h3>Localização</h3><p>Geografia ausente ou inválida é mantida como <span class="pill gray">SEM_LOCAL</span>.</p><p class="small">1.033 pedidos no pool modelável.</p></div>
-      <div class="card"><h3>Prazo</h3><p><b>Em andamento:</b> fora da modelagem.</p><p><b>Outlier:</b> MAD robusto, aplicado só no treino.</p></div>
+      <div class="card"><h3>Categoria</h3><p><b>&lt; 50 no treino:</b> exclui por decisão de negócio — <b>384</b> removidos.</p><p><b>Ausente:</b> <span class="pill gray">SEM_CATEGORIA</span></p></div>
+      <div class="card"><h3>Localização</h3><p>Geografia inválida ou ausente vira <span class="pill gray">SEM_LOCAL</span> — não imputamos distância falsa.</p><p class="small">1.033 pedidos no pool modelável.</p></div>
+      <div class="card"><h3>Prazo</h3><p><b>Em andamento:</b> fora da modelagem (<b>1.719</b>).</p><p><b>Extremo:</b> MAD no treino removeu <b>74</b>; permanecem na base histórica.</p></div>
     </div>
   </div>
-  <div class="foot"><span>Curadoria com regra explícita e antes/depois mensurável</span><span class="pg">04 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Curadoria com regra explícita e antes/depois mensurável</span><span class="pg">05 / 17</span></div>
 </section>
 
 <!-- =========================================================
      SLIDE 05 · TRANSFORMAÇÕES
      ========================================================= -->
-<section class="slide" data-notes="<b>Mensagem:</b> distinguir “dado extremo real” de “erro de dado”. O MAD é aplicado somente no treino; o teste mantém extremos futuros.">
+<section class="slide tight" data-notes="<b>Mensagem:</b> distinguir “dado extremo real” de “erro de dado”. O MAD é aplicado somente no treino; o teste mantém extremos futuros.">
   <div class="head">
     <div><div class="kicker reveal d1">3.4 · Transparência das transformações</div>
     <h2 class="reveal d2">Sem “caixa-preta” na construção das variáveis</h2></div>
@@ -544,6 +613,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
           <div class="formula">Peso real (kg) = product_weight_g / 1000</div>
           <div class="formula">Volume = comprimento × altura × largura</div>
           <div class="formula">Peso volumétrico = volume / 6000</div>
+          <div class="formula">Maior dimensão = máx(C, A, L)</div>
         </div>
         <p><b>No pedido:</b> somamos os pesos dos itens e usamos a maior dimensão observada.</p>
         <p class="small">Volume não entra junto do peso volumétrico por redundância determinística.</p>
@@ -571,35 +641,107 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
       </div>
     </div>
   </div>
-  <div class="foot"><span>Transformações reproduzíveis e auditáveis</span><span class="pg">05 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Transformações reproduzíveis e auditáveis</span><span class="pg">06 / 17</span></div>
 </section>
 
+<!-- =========================================================
+     SLIDE · GLOSSÁRIO DE MÉTRICAS
+     ========================================================= -->
+<section class="slide" data-notes="<b>Mensagem:</b> cada fórmula tem leitura humana e finalidade. MAE, RMSE e P90 avaliam a previsão; MAD é curadoria de dados, não qualidade preditiva.">
+  <div class="head">
+    <div><div class="kicker reveal d1">4.1 · Glossário</div>
+    <h2 class="reveal d2">MAE, RMSE e P90 avaliam; <em>MAD faz curadoria</em></h2></div>
+    <span class="tag reveal d2">erro sempre em dias</span>
+  </div>
+  <div class="body">
+    <div class="gloss reveal d3">
+      <div class="g">
+        <div class="sig">MAE</div>
+        <div><div class="pt">Erro Absoluto Médio</div><div class="en">Mean Absolute Error</div></div>
+        <div class="fx">MAE = média(|real − previsto|)</div>
+        <div class="rd">“Em média, a previsão erra X dias.”</div>
+        <div class="use"><div class="k">avaliação preditiva</div><div class="v">Métrica principal de comparação e base do go/no-go.</div></div>
+      </div>
+      <div class="g">
+        <div class="sig">RMSE</div>
+        <div><div class="pt">Raiz do Erro Quadrático Médio</div><div class="en">Root Mean Squared Error</div></div>
+        <div class="fx">RMSE = √média((real − previsto)²)</div>
+        <div class="rd">“Penaliza mais os erros muito grandes.”</div>
+        <div class="use"><div class="k">avaliação preditiva</div><div class="v">Bem acima do MAE indica peso dos erros extremos.</div></div>
+      </div>
+      <div class="g">
+        <div class="sig">P90</div>
+        <div><div class="pt">Percentil 90 do erro absoluto</div><div class="en">90th percentile of absolute error</div></div>
+        <div class="fx">P90 = percentil₉₀(|real − previsto|)</div>
+        <div class="rd">“Em 90% dos pedidos o erro foi ≤ X dias.”</div>
+        <div class="use"><div class="k">incerteza do modelo</div><div class="v">Referência da folga operacional, após aprovação.</div></div>
+      </div>
+      <div class="g curation">
+        <div class="sig">MAD</div>
+        <div><div class="pt">Mediana do Desvio Absoluto</div><div class="en">Median Absolute Deviation</div></div>
+        <div class="fx">MAD = mediana(|x − mediana(x)|)</div>
+        <div class="rd">“Dispersão robusta, pouco afetada por extremos.”</div>
+        <div class="use"><div class="k">curadoria · não é acurácia</div><div class="v">Z-score modificado sobre log(1 + delivery_days) marca OUTLIER_PRAZO no treino.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Erro em dias · MAD aplicado somente no treino</span><span class="pg">07 / 17</span></div>
+</section>
+<!-- =========================================================
+     SLIDE · BASELINES E VALIDAÇÃO TEMPORAL
+     ========================================================= -->
+<section class="slide" data-notes="<b>Mensagem:</b> o teste futuro simula a produção. A mediana por faixa de distância é o patamar que qualquer modelo precisa vencer.">
+  <div class="head">
+    <div><div class="kicker reveal d1">4.1 · Baselines e validação temporal</div>
+    <h2 class="reveal d2">A regra simples define o <em>patamar mínimo</em></h2></div>
+    <span class="tag reveal d2">corte temporal · 25/05/2018</span>
+  </div>
+  <div class="body" style="gap:22px">
+    <div class="axis reveal d3">
+      <div class="seg">Treino · 75.690 pedidos anteriores<div class="ln x"></div></div>
+      <div class="cut">25/05/2018<br/>divisão 80/20 no tempo</div>
+      <div class="seg r"><div class="ln y"></div>Teste · 18.872 pedidos futuros</div>
+    </div>
+    <div class="grid4 reveal d4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+      <div class="card stat"><div class="n" style="font-size:52px">13,44 d</div><div class="l">média</div><p class="small">Prevê o prazo médio histórico do treino.</p></div>
+      <div class="card stat"><div class="n" style="font-size:52px">11,22 d</div><div class="l">mediana</div><p class="small">Prevê o prazo central robusto do treino.</p></div>
+      <div class="card stat"><div class="n" style="font-size:40px">7,24–17,00 d</div><div class="l">IQQ · Q1 a Q3</div><p class="small">Intervalo interquartil. Cobertura no teste: 45,37%.</p></div>
+      <div class="card stat top-accent"><div class="n" style="font-size:52px">4,372 d</div><div class="l">mediana por distância</div><p class="small">Melhor MAE da rodada.</p></div>
+    </div>
+    <div class="card fill-row reveal d5" style="justify-content:center;gap:16px">
+      <h3>MAE de cada baseline no teste futuro <span class="dir">menor é melhor ↓</span></h3>
+      <div class="bars">
+        <div class="row best"><div class="nm">Mediana por faixa de distância</div><div class="tr"><span class="fl" style="--w:67.9%"></span></div><div class="vl">4,372 d</div></div>
+        <div class="row"><div class="nm">Mediana</div><div class="tr"><span class="fl" style="--w:77.4%"></span></div><div class="vl">4,985 d</div></div>
+        <div class="row"><div class="nm">Média</div><div class="tr"><span class="fl" style="--w:99%"></span></div><div class="vl">6,375 d</div></div>
+      </div>
+      <p class="small">O IQQ não gera previsão pontual: entra como faixa de referência, com 45,37% de cobertura no teste.</p>
+    </div>
+    <div class="panel reveal d6">
+      <div class="big">4,372</div>
+      <div class="txt"><span class="k">patamar a vencer · MAE em dias</span>Treinar no passado e avaliar em pedidos posteriores reproduz a direção da decisão real. <b>Qualquer modelo precisa superar essa regra simples para justificar sua adoção.</b></div>
+    </div>
+  </div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Baselines calculados a partir do treino</span><span class="pg">08 / 17</span></div>
+</section>
 <!-- =========================================================
      SLIDE 06 · CRITÉRIO DE ADEQUAÇÃO (GO/NO-GO)
      ========================================================= -->
 <section class="slide">
   <div class="head">
     <div><div class="kicker reveal d1">4.1 · Adequação da análise</div>
-    <h2 class="reveal d2">O modelo precisa vencer uma regra simples para merecer produção</h2></div>
+    <h2 class="reveal d2">O critério de aprovação é fixado <em>antes</em> do resultado</h2></div>
   </div>
   <div class="body">
-    <div class="grid3 fill-row reveal d3">
+    <div class="grid3 fill-row vcenter reveal d3">
       <div class="card"><h3>Baselines</h3><ul>
         <li>Média histórica</li><li>Mediana histórica</li><li>IQQ (faixa Q1–Q3)</li><li>Mediana por faixa de distância</li></ul></div>
       <div class="card"><h3>Modelos testados</h3><ul>
         <li>Regressão Linear</li><li>Random Forest</li><li>Gradient Boosting</li></ul></div>
-      <div class="card top-accent"><h3>Métricas <span class="dir">e direção</span></h3>
-        <table>
-          <tbody>
-            <tr><td style="padding:9px 0"><b>MAE</b> — erro médio em dias</td><td class="num" style="padding:9px 0;font-family:var(--mono);font-size:16px;color:var(--accent);white-space:nowrap">menor ↓</td></tr>
-            <tr><td style="padding:9px 0"><b>RMSE</b> — penaliza erros grandes</td><td class="num" style="padding:9px 0;font-family:var(--mono);font-size:16px;color:var(--accent);white-space:nowrap">menor ↓</td></tr>
-            <tr><td style="padding:9px 0"><b>P90</b> do erro absoluto</td><td class="num" style="padding:9px 0;font-family:var(--mono);font-size:16px;color:var(--accent);white-space:nowrap">menor ↓</td></tr>
-            <tr><td style="padding:9px 0"><b>Recall</b> — atrasos capturados</td><td class="num" style="padding:9px 0;font-family:var(--mono);font-size:16px;color:var(--good);white-space:nowrap">maior ↑</td></tr>
-            <tr><td style="padding:9px 0"><b>Precision</b> — alertas confirmados</td><td class="num" style="padding:9px 0;font-family:var(--mono);font-size:16px;color:var(--good);white-space:nowrap">maior ↑</td></tr>
-            <tr><td style="padding:9px 0"><b>Multa identificada</b> — R$ detectado</td><td class="num" style="padding:9px 0;font-family:var(--mono);font-size:16px;color:var(--good);white-space:nowrap">maior ↑</td></tr>
-          </tbody>
-        </table>
-        <p class="tiny">A multa <b>não identificada</b> é o espelho: quanto menor, melhor.</p>
+      <div class="card top-accent"><h3>Critério de aprovação</h3>
+        <div class="callout good"><b>GO:</b> superar o melhor baseline no MAE e não piorar o Recall do modelo vigente.</div>
+        <div class="callout bad"><b>NO-GO:</b> sem ganho comprovado, não entra em produção.</div>
+        <p class="small">O critério é fixado antes de olhar os resultados. As métricas e suas direções estão no glossário.</p>
       </div>
     </div>
     <div class="formula band reveal d4">Go/no-go: superar o melhor baseline no MAE &nbsp;+&nbsp; não piorar o Recall do modelo vigente</div>
@@ -608,7 +750,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
       <div class="callout warn"><b>Multa assumida:</b> 10% do valor do frete × dias de atraso.</div>
     </div>
   </div>
-  <div class="foot"><span>Método adequado = desempenho visível contra baseline + custo do erro</span><span class="pg">06 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Método adequado = desempenho visível contra baseline + custo do erro</span><span class="pg">09 / 17</span></div>
 </section>
 
 <!-- =========================================================
@@ -648,26 +790,26 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
     <div class="reveal d4">
       <div class="eyebrow" style="margin-bottom:12px">As seis métricas do go/no-go nos dois extremos do ranking</div>
       <table>
-        <thead><tr><th>Métrica — o que mede</th><th>Direção</th><th class="num">Mediana por distância</th><th class="num">Regressão Linear</th><th>Vence</th></tr></thead>
+        <thead><tr><th>Métrica — o que mede<span class="u">direção desejada</span></th><th class="num">Mediana por distância</th><th class="num">Regressão Linear</th><th>Vence</th></tr></thead>
         <tbody>
-          <tr class="hl"><td><b>MAE</b> — erro médio, em dias</td><td>menor é melhor ↓</td><td class="num"><b>4,37 d</b></td><td class="num">6,44 d</td><td>Mediana por distância</td></tr>
-          <tr class="hl"><td><b>RMSE</b> — penaliza erros grandes</td><td>menor é melhor ↓</td><td class="num"><b>5,83 d</b></td><td class="num">7,62 d</td><td>Mediana por distância</td></tr>
-          <tr class="hl"><td><b>P90 do erro</b> — pior caso típico</td><td>menor é melhor ↓</td><td class="num"><b>8,01 d</b></td><td class="num">11,22 d</td><td>Mediana por distância</td></tr>
-          <tr class="hl2"><td><b>Recall</b> — atrasos reais capturados</td><td>maior é melhor ↑</td><td class="num">45,4%</td><td class="num"><b>71,3%</b></td><td>Regressão Linear</td></tr>
-          <tr class="hl"><td><b>Precision</b> — alertas que se confirmam</td><td>maior é melhor ↑</td><td class="num"><b>22,5%</b></td><td class="num">16,1%</td><td>Mediana por distância</td></tr>
-          <tr class="hl2"><td><b>Multa identificada</b> — R$ evitável detectado</td><td>maior é melhor ↑</td><td class="num">23,2%</td><td class="num"><b>48,1%</b></td><td>Regressão Linear</td></tr>
+          <tr class="hl"><td><b>MAE</b> — erro médio, em dias <span class="mn">↓</span></td><td class="num"><b>4,37 d</b></td><td class="num">6,44 d</td><td>Mediana por distância</td></tr>
+          <tr class="hl"><td><b>RMSE</b> — penaliza erros grandes <span class="mn">↓</span></td><td class="num"><b>5,83 d</b></td><td class="num">7,62 d</td><td>Mediana por distância</td></tr>
+          <tr class="hl"><td><b>P90 do erro</b> — pior caso típico <span class="mn">↓</span></td><td class="num"><b>8,01 d</b></td><td class="num">11,22 d</td><td>Mediana por distância</td></tr>
+          <tr class="hl2"><td><b>Recall</b> — atrasos reais capturados <span class="mx">↑</span></td><td class="num">45,4%</td><td class="num"><b>71,3%</b></td><td>Regressão Linear</td></tr>
+          <tr class="hl"><td><b>Precision</b> — alertas que se confirmam <span class="mx">↑</span></td><td class="num"><b>22,5%</b></td><td class="num">16,1%</td><td>Mediana por distância</td></tr>
+          <tr class="hl2"><td><b>Multa identificada</b> — R$ evitável detectado <span class="mx">↑</span></td><td class="num">23,2%</td><td class="num"><b>48,1%</b></td><td>Regressão Linear</td></tr>
         </tbody>
       </table>
       <p class="tiny" style="margin-top:10px">Go/no-go atual: superar o melhor baseline no <b>MAE</b> sem piorar o <b>Recall</b> — nenhum ML cumpriu as duas condições.</p>
     </div>
   </div>
-  <div class="foot"><span>Resultado técnico principal da primeira rodada</span><span class="pg">07 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Resultado técnico principal da primeira rodada</span><span class="pg">10 / 17</span></div>
 </section>
 
 <!-- =========================================================
      SLIDE 08 · CUSTO DO ERRO
      ========================================================= -->
-<section class="slide">
+<section class="slide dense">
   <div class="head">
     <div><div class="kicker reveal d1">4.1 · Custo do erro</div>
     <h2 class="reveal d2">O falso negativo tem custo em <em>R$</em></h2></div>
@@ -676,7 +818,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
   <div class="body" style="gap:26px">
     <div class="grid3 reveal d3">
       <div class="card stat"><div class="n">1.012</div><div class="l">atrasos reais no teste</div><p class="small">Entre 18.872 pedidos avaliados.</p></div>
-      <div class="card stat"><div class="n">R$ 12,2 mil</div><div class="l">multa potencial total</div><p class="small">Regra: 10% do frete por dia de atraso.</p></div>
+      <div class="card stat"><div class="n">R$ 12.161,33</div><div class="l">multa potencial total</div><p class="small">Regra do projeto: 10% do frete × dias reais de atraso.</p></div>
       <div class="card stat top-accent"><div class="n">48,1%</div><div class="l">maior multa identificada</div><p class="small">Valor observado na Regressão Linear.</p></div>
     </div>
     <div class="reveal d4" style="flex:1;min-height:0">
@@ -690,9 +832,9 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
         </tbody>
       </table>
     </div>
-    <div class="callout reveal d5"><b>Leitura:</b> o modelo que mais reduz falso negativo não é o que melhor prevê o número exato de dias.</div>
+    <div class="callout reveal d5"><b>Leitura:</b> o modelo que mais reduz falso negativo não é o que melhor prevê o número exato de dias. Multa identificada é <b>risco sinalizado</b> — não representa automaticamente economia realizada.</div>
   </div>
-  <div class="foot"><span>Negócio: custo do erro, não apenas acurácia</span><span class="pg">08 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Negócio: custo do erro, não apenas acurácia</span><span class="pg">11 / 17</span></div>
 </section>
 
 <!-- =========================================================
@@ -725,7 +867,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
           <div class="t"><div class="n">4.482</div><div class="l">FP + TP</div></div>
           <div class="t grand"><div class="n">18.872</div><div class="l">total</div></div>
         </div>
-        <p class="tiny">Regra de classificação: atraso previsto quando <b>prazo previsto &gt; prazo prometido</b>.</p>
+        <p class="tiny"><b>Acurácia 78,54%</b> · <b>F1 26,28%</b> — regra de classificação: atraso previsto quando <b>prazo previsto &gt; prazo prometido</b>.</p>
       </div>
       <div class="reveal d4" style="display:flex;flex-direction:column;gap:16px;min-height:0">
         <div class="grid2" style="gap:16px">
@@ -738,7 +880,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
       </div>
     </div>
   </div>
-  <div class="foot"><span>Matriz de confusão · conjunto de teste futuro</span><span class="pg">09 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Matriz de confusão · conjunto de teste futuro</span><span class="pg">12 / 17</span></div>
 </section>
 
 <!-- =========================================================
@@ -764,7 +906,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
     </div>
     <div class="callout warn reveal d6"><b>Importante:</b> as faixas numéricas só são ativadas depois que um modelo passar no go/no-go. A primeira rodada ainda não aprovou nenhum ML.</div>
   </div>
-  <div class="foot"><span>Classificação explicável e calibrada pela incerteza real do modelo</span><span class="pg">10 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Classificação explicável e calibrada pela incerteza real do modelo</span><span class="pg">13 / 17</span></div>
 </section>
 
 <!-- =========================================================
@@ -798,7 +940,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
       </div>
     </div>
   </div>
-  <div class="foot"><span>Gestão = dono + cadência + gatilho + fallback</span><span class="pg">11 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Gestão = dono + cadência + gatilho + fallback</span><span class="pg">14 / 17</span></div>
 </section>
 
 <!-- =========================================================
@@ -831,7 +973,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
       </div>
     </div>
   </div>
-  <div class="foot"><span>Humano no circuito por desenho, não como contingência</span><span class="pg">12 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Humano no circuito por desenho, não como contingência</span><span class="pg">15 / 17</span></div>
 </section>
 
 <!-- =========================================================
@@ -866,7 +1008,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
       </div>
     </div>
   </div>
-  <div class="foot"><span>Especificação pronta para continuar no Módulo 2 · aplicação prática</span><span class="pg">13 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Especificação pronta para continuar no Módulo 2 · aplicação prática</span><span class="pg">16 / 17</span></div>
 </section>
 
 <!-- =========================================================
@@ -881,7 +1023,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
   <div class="body" style="gap:28px">
     <div class="reveal d3">
       <table>
-        <thead><tr><th>Método</th><th class="num">MAE</th><th class="num">RMSE</th><th class="num">P90 erro</th><th class="num">Recall</th><th class="num">Precision</th><th class="num">Multa identificada</th></tr></thead>
+        <thead><tr><th>Método</th><th class="num">MAE<span class="u">dias ↓</span></th><th class="num">RMSE<span class="u">dias ↓</span></th><th class="num">P90 erro<span class="u">dias ↓</span></th><th class="num">Recall<span class="u">atrasos ↑</span></th><th class="num">Precision<span class="u">alertas ↑</span></th><th class="num">Multa identificada<span class="u">potencial ↑</span></th></tr></thead>
         <tbody>
           <tr class="hl"><td>Baseline · mediana por distância</td><td class="num"><b>4,372</b></td><td class="num"><b>5,826</b></td><td class="num"><b>8,011</b></td><td class="num">45,36%</td><td class="num"><b>22,49%</b></td><td class="num">23,19%</td></tr>
           <tr><td>Baseline · mediana</td><td class="num">4,985</td><td class="num">6,414</td><td class="num">8,900</td><td class="num">61,46%</td><td class="num">17,82%</td><td class="num">25,87%</td></tr>
@@ -899,7 +1041,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
     </div>
     <p class="tiny reveal d5">Fonte: processamento da base Olist consolidada. Multa simulada conforme a regra de negócio definida — 10% do valor do frete por dia real de atraso.</p>
   </div>
-  <div class="foot"><span>Apêndice técnico</span><span class="pg">14 / 14</span></div>
+  <div class="foot"><span><strong>Dados e IA no transporte</strong> · Apêndice técnico</span><span class="pg">17 / 17</span></div>
 </section>
 
 </main>
