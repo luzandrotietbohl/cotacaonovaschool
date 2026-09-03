@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Previsão de Prazo e Risco de Atraso · Dossiê Técnico</title>
+
+<!-- ===========================================================
+     TIPOGRAFIA
+     Display/serif editorial: Bespoke Serif (Fontshare)
+     Texto e interface:       Satoshi (Fontshare)
+     Dados e fórmulas:        JetBrains Mono (Google)
+     =========================================================== -->
+<link rel="preconnect" href="https://api.fontshare.com"/>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=bespoke-serif@400,500,700&f[]=satoshi@400,500,700,900&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"/>
+
+<style>
+/* ===========================================================
+   1. TOKENS DO SISTEMA DE DESIGN
+   Alterar aqui muda o deck inteiro.
+   =========================================================== */
+:root{
+  /* Tinta e papel — paleta editorial quente, pensada para projeção e impressão */
+  --ink:#12242F;          /* petróleo profundo: títulos e números */
+  --ink-2:#3A5260;        /* corpo de texto */
+  --muted:#71889A;        /* metadados, legendas */
+  --paper:#F2EFE9;        /* fundo do slide (osso quente) */
+  --paper-2:#FBFAF7;      /* superfície de card */
+  --rule:#D9D2C6;         /* fio principal */
+  --rule-2:#E9E4DA;       /* fio secundário */
+
+  /* Azul institucional, aprofundado para uso editorial */
+  --accent:#0A6E9E;
+  --accent-2:#17A2D6;
+  --accent-wash:#E7F1F6;
+
+  /* Semântica de dados */
+  --good:#2C7A5B;  --good-wash:#EAF3EE;
+  --warn:#A97317;  --warn-wash:#FAF2E4;
+  --bad:#A83B2E;   --bad-wash:#FAEDEB;
+
+  --stage-bg:#0B1720;     /* letterbox ao redor do palco */
+  --slide-bg:var(--paper);
+
+  /* Tipografia */
+  --display:'Bespoke Serif','Iowan Old Style',Georgia,'Times New Roman',serif;
+  --body:'Satoshi','Segoe UI',Helvetica,Arial,sans-serif;
+  --mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+
+  /* Movimento */
+  --e:cubic-bezier(.16,1,.3,1);
+  --dur:.62s;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+/* ===========================================================
+   2. BASE DE PALCO FIXO 16:9  (viewport-base.css — íntegro)
+   Slides são desenhados em 1920×1080 e o palco inteiro é escalado.
+   =========================================================== */
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--stage-bg,#000)}
+.deck-viewport{position:fixed;inset:0;overflow:hidden;background:var(--stage-bg,#000)}
+.deck-stage{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;transform-origin:0 0;background:var(--slide-bg,#fff)}
+.slide{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;display:block;visibility:hidden;opacity:0;pointer-events:none;background:var(--slide-bg,#fff)}
+.slide.active,.slide.visible{visibility:visible;opacity:1;pointer-events:auto;z-index:1}
+img,video,canvas,svg{max-width:100%;max-height:100%}
+.deck-controls{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:1000}
+@media print{
+  html,body{width:1920px;height:auto;overflow:visible;background:#fff}
+  .deck-viewport{position:static;overflow:visible;background:#fff}
+  .deck-stage{position:static;width:auto;height:auto;transform:none!important;background:none}
+  .slide{position:relative;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;width:1920px;height:1080px;break-after:page;page-break-after:always}
+  .slide:last-child{break-after:auto;page-break-after:auto}
+  .deck-controls{display:none!important}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.2s!important}
+}
+
+/* ===========================================================
+   3. ESTRUTURA DO SLIDE
+   Grade: filete de 10px à esquerda, cabeçalho com fio, corpo
+   flexível, rodapé fixo. Tudo em px na escala 1920×1080.
+   =========================================================== */
+.slide{
+  font-family:var(--body);color:var(--ink-2);
+  padding:60px 92px 88px 118px;
+  display:flex;flex-direction:column;
+  transition:opacity .5s var(--e);
+}
+/* filete institucional */
+.slide::before{content:"";position:absolute;left:0;top:0;bottom:0;width:10px;
+  background:linear-gradient(180deg,var(--accent-2),var(--accent) 55%,#07506F)}
+/* textura de papel: grade técnica muito discreta */
+.slide::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(var(--rule-2) 1px,transparent 1px),linear-gradient(90deg,var(--rule-2) 1px,transparent 1px);
+  background-size:120px 120px;-webkit-mask-image:radial-gradient(ellipse at 82% 8%,#000 0%,transparent 62%);mask-image:radial-gradient(ellipse at 82% 8%,#000 0%,transparent 62%)}
+
+.head{position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:48px;
+  border-bottom:1px solid var(--rule);padding-bottom:20px;margin-bottom:32px}
+.kicker{font-family:var(--mono);font-size:19px;font-weight:700;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--accent)}
+h2{font-family:var(--display);font-weight:500;font-size:57px;line-height:1.04;
+  letter-spacing:-.022em;color:var(--ink);margin-top:14px;max-width:1480px}
+h2 em{font-style:normal;color:var(--accent);font-weight:700}
+.tag{flex:0 0 auto;font-family:var(--mono);font-size:15px;font-weight:500;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);border:1px solid var(--rule);border-radius:999px;padding:9px 16px;background:var(--paper-2)}
+
+.body{position:relative;z-index:2;flex:1;min-height:0;display:flex;flex-direction:column;gap:22px}
+
+.foot{position:absolute;z-index:2;left:118px;right:92px;bottom:36px;display:flex;justify-content:space-between;
+  align-items:baseline;border-top:1px solid var(--rule-2);padding-top:14px;
+  font-family:var(--mono);font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.foot .pg{color:var(--ink);font-weight:700;letter-spacing:.1em}
+
+/* ===========================================================
+   4. COMPONENTES
+   =========================================================== */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.fill-row{flex:1;min-height:0}
+/* grupo de cards com altura natural, centrado no espaço disponível */
+.vcenter{align-content:center}
+.vcenter>.card{justify-content:flex-start!important}
+
+.card{position:relative;background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;
+  padding:26px 30px;display:flex;flex-direction:column;gap:12px}
+.card.top-accent::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:3px;
+  background:var(--accent);border-radius:6px 6px 0 0}
+
+h3{font-family:var(--display);font-weight:500;font-size:29px;line-height:1.15;letter-spacing:-.015em;color:var(--ink)}
+h3 .dir{font-family:var(--mono);font-size:15px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.eyebrow{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+p{font-size:20px;line-height:1.45}
+.small{font-size:17px;line-height:1.42;color:var(--muted)}
+.tiny{font-size:15px;line-height:1.4;color:var(--muted)}
+b,strong{color:var(--ink);font-weight:700}
+ul,ol{margin-left:22px;display:flex;flex-direction:column;gap:9px}
+li{font-size:19px;line-height:1.4}
+.rule{height:1px;background:var(--rule);margin:4px 0}
+
+/* fórmula / código */
+.formula{font-family:var(--mono);font-size:18px;line-height:1.55;color:#0E3D53;
+  background:var(--accent-wash);border-left:3px solid var(--accent);border-radius:4px;padding:12px 17px}
+.formula.band{font-size:21px;text-align:center;border-left:0;border-top:1px solid #C9E1EC;border-bottom:1px solid #C9E1EC;border-radius:0}
+
+/* destaque */
+.callout{border:1px solid var(--rule);border-left:4px solid var(--accent);background:#F6FAFC;
+  border-radius:4px;padding:14px 19px;font-size:19px;line-height:1.4}
+.callout.warn{border-left-color:var(--warn);background:var(--warn-wash);border-color:#EEDFC0}
+.callout.bad{border-left-color:var(--bad);background:var(--bad-wash);border-color:#EFD3CE}
+.callout.good{border-left-color:var(--good);background:var(--good-wash);border-color:#CFE4D8}
+
+/* etiquetas */
+.pill{display:inline-block;font-family:var(--mono);font-size:15px;font-weight:500;
+  border:1px solid #BFDCE9;background:#EDF6FA;color:#0A5D85;border-radius:999px;padding:6px 13px}
+.pill.gray{border-color:var(--rule);background:#F1EEE8;color:#5B6E7A}
+.pill.bad{border-color:#EBC9C3;background:var(--bad-wash);color:var(--bad)}
+
+/* números-chave */
+.stat{display:flex;flex-direction:column;gap:8px;justify-content:center}
+.stat .n{font-family:var(--display);font-weight:500;font-size:62px;line-height:1;letter-spacing:-.035em;
+  color:var(--ink);font-feature-settings:"tnum" 1}
+.stat .l{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+
+/* tabelas editoriais: fios, sem preenchimento pesado */
+table{width:100%;border-collapse:collapse;font-feature-settings:"tnum" 1}
+th{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);text-align:left;padding:0 14px 12px;border-bottom:2px solid var(--ink)}
+td{font-size:19px;padding:13px 14px;border-bottom:1px solid var(--rule-2);color:var(--ink-2)}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}
+tr.hl td{background:var(--accent-wash);color:#0A4B69}
+tr.hl td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+tr.hl2 td{background:var(--warn-wash)}
+tr.hl2 td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
+
+/* barras horizontais comparativas */
+.bars{display:flex;flex-direction:column;gap:2px}
+.bars .row{display:grid;grid-template-columns:250px 1fr 92px;gap:18px;align-items:center;height:41px}
+.bars .nm{font-size:17px;color:var(--ink-2)}
+.bars .tr{height:9px;background:#E4DFD5;border-radius:999px;overflow:hidden}
+.bars .fl{display:block;height:100%;width:0;border-radius:999px;
+  background:linear-gradient(90deg,var(--accent-2),var(--accent));transition:width 1s var(--e) .15s}
+.slide.visible .bars .fl{width:var(--w)}
+.bars .vl{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--ink);text-align:right}
+.bars .row.best .nm{color:var(--ink);font-weight:700}
+.bars .row.best .fl{background:linear-gradient(90deg,#3FBF8E,var(--good))}
+
+/* funil de curadoria */
+.funnel{display:grid;grid-template-columns:repeat(7,1fr);gap:16px;height:262px}
+.fstep{display:flex;flex-direction:column;justify-content:flex-end;text-align:center}
+.fstep .fn{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--ink);margin-bottom:9px}
+.fstep .ft{flex:1;display:flex;align-items:flex-end;min-height:0}
+.fstep .fb{width:100%;height:0;border-radius:4px 4px 0 0;
+  background:linear-gradient(180deg,var(--accent-2),var(--accent));transition:height 1.1s var(--e) .2s}
+.slide.visible .fstep .fb{height:var(--h)}
+.fstep.last .fb{background:linear-gradient(180deg,#3FBF8E,var(--good))}
+.fstep .fcap{font-size:15px;color:var(--muted);line-height:1.25;margin-top:11px;min-height:38px}
+
+/* fronteira temporal */
+.axis{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:22px;
+  background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;padding:16px 26px}
+.axis .seg{display:flex;align-items:center;gap:16px;font-family:var(--mono);font-size:16px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+.axis .seg.r{justify-content:flex-end}
+.axis .ln{flex:1;height:4px;border-radius:999px}
+.axis .ln.x{background:linear-gradient(90deg,#BEE2F0,var(--accent))}
+.axis .ln.y{background:linear-gradient(90deg,#CFD6DB,#8C9FAB)}
+.axis .cut{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);text-align:center;line-height:1.35;padding:4px 20px;
+  border-left:2px dashed var(--accent);border-right:2px dashed var(--accent)}
+
+.frow{display:grid;grid-template-columns:162px 1fr;gap:18px;align-items:start;
+  padding:13px 0;border-top:1px solid var(--rule-2)}
+.frow:first-child{border-top:0;padding-top:4px}
+.frow .flab{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink);padding-top:7px}
+.frow .fv{display:flex;flex-wrap:wrap;gap:7px}
+.frow .fd{width:100%;font-size:17px;color:var(--muted);line-height:1.35;margin-top:6px}
+
+/* matriz de confusão com marginais */
+.cm{display:grid;grid-template-columns:196px 1fr 1fr 152px;grid-template-rows:auto 1fr 1fr auto;gap:10px;flex:1;min-height:0}
+.cm .h,.cm .s{display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink);background:#EAE5DB;border:1px solid var(--rule);border-radius:5px;padding:12px 8px}
+.cm .c{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  border:1px solid var(--rule);border-radius:6px;background:var(--paper-2)}
+.cm .c .n{font-family:var(--display);font-weight:500;font-size:52px;line-height:1;letter-spacing:-.03em;color:var(--ink);font-feature-settings:"tnum" 1}
+.cm .c .l{font-family:var(--mono);font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.cm .c.good{background:var(--good-wash);border-color:#CFE4D8}
+.cm .c.warn{background:var(--warn-wash);border-color:#EEDFC0}
+.cm .c.bad{background:var(--bad-wash);border-color:#EFD3CE}
+.cm .t{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  border:1px dashed var(--rule);border-radius:5px;background:#F0EDE6}
+.cm .t .n{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--ink)}
+.cm .t .l{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.cm .t.grand{border-style:solid;background:#E5EFF4;border-color:#C6DEE9}
+
+/* faixas de risco */
+.risk{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;flex:1;min-height:0}
+.risk .r{position:relative;background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;
+  padding:24px 23px;display:flex;flex-direction:column;gap:13px;justify-content:space-between}
+.risk .act{border-top:1px solid var(--rule-2);padding-top:14px;display:flex;flex-direction:column;gap:6px}
+.risk .act .k{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+.risk .act .v{font-size:18px;line-height:1.35;color:var(--ink)}
+.risk .r::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:5px;border-radius:6px 6px 0 0}
+.risk .low::before{background:var(--good)}
+.risk .mod::before{background:#C9A227}
+.risk .high::before{background:#C8781F}
+.risk .crit::before{background:var(--bad)}
+.risk .rt{font-family:var(--display);font-size:31px;font-weight:500;color:var(--ink)}
+.risk .rr{font-family:var(--mono);font-size:16px;color:#334A57;background:#F0EDE6;
+  border:1px solid var(--rule-2);border-radius:4px;padding:10px 12px}
+.risk .rd{font-size:18px;line-height:1.4;color:var(--muted)}
+
+/* cadeia de decisão */
+.chain{display:flex;flex-direction:column;gap:12px}
+.chain .node{display:flex;align-items:center;gap:16px;background:var(--paper-2);
+  border:1px solid var(--rule);border-radius:5px;padding:13px 17px;font-size:18px;color:var(--ink)}
+.chain.lg .node{padding:20px 22px;font-size:21px}
+.chain .node .ix{flex:0 0 auto;font-family:var(--mono);font-size:14px;font-weight:700;color:var(--accent);
+  border:1px solid #BFDCE9;background:var(--accent-wash);border-radius:4px;padding:5px 9px;letter-spacing:.08em}
+
+/* ===========================================================
+   5. SLIDE DE ABERTURA (tinta)
+   =========================================================== */
+.slide.dark{background:var(--ink);color:#D8E2E8}
+.slide.dark::before{background:linear-gradient(180deg,var(--accent-2),#0A6E9E)}
+.slide.dark::after{opacity:.28;
+  background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);
+  background-size:120px 120px;-webkit-mask-image:radial-gradient(ellipse at 78% 12%,#000 0%,transparent 70%);mask-image:radial-gradient(ellipse at 78% 12%,#000 0%,transparent 70%)}
+.glow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(720px 460px at 84% 16%,rgba(23,162,214,.20),transparent 62%),
+             radial-gradient(560px 380px at 6% 96%,rgba(10,110,158,.22),transparent 60%)}
+.slide.dark .kicker{color:var(--accent-2)}
+.slide.dark h1{font-family:var(--display);font-weight:500;font-size:100px;line-height:1.02;
+  letter-spacing:-.03em;color:#FFFFFF;max-width:1440px}
+.slide.dark h1 em{font-style:normal;color:var(--accent-2)}
+.slide.dark .lead{font-size:25px;line-height:1.5;color:#AFC2CE;max-width:1180px;margin-top:26px}
+.slide.dark .foot{color:#7C93A1;border-top-color:rgba(255,255,255,.14)}
+.slide.dark .foot .pg{color:#D8E2E8}
+.statband{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid rgba(255,255,255,.16)}
+.statband .sb{padding:30px 40px 0;border-left:1px solid rgba(255,255,255,.16)}
+.statband .sb:first-child{padding-left:0;border-left:0}
+.statband .n{font-family:var(--display);font-weight:500;font-size:66px;line-height:1;letter-spacing:-.035em;
+  color:#FFFFFF;font-feature-settings:"tnum" 1}
+.statband .l{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--accent-2);margin:12px 0 8px}
+.statband .d{font-size:17px;line-height:1.4;color:#93A8B6}
+
+/* ===========================================================
+   6. ANIMAÇÃO DE ENTRADA (staggered)
+   =========================================================== */
+.reveal{opacity:0;transform:translateY(26px);
+  transition:opacity var(--dur) var(--e),transform var(--dur) var(--e)}
+.slide.visible .reveal{opacity:1;transform:none}
+.d1{transition-delay:.05s}.d2{transition-delay:.13s}.d3{transition-delay:.21s}
+.d4{transition-delay:.29s}.d5{transition-delay:.37s}.d6{transition-delay:.45s}
+
+/* --- variante compacta para o slide de resultados (mais densa do deck) --- */
+/* --- variante ampliada para slides de texto: melhor leitura em projeção --- */
+.slide.roomy p{font-size:22px}
+.slide.roomy li{font-size:21px;line-height:1.42}
+.slide.roomy h3{font-size:32px}
+.slide.roomy .callout{font-size:21px;padding:16px 21px}
+.slide.roomy td{font-size:21px;padding:14px 14px}
+.slide.roomy .small{font-size:18px}
+.slide.roomy .chain .node{font-size:20px;padding:16px 19px}
+.slide.roomy .formula{font-size:19px}
+
+.slide.dense h2{font-size:52px}
+.slide.dense .card{padding:22px 26px;gap:10px}
+.slide.dense h3{font-size:26px}
+.slide.dense .bars .row{height:33px;grid-template-columns:228px 1fr 84px}
+.slide.dense .bars .nm{font-size:16px}
+.slide.dense .bars .vl{font-size:16px}
+.slide.dense .callout{padding:13px 17px;font-size:18px}
+.slide.dense td{font-size:17px;padding:9px 12px}
+.slide.dense th{font-size:13px;padding:0 12px 9px}
+
+/* ===========================================================
+   7. CHROME FORA DO PALCO (controles, progresso, notas, edição)
+   =========================================================== */
+.deck-controls{display:flex;align-items:center;gap:8px;
+  background:rgba(11,23,32,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:7px 10px;opacity:.3;transition:opacity .3s}
+.deck-controls:hover{opacity:1}
+.deck-controls button{border:0;background:transparent;color:#D8E2E8;font-family:var(--mono);font-size:13px;
+  letter-spacing:.1em;cursor:pointer;padding:7px 11px;border-radius:999px}
+.deck-controls button:hover{background:rgba(255,255,255,.12)}
+.deck-controls .count{font-family:var(--mono);font-size:13px;color:#9FB3C0;padding:0 6px;letter-spacing:.12em}
+.bar-progress{position:fixed;left:0;bottom:0;height:3px;width:0;z-index:1001;
+  background:linear-gradient(90deg,var(--accent-2),var(--accent));transition:width .35s var(--e)}
+.notes{position:fixed;right:24px;bottom:74px;width:520px;max-height:44vh;overflow:auto;z-index:1002;
+  display:none;background:rgba(9,22,30,.96);color:#DCE7ED;border:1px solid rgba(255,255,255,.14);
+  border-radius:10px;padding:20px 22px;font-family:var(--body);font-size:15px;line-height:1.5}
+.notes.show{display:block}
+.notes b{color:var(--accent-2)}
+.edit-hotzone{position:fixed;top:0;left:0;width:80px;height:80px;z-index:10000;cursor:pointer}
+.edit-toggle{position:fixed;top:16px;left:16px;z-index:10001;opacity:0;pointer-events:none;
+  transition:opacity .3s;border:1px solid rgba(255,255,255,.16);background:rgba(11,23,32,.86);
+  color:#D8E2E8;font-family:var(--mono);font-size:12px;letter-spacing:.12em;border-radius:999px;
+  padding:9px 14px;cursor:pointer}
+.edit-toggle.show,.edit-toggle.active{opacity:1;pointer-events:auto}
+.edit-toggle.active{border-color:var(--accent-2);color:#fff}
+body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline-offset:3px;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- =========================================================
+     SLIDE 01 · ABERTURA
+     ========================================================= -->
+<section class="slide dark active" data-notes="<b>Mensagem:</b> abrir pelo problema, não pela tecnologia. O sistema é de apoio à decisão e nasce no momento da criação do pedido.">
+  <div class="glow"></div>
+  <div class="head" style="border-bottom:0;padding-bottom:0;margin-bottom:0;display:block">
+    <div class="kicker reveal d1">Sistema de apoio à decisão · Prazo de entrega</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:0">
+    <h1 class="reveal d2">Prever o prazo real.<br/><em>Antecipar o risco de atraso.</em></h1>
+    <p class="lead reveal d3">Especificação de um sistema que estima o tempo de entrega no momento da criação do pedido e transforma essa previsão em quatro níveis de risco — mantendo a decisão operacional com o humano.</p>
+  </div>
+  <div class="statband reveal d4" style="margin-bottom:8px">
+    <div class="sb"><div class="n">98.666</div><div class="l">pedidos únicos</div><div class="d">112.650 itens na base original.</div></div>
+    <div class="sb"><div class="n">75.690</div><div class="l">treino final</div><div class="d">Divisão temporal, curadoria e MAD aplicados.</div></div>
+    <div class="sb"><div class="n">18.872</div><div class="l">teste futuro</div><div class="d">Pedidos mais recentes, sem olhar o futuro durante o treino.</div></div>
+  </div>
+  <div class="foot"><span>Módulo 1 · Dados e IA no transporte</span><span class="pg">01 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 02 · OBJETIVO E AÇÕES
+     ========================================================= -->
+<section class="slide roomy" data-notes="<b>Mensagem:</b> reforçar que rota ainda não existe na criação do pedido. O risco orienta a decisão, mas não executa ação.">
+  <div class="head">
+    <div><div class="kicker reveal d1">1 · Objetivo &nbsp;+&nbsp; 2 · Ações</div>
+    <h2 class="reveal d2">O sistema serve para agir <em>antes</em> do atraso acontecer</h2></div>
+  </div>
+  <div class="body">
+    <div class="grid2 fill-row vcenter">
+      <div class="card top-accent reveal d3" style="justify-content:space-between">
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div class="eyebrow">Propósito em uma frase</div>
+          <p style="font-family:var(--display);font-size:50px;line-height:1.18;color:var(--ink);font-weight:400;letter-spacing:-.015em">“Estimar antecipadamente o prazo real de novos pedidos e indicar aqueles com risco de ultrapassar a data prometida.”</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="rule"></div>
+          <p><b>Não faz:</b> não altera promessa, rota ou prioridade sozinho.</p>
+          <p><b>Critério de negócio:</b> reduzir multa não antecipada e apoiar decisões antes do vencimento.</p>
+        </div>
+      </div>
+      <div class="card reveal d4" style="justify-content:space-between">
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <h3>Ações possíveis após o alerta</h3>
+          <div class="chain lg">
+            <div class="node"><span class="ix">01</span> Priorizar expedição / processamento</div>
+            <div class="node"><span class="ix">02</span> Avaliar alternativa de rota após a roteirização existir</div>
+            <div class="node"><span class="ix">03</span> Acionar o responsável operacional quando necessário</div>
+          </div>
+        </div>
+        <div class="callout"><b>Fronteira:</b> o modelo informa; o operador de planejamento decide o que fazer.</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Objetivo operacional + ações executáveis</span><span class="pg">02 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 03 · FRONTEIRA TEMPORAL (LEAKAGE)
+     ========================================================= -->
+<section class="slide" data-notes="<b>Mensagem:</b> explicar a diferença treino vs uso futuro. O histórico conhece o resultado porque o evento já aconteceu.">
+  <div class="head">
+    <div><div class="kicker reveal d1">3.2 · Adequação dos dados</div>
+    <h2 class="reveal d2">A fronteira temporal evita <em>leakage</em></h2></div>
+    <span class="tag reveal d2">corte temporal · 25/05/2018</span>
+  </div>
+  <div class="body" style="gap:20px">
+    <div class="axis reveal d3">
+      <div class="seg">Passado do pedido<div class="ln x"></div></div>
+      <div class="cut">Criação do pedido<br/>corte de informação</div>
+      <div class="seg r"><div class="ln y"></div>Futuro do pedido</div>
+    </div>
+    <div class="grid2 fill-row">
+      <div class="card top-accent reveal d4" style="justify-content:space-between">
+        <h3>Antes do corte · entra em <span style="font-family:var(--mono);color:var(--accent)">X</span></h3>
+        <div>
+          <div class="frow"><div class="flab">Carga</div><div class="fv">
+            <span class="pill">peso real total</span><span class="pill">peso volumétrico</span><span class="pill">maior dimensão</span><span class="pill">nº itens</span>
+            <div class="fd">Peso, volume e maior dimensão do pacote, mais a quantidade de itens.</div></div></div>
+          <div class="frow"><div class="flab">Geografia</div><div class="fv">
+            <span class="pill">distância Haversine</span><span class="pill">UF origem</span><span class="pill">UF destino</span><span class="pill">mesma UF</span>
+            <div class="fd">Origem, destino e distância em linha reta — proxy da rota, que ainda não existe.</div></div></div>
+          <div class="frow"><div class="flab">Tempo e produto</div><div class="fv">
+            <span class="pill">tendência temporal</span><span class="pill">mês</span><span class="pill">dia da semana</span><span class="pill">categoria</span>
+            <div class="fd">Quando o pedido nasce e o que ele contém.</div></div></div>
+        </div>
+        <div class="formula">distância = Haversine(lat/lon origem, lat/lon destino)<br/>peso volumétrico = comprimento × altura × largura / 6000</div>
+        <p class="small">Somente informações disponíveis — ou deriváveis — quando o pedido nasce.</p>
+      </div>
+      <div class="card reveal d5" style="justify-content:space-between">
+        <h3>Depois do corte · ensina e avalia <span style="font-family:var(--mono);color:var(--accent)">Y</span></h3>
+        <div>
+          <div class="frow"><div class="flab">Alvo (Y)</div><div class="fv">
+            <span class="pill gray">data real de entrega</span><span class="pill gray">delivery_days</span>
+            <div class="fd">O que o modelo aprende a prever: dias entre criação e entrega.</div></div></div>
+          <div class="frow"><div class="flab">Avaliação</div><div class="fv">
+            <span class="pill gray">delivered_late</span><span class="pill gray">dias de atraso</span>
+            <div class="fd">Usados só para medir acerto, recall e multa — nunca para treinar X.</div></div></div>
+          <div class="frow"><div class="flab">Nunca em X</div><div class="fv">
+            <span class="pill bad">qualquer campo pós-criação</span>
+            <div class="fd">Status, datas de aprovação, postagem ou entrega: conhecidos depois do corte.</div></div></div>
+        </div>
+        <div class="formula">delivery_days = data_entrega − data_criação<br/>delivered_late = data_entrega &gt; data_prometida</div>
+        <p class="small">Dados pós-criação constroem o alvo e medem o resultado — nunca alimentam a previsão.</p>
+      </div>
+    </div>
+    <div class="formula band reveal d6">X_criação &nbsp;→&nbsp; modelo &nbsp;→&nbsp; ŷ = prazo previsto &nbsp;&nbsp;|&nbsp;&nbsp; Y_futuro = prazo real observado</div>
+    <div class="grid2 reveal d6">
+      <div class="callout warn"><b>3.1 Alegação:</b> autoria real dos campos não está documentada na base fornecida.</div>
+      <div class="callout warn"><b>3.3 Proveniência:</b> sistemas atravessados, acessos, LGPD e retenção não estão documentados.</div>
+    </div>
+  </div>
+  <div class="foot"><span>O que não sabemos é registrado como lacuna — não inventado</span><span class="pg">03 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 04 · CURADORIA (FUNIL)
+     ========================================================= -->
+<section class="slide" data-notes="<b>Números:</b> 1.719 em andamento; 468 sem modelo de prazo; 19 categorias raras; 384 removidos do treino e 165 do teste; 74 outliers MAD removidos do treino.">
+  <div class="head">
+    <div><div class="kicker reveal d1">3.4 · Curadoria</div>
+    <h2 class="reveal d2">Da base bruta à base oficial de modelagem</h2></div>
+    <span class="tag reveal d2">−22.976 pedidos · −23,3%</span>
+  </div>
+  <div class="body" style="gap:30px">
+    <div class="funnel reveal d3">
+      <div class="fstep"><div class="fn">98.666</div><div class="ft"><div class="fb" style="--h:100%"></div></div><div class="fcap">pedidos únicos</div></div>
+      <div class="fstep"><div class="fn">97.388</div><div class="ft"><div class="fb" style="--h:98.7%"></div></div><div class="fcap">sem múltiplas origens</div></div>
+      <div class="fstep"><div class="fn">95.201</div><div class="ft"><div class="fb" style="--h:96.5%"></div></div><div class="fcap">com prazo real observável</div></div>
+      <div class="fstep"><div class="fn">95.185</div><div class="ft"><div class="fb" style="--h:96.5%"></div></div><div class="fcap">peso / dimensão válidos</div></div>
+      <div class="fstep"><div class="fn">76.148</div><div class="ft"><div class="fb" style="--h:77.2%"></div></div><div class="fcap">80% mais antigos</div></div>
+      <div class="fstep"><div class="fn">75.764</div><div class="ft"><div class="fb" style="--h:76.8%"></div></div><div class="fcap">após categorias raras</div></div>
+      <div class="fstep last"><div class="fn">75.690</div><div class="ft"><div class="fb" style="--h:76.7%"></div></div><div class="fcap">treino final após MAD</div></div>
+    </div>
+    <div class="grid3 reveal d4">
+      <div class="card"><h3>Categoria</h3><p><b>&lt; 50 no treino:</b> exclui — decisão de negócio.</p><p><b>Ausente:</b> <span class="pill gray">SEM_CATEGORIA</span></p></div>
+      <div class="card"><h3>Localização</h3><p>Geografia ausente ou inválida é mantida como <span class="pill gray">SEM_LOCAL</span>.</p><p class="small">1.033 pedidos no pool modelável.</p></div>
+      <div class="card"><h3>Prazo</h3><p><b>Em andamento:</b> fora da modelagem.</p><p><b>Outlier:</b> MAD robusto, aplicado só no treino.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Curadoria com regra explícita e antes/depois mensurável</span><span class="pg">04 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 05 · TRANSFORMAÇÕES
+     ========================================================= -->
+<section class="slide" data-notes="<b>Mensagem:</b> distinguir “dado extremo real” de “erro de dado”. O MAD é aplicado somente no treino; o teste mantém extremos futuros.">
+  <div class="head">
+    <div><div class="kicker reveal d1">3.4 · Transparência das transformações</div>
+    <h2 class="reveal d2">Sem “caixa-preta” na construção das variáveis</h2></div>
+  </div>
+  <div class="body">
+    <div class="grid2 fill-row reveal d3">
+      <div class="card top-accent" style="justify-content:space-between">
+        <h3>Peso e dimensão</h3>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div class="formula">Peso real (kg) = product_weight_g / 1000</div>
+          <div class="formula">Volume = comprimento × altura × largura</div>
+          <div class="formula">Peso volumétrico = volume / 6000</div>
+        </div>
+        <p><b>No pedido:</b> somamos os pesos dos itens e usamos a maior dimensão observada.</p>
+        <p class="small">Volume não entra junto do peso volumétrico por redundância determinística.</p>
+      </div>
+      <div class="card" style="justify-content:space-between">
+        <h3>Distância</h3>
+        <div class="formula">distance_km = Haversine(lat_origem, lon_origem,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lat_destino, lon_destino)</div>
+        <p>É uma <b>proxy geográfica disponível na criação</b>, independente da rota futura.</p>
+        <div class="callout good"><b>Sinal observado:</b> correlação de Spearman ≈ 0,54 com o prazo — muito superior ao efeito isolado de peso e dimensão.</div>
+      </div>
+    </div>
+    <div class="grid2 fill-row reveal d4">
+      <div class="card" style="justify-content:space-between">
+        <h3>Outlier de prazo</h3>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div class="formula">x = log(1 + delivery_days)</div>
+          <div class="formula">M = 0,6745 × (x − mediana(x)) / MAD</div>
+        </div>
+        <p><b>OUTLIER_PRAZO</b> quando M &gt; 3,5 — marcado, não apagado.</p>
+      </div>
+      <div class="card" style="justify-content:space-between">
+        <h3>Regra temporal</h3>
+        <p>Treino e teste são separados por tempo, nunca aleatoriamente.</p>
+        <div class="stat"><div class="n" style="font-size:46px">80% passado → 20% futuro</div><div class="l">corte observado: 25/05/2018</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Transformações reproduzíveis e auditáveis</span><span class="pg">05 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 06 · CRITÉRIO DE ADEQUAÇÃO (GO/NO-GO)
+     ========================================================= -->
+<section class="slide">
+  <div class="head">
+    <div><div class="kicker reveal d1">4.1 · Adequação da análise</div>
+    <h2 class="reveal d2">O modelo precisa vencer uma regra simples para merecer produção</h2></div>
+  </div>
+  <div class="body">
+    <div class="grid3 fill-row reveal d3">
+      <div class="card"><h3>Baselines</h3><ul>
+        <li>Média histórica</li><li>Mediana histórica</li><li>IQQ (faixa Q1–Q3)</li><li>Mediana por faixa de distância</li></ul></div>
+      <div class="card"><h3>Modelos testados</h3><ul>
+        <li>Regressão Linear</li><li>Random Forest</li><li>Gradient Boosting</li></ul></div>
+      <div class="card top-accent"><h3>Métricas <span class="dir">e direção</span></h3>
+        <table>
+          <tbody>
+            <tr><td style="padding:9px 0"><b>MAE</b> — erro médio em dias</td><td class="num" style="padding:9px 0;font-family:var(--mono);font-size:16px;color:var(--accent);white-space:nowrap">menor ↓</td></tr>
+            <tr><td style="padding:9px 0"><b>RMSE</b> — penaliza erros grandes</td><td class="num" style="padding:9px 0;font-family:var(--mono);font-size:16px;color:var(--accent);white-space:nowrap">menor ↓</td></tr>
+            <tr><td style="padding:9px 0"><b>P90</b> do erro absoluto</td><td class="num" style="padding:9px 0;font-family:var(--mono);font-size:16px;color:var(--accent);white-space:nowrap">menor ↓</td></tr>
+            <tr><td style="padding:9px 0"><b>Recall</b> — atrasos capturados</td><td class="num" style="padding:9px 0;font-family:var(--mono);font-size:16px;color:var(--good);white-space:nowrap">maior ↑</td></tr>
+            <tr><td style="padding:9px 0"><b>Precision</b> — alertas confirmados</td><td class="num" style="padding:9px 0;font-family:var(--mono);font-size:16px;color:var(--good);white-space:nowrap">maior ↑</td></tr>
+            <tr><td style="padding:9px 0"><b>Multa identificada</b> — R$ detectado</td><td class="num" style="padding:9px 0;font-family:var(--mono);font-size:16px;color:var(--good);white-space:nowrap">maior ↑</td></tr>
+          </tbody>
+        </table>
+        <p class="tiny">A multa <b>não identificada</b> é o espelho: quanto menor, melhor.</p>
+      </div>
+    </div>
+    <div class="formula band reveal d4">Go/no-go: superar o melhor baseline no MAE &nbsp;+&nbsp; não piorar o Recall do modelo vigente</div>
+    <div class="grid2 reveal d5">
+      <div class="callout"><b>Erro prioritário:</b> falso negativo — deixar passar um pedido que realmente atrasará.</div>
+      <div class="callout warn"><b>Multa assumida:</b> 10% do valor do frete × dias de atraso.</div>
+    </div>
+  </div>
+  <div class="foot"><span>Método adequado = desempenho visível contra baseline + custo do erro</span><span class="pg">06 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 07 · RESULTADO DOS MODELOS
+     ========================================================= -->
+<section class="slide dense" data-notes="<b>Mensagem:</b> não esconder o resultado. O baseline por distância é melhor em prazo; a regressão linear é melhor em recall e multa. Isso cria uma decisão de negócio, não um “vencedor automático”.">
+  <div class="head">
+    <div><div class="kicker reveal d1">4.1 · Resultado dos modelos</div>
+    <h2 class="reveal d2">O melhor preditor de prazo foi uma <em>regra simples por distância</em></h2></div>
+    <span class="tag reveal d2">teste futuro · 18.872 pedidos</span>
+  </div>
+  <div class="body" style="gap:22px">
+    <div class="grid2 reveal d3">
+      <div class="card"><h3>MAE — erro médio em dias <span class="dir">menor é melhor ↓</span></h3>
+        <div class="bars">
+          <div class="row best"><div class="nm">Mediana por distância</div><div class="tr"><span class="fl" style="--w:67.9%"></span></div><div class="vl">4,37 d</div></div>
+          <div class="row"><div class="nm">Mediana</div><div class="tr"><span class="fl" style="--w:77.4%"></span></div><div class="vl">4,99 d</div></div>
+          <div class="row"><div class="nm">Random Forest</div><div class="tr"><span class="fl" style="--w:81.8%"></span></div><div class="vl">5,27 d</div></div>
+          <div class="row"><div class="nm">Gradient Boosting</div><div class="tr"><span class="fl" style="--w:90.7%"></span></div><div class="vl">5,84 d</div></div>
+          <div class="row"><div class="nm">Média</div><div class="tr"><span class="fl" style="--w:99%"></span></div><div class="vl">6,38 d</div></div>
+          <div class="row"><div class="nm">Regressão Linear</div><div class="tr"><span class="fl" style="--w:100%"></span></div><div class="vl">6,44 d</div></div>
+        </div>
+        <div class="callout good"><b>Resultado:</b> nenhum modelo de ML superou o melhor baseline no MAE.</div>
+      </div>
+      <div class="card"><h3>Recall — atrasos capturados <span class="dir">maior é melhor ↑</span></h3>
+        <div class="bars">
+          <div class="row best"><div class="nm">Regressão Linear</div><div class="tr"><span class="fl" style="--w:100%"></span></div><div class="vl">71,3%</div></div>
+          <div class="row"><div class="nm">Média</div><div class="tr"><span class="fl" style="--w:95%"></span></div><div class="vl">67,8%</div></div>
+          <div class="row"><div class="nm">Mediana</div><div class="tr"><span class="fl" style="--w:86.2%"></span></div><div class="vl">61,5%</div></div>
+          <div class="row"><div class="nm">Gradient Boosting</div><div class="tr"><span class="fl" style="--w:81.9%"></span></div><div class="vl">58,4%</div></div>
+          <div class="row"><div class="nm">Random Forest</div><div class="tr"><span class="fl" style="--w:76.9%"></span></div><div class="vl">54,8%</div></div>
+          <div class="row"><div class="nm">Mediana por distância</div><div class="tr"><span class="fl" style="--w:63.6%"></span></div><div class="vl">45,4%</div></div>
+        </div>
+        <div class="callout warn"><b>Tensão:</b> melhor MAE não significa melhor detecção de atrasos.</div>
+      </div>
+    </div>
+    <div class="reveal d4">
+      <div class="eyebrow" style="margin-bottom:12px">As seis métricas do go/no-go nos dois extremos do ranking</div>
+      <table>
+        <thead><tr><th>Métrica — o que mede</th><th>Direção</th><th class="num">Mediana por distância</th><th class="num">Regressão Linear</th><th>Vence</th></tr></thead>
+        <tbody>
+          <tr class="hl"><td><b>MAE</b> — erro médio, em dias</td><td>menor é melhor ↓</td><td class="num"><b>4,37 d</b></td><td class="num">6,44 d</td><td>Mediana por distância</td></tr>
+          <tr class="hl"><td><b>RMSE</b> — penaliza erros grandes</td><td>menor é melhor ↓</td><td class="num"><b>5,83 d</b></td><td class="num">7,62 d</td><td>Mediana por distância</td></tr>
+          <tr class="hl"><td><b>P90 do erro</b> — pior caso típico</td><td>menor é melhor ↓</td><td class="num"><b>8,01 d</b></td><td class="num">11,22 d</td><td>Mediana por distância</td></tr>
+          <tr class="hl2"><td><b>Recall</b> — atrasos reais capturados</td><td>maior é melhor ↑</td><td class="num">45,4%</td><td class="num"><b>71,3%</b></td><td>Regressão Linear</td></tr>
+          <tr class="hl"><td><b>Precision</b> — alertas que se confirmam</td><td>maior é melhor ↑</td><td class="num"><b>22,5%</b></td><td class="num">16,1%</td><td>Mediana por distância</td></tr>
+          <tr class="hl2"><td><b>Multa identificada</b> — R$ evitável detectado</td><td>maior é melhor ↑</td><td class="num">23,2%</td><td class="num"><b>48,1%</b></td><td>Regressão Linear</td></tr>
+        </tbody>
+      </table>
+      <p class="tiny" style="margin-top:10px">Go/no-go atual: superar o melhor baseline no <b>MAE</b> sem piorar o <b>Recall</b> — nenhum ML cumpriu as duas condições.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Resultado técnico principal da primeira rodada</span><span class="pg">07 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 08 · CUSTO DO ERRO
+     ========================================================= -->
+<section class="slide">
+  <div class="head">
+    <div><div class="kicker reveal d1">4.1 · Custo do erro</div>
+    <h2 class="reveal d2">O falso negativo tem custo em <em>R$</em></h2></div>
+    <span class="tag reveal d2">multa = 10% do frete × dia</span>
+  </div>
+  <div class="body" style="gap:26px">
+    <div class="grid3 reveal d3">
+      <div class="card stat"><div class="n">1.012</div><div class="l">atrasos reais no teste</div><p class="small">Entre 18.872 pedidos avaliados.</p></div>
+      <div class="card stat"><div class="n">R$ 12,2 mil</div><div class="l">multa potencial total</div><p class="small">Regra: 10% do frete por dia de atraso.</p></div>
+      <div class="card stat top-accent"><div class="n">48,1%</div><div class="l">maior multa identificada</div><p class="small">Valor observado na Regressão Linear.</p></div>
+    </div>
+    <div class="reveal d4" style="flex:1;min-height:0">
+      <table>
+        <thead><tr><th>Método</th><th class="num">TP</th><th class="num">FN</th><th class="num">Precision</th><th class="num">Multa identificada</th><th class="num">Multa não identificada</th></tr></thead>
+        <tbody>
+          <tr><td>Mediana por distância</td><td class="num">459</td><td class="num">553</td><td class="num">22,5%</td><td class="num">R$ 2.819,68</td><td class="num">R$ 9.341,64</td></tr>
+          <tr><td>Random Forest</td><td class="num">555</td><td class="num">457</td><td class="num">18,9%</td><td class="num">R$ 3.909,42</td><td class="num">R$ 8.251,91</td></tr>
+          <tr><td>Gradient Boosting</td><td class="num">591</td><td class="num">421</td><td class="num">16,9%</td><td class="num">R$ 4.459,83</td><td class="num">R$ 7.701,49</td></tr>
+          <tr class="hl"><td>Regressão Linear</td><td class="num">722</td><td class="num"><b>290</b></td><td class="num">16,1%</td><td class="num"><b>R$ 5.853,19</b></td><td class="num"><b>R$ 6.308,14</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout reveal d5"><b>Leitura:</b> o modelo que mais reduz falso negativo não é o que melhor prevê o número exato de dias.</div>
+  </div>
+  <div class="foot"><span>Negócio: custo do erro, não apenas acurácia</span><span class="pg">08 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 09 · MATRIZ DE CONFUSÃO
+     ========================================================= -->
+<section class="slide">
+  <div class="head">
+    <div><div class="kicker reveal d1">4.1 · Avaliação de atraso</div>
+    <h2 class="reveal d2">A matriz de confusão mostra onde o modelo <em>erra de verdade</em></h2></div>
+    <span class="tag reveal d2">Regressão Linear · maior recall</span>
+  </div>
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1.42fr .78fr;gap:26px;flex:1;min-height:0">
+      <div class="reveal d3" style="display:flex;flex-direction:column;gap:12px;min-height:0">
+        <div class="cm">
+          <div></div>
+          <div class="h">Previsto: no prazo</div>
+          <div class="h">Previsto: atraso</div>
+          <div class="h">Total real</div>
+          <div class="s">Real: no prazo</div>
+          <div class="c good"><div class="n">14.100</div><div class="l">Verdadeiro negativo · TN</div></div>
+          <div class="c warn"><div class="n">3.760</div><div class="l">Falso positivo · FP</div></div>
+          <div class="t"><div class="n">17.860</div><div class="l">TN + FP</div></div>
+          <div class="s">Real: atrasou</div>
+          <div class="c bad"><div class="n">290</div><div class="l">Falso negativo · FN</div></div>
+          <div class="c good"><div class="n">722</div><div class="l">Verdadeiro positivo · TP</div></div>
+          <div class="t"><div class="n">1.012</div><div class="l">FN + TP</div></div>
+          <div class="h">Total previsto</div>
+          <div class="t"><div class="n">14.390</div><div class="l">TN + FN</div></div>
+          <div class="t"><div class="n">4.482</div><div class="l">FP + TP</div></div>
+          <div class="t grand"><div class="n">18.872</div><div class="l">total</div></div>
+        </div>
+        <p class="tiny">Regra de classificação: atraso previsto quando <b>prazo previsto &gt; prazo prometido</b>.</p>
+      </div>
+      <div class="reveal d4" style="display:flex;flex-direction:column;gap:16px;min-height:0">
+        <div class="grid2" style="gap:16px">
+          <div class="card stat" style="padding:22px 24px;gap:6px"><div class="n" style="font-size:44px">71,34%</div><div class="l">recall</div><p class="tiny">Captura 722 dos 1.012 atrasos reais.</p></div>
+          <div class="card stat" style="padding:22px 24px;gap:6px"><div class="n" style="font-size:44px">16,11%</div><div class="l">precision</div><p class="tiny">Parte relevante dos alertas não se confirma.</p></div>
+          <div class="card stat" style="padding:22px 24px;gap:6px"><div class="n" style="font-size:44px">28,66%</div><div class="l">atrasos perdidos</div><p class="tiny">290 falsos negativos — o erro mais grave.</p></div>
+          <div class="card stat" style="padding:22px 24px;gap:6px"><div class="n" style="font-size:44px">5,36%</div><div class="l">taxa real de atraso</div><p class="tiny">Classe rara: acurácia isolada engana.</p></div>
+        </div>
+        <div class="callout warn"><b>Leitura de negócio:</b> a regressão captura o maior número de atrasos, mas gera 3.760 alertas desnecessários. O trade-off é coerente com a prioridade dada ao falso negativo.</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Matriz de confusão · conjunto de teste futuro</span><span class="pg">09 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 10 · CATEGORIAS DE RISCO
+     ========================================================= -->
+<section class="slide">
+  <div class="head">
+    <div><div class="kicker reveal d1">Saída operacional</div>
+    <h2 class="reveal d2">Quatro categorias de risco pela <em>folga</em></h2></div>
+  </div>
+  <div class="body" style="gap:24px">
+    <div class="formula band reveal d3">Folga = prazo prometido − prazo previsto</div>
+    <div class="risk reveal d4">
+      <div class="r low"><div class="rt">Baixo</div><div class="rr">Folga &gt; P90 do erro</div><div class="rd">Há margem maior que 90% dos erros absolutos observados.</div><div class="act"><div class="k">ação sugerida</div><div class="v">Nenhuma ação: o pedido segue o fluxo normal.</div></div></div>
+      <div class="r mod"><div class="rt">Moderado</div><div class="rr">MAE &lt; Folga ≤ P90</div><div class="rd">Há margem, mas uma previsão ruim pode consumi-la.</div><div class="act"><div class="k">ação sugerida</div><div class="v">Acompanhar e revisar se a malha piorar.</div></div></div>
+      <div class="r high"><div class="rt">Alto</div><div class="rr">0 &lt; Folga ≤ MAE</div><div class="rd">A promessa está dentro do erro típico do modelo.</div><div class="act"><div class="k">ação sugerida</div><div class="v">Priorizar expedição e avaliar alternativa de rota.</div></div></div>
+      <div class="r crit"><div class="rt">Crítico</div><div class="rr">Folga ≤ 0</div><div class="rd">O próprio prazo previsto já ultrapassa a promessa.</div><div class="act"><div class="k">ação sugerida</div><div class="v">Acionar o responsável operacional imediatamente.</div></div></div>
+    </div>
+    <div class="callout warn reveal d5"><b>Importante:</b> as faixas numéricas só são ativadas depois que um modelo passar no go/no-go. A primeira rodada ainda não aprovou nenhum ML.</div>
+  </div>
+  <div class="foot"><span>Classificação explicável e calibrada pela incerteza real do modelo</span><span class="pg">10 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 11 · GESTÃO E MONITORAMENTO
+     ========================================================= -->
+<section class="slide roomy">
+  <div class="head">
+    <div><div class="kicker reveal d1">4.2 · Gestão</div>
+    <h2 class="reveal d2">O modelo precisa continuar merecendo confiança <em>todo mês</em></h2></div>
+  </div>
+  <div class="body">
+    <div class="grid2 fill-row vcenter">
+      <div class="card top-accent reveal d3" style="justify-content:space-between">
+        <h3>Governança</h3>
+        <table>
+          <tbody>
+            <tr><td style="width:34%"><b>Dono</b></td><td>Gestor de Planejamento</td></tr>
+            <tr><td><b>Revalidação</b></td><td>Mensal</td></tr>
+            <tr><td><b>Gatilho 1</b></td><td>MAE piora &gt; 10%</td></tr>
+            <tr><td><b>Gatilho 2</b></td><td>Recall cai &gt; 10 p.p.</td></tr>
+            <tr><td><b>Fallback</b></td><td>Média histórica do prazo</td></tr>
+          </tbody>
+        </table>
+        <p class="small">Monitoramento mensal por UF de origem, UF de destino e categoria, para detectar degradação desigual.</p>
+      </div>
+      <div class="card reveal d4" style="justify-content:space-between">
+        <h3>Go / no-go</h3>
+        <div class="callout good"><b>GO:</b> superar o melhor baseline no MAE e não piorar o Recall do modelo vigente.</div>
+        <div class="callout bad"><b>NO-GO:</b> se não superar a regra simples, não entra em produção.</div>
+        <div class="formula">Modelo suspenso / falha operacional<br/>→ previsão pela média histórica</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Gestão = dono + cadência + gatilho + fallback</span><span class="pg">11 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 12 · ÉTICA E DECISÃO
+     ========================================================= -->
+<section class="slide roomy">
+  <div class="head">
+    <div><div class="kicker reveal d1">5 · Ética &nbsp;+&nbsp; 6 · Configuração da decisão</div>
+    <h2 class="reveal d2">O sistema informa. <em>O humano decide.</em></h2></div>
+  </div>
+  <div class="body">
+    <div class="grid2 fill-row vcenter">
+      <div class="card reveal d3" style="justify-content:space-between">
+        <h3>Quem carrega o risco</h3>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <p><b>Cliente:</b> não receber dentro do prazo prometido.</p>
+          <p><b>Gestor / empresa:</b> multa de 10% do frete por dia de atraso.</p>
+        </div>
+        <div class="callout bad"><b>Legal, mas errado:</b> aumentar deliberadamente o prazo prometido apenas para reduzir o risco de multa, transferindo o custo para o cliente.</div>
+        <p class="small">O humano pode ignorar ou reverter a classificação, com justificativa registrada.</p>
+      </div>
+      <div class="card top-accent reveal d4" style="justify-content:space-between">
+        <h3>Quem decide o quê</h3>
+        <div class="chain">
+          <div class="node"><span class="ix">MODELO</span> propõe prazo, folga e nível de risco</div>
+          <div class="node"><span class="ix">OPERADOR</span> Planejamento decide a ação</div>
+          <div class="node"><span class="ix">GESTOR</span> Planejamento é o responsável final</div>
+        </div>
+        <div class="callout"><b>Reversão:</b> o operador pode rever enquanto a ação não foi executada; o gestor pode reverter qualquer decisão relacionada ao modelo.</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Humano no circuito por desenho, não como contingência</span><span class="pg">12 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 13 · CONCLUSÃO
+     ========================================================= -->
+<section class="slide roomy" data-notes="<b>Fechamento:</b> o resultado não é “ML falhou”; é “a regra simples ainda é melhor no critério definido”. O próximo ciclo deve testar se a priorização de falso negativo muda o critério de produção.">
+  <div class="head">
+    <div><div class="kicker reveal d1">Conclusão</div>
+    <h2 class="reveal d2">A primeira rodada respondeu uma pergunta importante</h2></div>
+  </div>
+  <div class="body">
+    <div class="grid2 fill-row vcenter">
+      <div class="card reveal d3" style="justify-content:center;gap:20px">
+        <h3>O que já sabemos</h3>
+        <ul>
+          <li>É possível prever prazo usando apenas dados disponíveis na criação.</li>
+          <li>Distância é a variável estrutural mais forte observada.</li>
+          <li>Na primeira rodada, <b>nenhum ML superou o baseline por distância no MAE</b>.</li>
+          <li>Regressão Linear teve o maior Recall e identificou a maior parcela de multa potencial.</li>
+          <li>Logo, <b>prever dias</b> e <b>antecipar atraso</b> não são exatamente o mesmo objetivo.</li>
+        </ul>
+      </div>
+      <div class="card top-accent reveal d4" style="justify-content:center;gap:20px">
+        <h3>Próximo passo recomendado</h3>
+        <ol>
+          <li>Otimizar os mesmos modelos no treino, sem tocar no teste.</li>
+          <li>Reavaliar o go/no-go contra MAE = <b>4,37 dias</b>.</li>
+          <li>Se nenhum ML vencer, assumir formalmente a regra por distância como melhor preditor de prazo.</li>
+          <li>Revisitar o critério de escolha se o negócio priorizar Recall e multa acima do MAE.</li>
+        </ol>
+        <div class="callout"><b>Conclusão de governança:</b> sofisticação só entra se gerar ganho comprovável.</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Especificação pronta para continuar no Módulo 2 · aplicação prática</span><span class="pg">13 / 14</span></div>
+</section>
+
+<!-- =========================================================
+     SLIDE 14 · APÊNDICE TÉCNICO
+     ========================================================= -->
+<section class="slide">
+  <div class="head">
+    <div><div class="kicker reveal d1">Apêndice · Comparação completa</div>
+    <h2 class="reveal d2">Desempenho no conjunto de teste futuro</h2></div>
+    <span class="tag reveal d2">18.872 pedidos · 1.012 atrasos</span>
+  </div>
+  <div class="body" style="gap:28px">
+    <div class="reveal d3">
+      <table>
+        <thead><tr><th>Método</th><th class="num">MAE</th><th class="num">RMSE</th><th class="num">P90 erro</th><th class="num">Recall</th><th class="num">Precision</th><th class="num">Multa identificada</th></tr></thead>
+        <tbody>
+          <tr class="hl"><td>Baseline · mediana por distância</td><td class="num"><b>4,372</b></td><td class="num"><b>5,826</b></td><td class="num"><b>8,011</b></td><td class="num">45,36%</td><td class="num"><b>22,49%</b></td><td class="num">23,19%</td></tr>
+          <tr><td>Baseline · mediana</td><td class="num">4,985</td><td class="num">6,414</td><td class="num">8,900</td><td class="num">61,46%</td><td class="num">17,82%</td><td class="num">25,87%</td></tr>
+          <tr><td>Random Forest</td><td class="num">5,269</td><td class="num">6,559</td><td class="num">9,560</td><td class="num">54,84%</td><td class="num">18,92%</td><td class="num">32,15%</td></tr>
+          <tr><td>Gradient Boosting</td><td class="num">5,844</td><td class="num">7,124</td><td class="num">10,489</td><td class="num">58,40%</td><td class="num">16,91%</td><td class="num">36,67%</td></tr>
+          <tr><td>Baseline · média</td><td class="num">6,375</td><td class="num">7,539</td><td class="num">10,584</td><td class="num">67,79%</td><td class="num">13,71%</td><td class="num">31,17%</td></tr>
+          <tr class="hl2"><td>Regressão Linear</td><td class="num">6,442</td><td class="num">7,617</td><td class="num">11,222</td><td class="num"><b>71,34%</b></td><td class="num">16,11%</td><td class="num"><b>48,13%</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid3 reveal d4">
+      <div class="card stat" style="padding:24px 26px"><div class="n" style="font-size:46px">13,44 d</div><div class="l">média do treino</div></div>
+      <div class="card stat" style="padding:24px 26px"><div class="n" style="font-size:46px">11,22 d</div><div class="l">mediana do treino</div></div>
+      <div class="card stat" style="padding:24px 26px"><div class="n" style="font-size:46px">7,24–17,00 d</div><div class="l">IQQ do treino</div><p class="tiny">Cobertura no teste: 45,37%.</p></div>
+    </div>
+    <p class="tiny reveal d5">Fonte: processamento da base Olist consolidada. Multa simulada conforme a regra de negócio definida — 10% do valor do frete por dia real de atraso.</p>
+  </div>
+  <div class="foot"><span>Apêndice técnico</span><span class="pg">14 / 14</span></div>
+</section>
+
+</main>
+</div>
+
+<!-- Chrome de apresentação: fora do palco, não escala com os slides -->
+<div class="bar-progress" id="progress"></div>
+<div class="deck-controls">
+  <button id="prev" title="Anterior (←)">←</button>
+  <span class="count" id="count">01 / 14</span>
+  <button id="next" title="Próximo (→)">→</button>
+  <button id="notesBtn" title="Notas do apresentador (N)">NOTAS</button>
+  <button id="fs" title="Tela cheia (F)">⛶</button>
+</div>
+<div class="notes" id="notes"></div>
+<div class="edit-hotzone" id="hotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Modo de edição (E)">EDITAR</button>
+
+<script>
+/* ===========================================================
+   CONTROLADOR DA APRESENTAÇÃO
+   - escala o palco 1920×1080 inteiro (letterbox, sem reflow)
+   - teclado, roda do mouse, toque
+   - notas do apresentador (N) e barra de progresso
+   =========================================================== */
+class SlidePresentation{
+  constructor(){
+    this.slides=[...document.querySelectorAll('.slide')];
+    this.stage=document.getElementById('deckStage');
+    this.i=0;
+    this.setupStageScale();
+    this.setupKeyboardNav();
+    this.setupPointerNav();
+    this.setupTouchNav();
+    const m=location.hash.match(/s(\d+)/);
+    this.show(m?Number(m[1])-1:0);
+  }
+  /* Escala uniforme: o palco nunca reflui, apenas encaixa na janela */
+  setupStageScale(){
+    const scale=()=>{
+      const f=Math.min(window.innerWidth/1920,window.innerHeight/1080);
+      const x=(window.innerWidth-1920*f)/2, y=(window.innerHeight-1080*f)/2;
+      this.stage.style.transform='translate('+x+'px,'+y+'px) scale('+f+')';
+    };
+    scale();
+    window.addEventListener('resize',scale);
+  }
+  setupKeyboardNav(){
+    document.addEventListener('keydown',e=>{
+      if(e.target.isContentEditable) return;
+      if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();this.show(this.i+1)}
+      else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();this.show(this.i-1)}
+      else if(e.key==='Home'){this.show(0)}
+      else if(e.key==='End'){this.show(this.slides.length-1)}
+      else if(e.key.toLowerCase()==='n'){this.toggleNotes()}
+      else if(e.key.toLowerCase()==='f'){this.toggleFullscreen()}
+    });
+  }
+  setupPointerNav(){
+    document.getElementById('prev').onclick=()=>this.show(this.i-1);
+    document.getElementById('next').onclick=()=>this.show(this.i+1);
+    document.getElementById('notesBtn').onclick=()=>this.toggleNotes();
+    document.getElementById('fs').onclick=()=>this.toggleFullscreen();
+    let lock=false;
+    window.addEventListener('wheel',e=>{
+      if(lock||Math.abs(e.deltaY)<24)return;
+      lock=true;setTimeout(()=>{lock=false},520);
+      this.show(this.i+(e.deltaY>0?1:-1));
+    },{passive:true});
+  }
+  setupTouchNav(){
+    let x0=null,y0=null;
+    window.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+    window.addEventListener('touchend',e=>{
+      if(x0===null)return;
+      const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0;
+      if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)) this.show(this.i+(dx<0?1:-1));
+      x0=y0=null;
+    },{passive:true});
+  }
+  show(n){
+    this.i=Math.max(0,Math.min(n,this.slides.length-1));
+    this.slides.forEach((s,k)=>{
+      const on=k===this.i;
+      s.classList.toggle('active',on);
+      s.classList.toggle('visible',on);
+    });
+    const pad=v=>String(v).padStart(2,'0');
+    document.getElementById('count').textContent=pad(this.i+1)+' / '+pad(this.slides.length);
+    document.getElementById('progress').style.width=((this.i+1)/this.slides.length*100)+'%';
+    this.renderNotes();
+    history.replaceState(null,'','#s'+(this.i+1));
+  }
+  renderNotes(){
+    const box=document.getElementById('notes');
+    const txt=this.slides[this.i].dataset.notes;
+    box.innerHTML=txt||'<span style="opacity:.55">Sem notas para este slide.</span>';
+  }
+  toggleNotes(){document.getElementById('notes').classList.toggle('show');this.renderNotes()}
+  toggleFullscreen(){
+    if(!document.fullscreenElement){if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen()}
+    else if(document.exitFullscreen){document.exitFullscreen()}
+  }
+}
+const deck=new SlidePresentation();
+
+/* ===========================================================
+   EDIÇÃO IN-LOCO
+   Hover no canto superior esquerdo ou tecla E. Ctrl+S grava o
+   conteúdo editado no localStorage deste navegador.
+   =========================================================== */
+const editor={
+  isActive:false,
+  targets:'h1,h2,h3,p,li,td,.kicker,.eyebrow,.pill,.callout,.formula,.rt,.rr,.rd,.fcap,.fn,.nm,.vl,.tag,.node,.foot span,.statband .n,.statband .d,.stat .n',
+  toggle(){
+    this.isActive=!this.isActive;
+    document.body.classList.toggle('editing',this.isActive);
+    document.getElementById('editToggle').classList.toggle('active',this.isActive);
+    document.querySelectorAll('.slide '+this.targets).forEach(el=>{
+      el.contentEditable=this.isActive?'true':'false';
+    });
+    if(!this.isActive) this.save();
+  },
+  save(){
+    try{localStorage.setItem('deck-prazo-html',document.getElementById('deckStage').innerHTML)}catch(e){}
+  }
+};
+document.getElementById('editToggle').addEventListener('click',()=>editor.toggle());
+const hotzone=document.getElementById('hotzone'), editToggle=document.getElementById('editToggle');
+let hideTimeout=null;
+const showBtn=()=>{clearTimeout(hideTimeout);editToggle.classList.add('show')};
+const hideBtn=()=>{hideTimeout=setTimeout(()=>{if(!editor.isActive)editToggle.classList.remove('show')},400)};
+hotzone.addEventListener('mouseenter',showBtn);
+hotzone.addEventListener('mouseleave',hideBtn);
+editToggle.addEventListener('mouseenter',showBtn);
+editToggle.addEventListener('mouseleave',hideBtn);
+hotzone.addEventListener('click',()=>editor.toggle());
+document.addEventListener('keydown',e=>{
+  if((e.key==='e'||e.key==='E')&&!e.target.isContentEditable){editor.toggle()}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();editor.save()}
+});
+</script>
+</body>
+</html>
