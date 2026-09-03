@@ -326,9 +326,26 @@ tr.hl2 td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 .slide.roomy .chain .node{font-size:22px;padding:16px 19px}
 .slide.roomy .formula{font-size:21px}
 
+/* --- variante da fronteira temporal: muitos blocos por card --- */
+.slide.tight h2{font-size:56px}
+.slide.tight .card{padding:20px 24px;gap:9px}
+.slide.tight h3{font-size:28px}
+.slide.tight .axis{padding:12px 24px}
+.slide.tight .pill{font-size:15px;padding:5px 11px}
+.slide.tight .frow{padding:9px 0;grid-template-columns:150px 1fr;gap:14px}
+.slide.tight .frow .flab{font-size:14px;padding-top:5px}
+.slide.tight .frow .fd{font-size:17px;margin-top:4px}
+.slide.tight .frow .fv{gap:6px}
+.slide.tight .formula{font-size:18px;line-height:1.45;padding:10px 15px}
+.slide.tight .formula.band{font-size:22px;padding:11px 15px}
+.slide.tight .small{font-size:17px}
+.slide.tight .callout{font-size:19px;padding:12px 17px}
+.slide.tight .body{gap:14px}
+
 .slide.dense h2{font-size:56px}
 .slide.dense .card{padding:22px 26px;gap:10px}
 .slide.dense h3{font-size:29px}
+.slide.dense .body{gap:16px}
 .slide.dense .bars .row{height:36px;grid-template-columns:240px 1fr 92px}
 .slide.dense .bars .nm{font-size:18px}
 .slide.dense .bars .vl{font-size:18px}
@@ -428,7 +445,7 @@ body.editing [contenteditable="true"]{outline:1px dashed var(--accent-2);outline
 <!-- =========================================================
      SLIDE 03 · FRONTEIRA TEMPORAL (LEAKAGE)
      ========================================================= -->
-<section class="slide" data-notes="<b>Mensagem:</b> explicar a diferença treino vs uso futuro. O histórico conhece o resultado porque o evento já aconteceu.">
+<section class="slide tight" data-notes="<b>Mensagem:</b> explicar a diferença treino vs uso futuro. O histórico conhece o resultado porque o evento já aconteceu.">
   <div class="head">
     <div><div class="kicker reveal d1">3.2 · Adequação dos dados</div>
     <h2 class="reveal d2">A fronteira temporal evita <em>leakage</em></h2></div>
